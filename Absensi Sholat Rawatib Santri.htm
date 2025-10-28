@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kehadiran Santri PPTQ Hidayatullah Ternate</title>
+<style>
+  body {
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    margin: 0;
+    padding: 0;
+    color: #333;
+  }
+  .container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  }
+  h1 {
+    text-align: center;
+    color: #1e3c72;
+    margin-bottom: 30px;
+  }
+  .kelas {
+    border: 2px solid #2a5298;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+  }
+  .kelas h2 { color: #2a5298; margin-top: 0; }
+  label { font-weight: 600; display: block; margin-top: 10px; }
+  select, input[type="text"], input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #aaa;
+    border-radius: 8px;
+    outline: none;
+  }
+  select:focus, input:focus { border-color: #2a5298; box-shadow: 0 0 4px #2a5298; }
+  button {
+    background: #2a5298;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    width: 100%;
+    margin-top: 20px;
+  }
+  button:hover { background: #1e3c72; }
+  .success {
+    display: none;
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 15px;
+    text-align: center;
+  }
+  .createdby {
+    text-align: center;
+    font-size: 12px;
+    margin-top: 15px;
+    color: #555;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>📋 Kehadiran Santri<br>PPTQ Hidayatullah Ternate</h1>
+
+  <form id="absensiForm">
+    <!-- Input Ustadz -->
+    <div class="kelas">
+      <h2>Ustadz Piket</h2>
+      <label for="Ustadz">Nama Ustadz / Pengisi Absensi</label>
+      <input type="text" id="Ustadz" placeholder="Tulis nama Anda" required>
+    </div>
+
+    <!-- Dropdown Jenis Absensi -->
+    <div class="kelas">
+      <h2>Absensi Sholat Rawatib</h2>
+      <label for="jenisAbsensi">Jenis Absensi</label>
+      <select id="jenisAbsensi">
+        <option value="Subuh">Sholat Subuh</option>
+        <option value="Dhuha">Sholat Dhuha</option>
+        <option value="Dzuhur">Sholat Dzuhur</option>
+        <option value="Ashar">Sholat Ashar</option>
+        <option value="Maghrib">Sholat Maghrib</option>
+        <option value="Isya">Sholat Isya</option>
+      </select>
+    </div>
+  </form>
+
+  <div class="success" id="successMsg">✅ Data Kehadiran Berhasil Dikirim!</div>
+  <div class="createdby">Created by Chatimgrafika & Aks Amir</div>
+</div>
+
+<script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzvhPvowptdcw7TetfRy1LGy5yFdkz8GZ1X5wfsI4y5E9bSHHBTQR2rToPIL49xtRVdcQ/exec";
+
+// Fungsi pembuat blok kelas
+function buatBlokKelas(kelas, namaSantri) {
+  const div = document.createElement('div');
+  div.className = 'kelas';
+  div.innerHTML = `
+    <h2>Kelas ${kelas} - PUTRA</h2>
+    <label>Hadir</label>
+    <select id="hadir${kelas}" multiple></select>
+    <label>Jumlah Hadir</label>
+    <input type="number" id="jumlahHadir${kelas}" readonly>
+
+    <label>Pulang</label>
+    <select id="pulang${kelas}" multiple></select>
+    <label>Jumlah Pulang</label>
+    <input type="number" id="jumlahPulang${kelas}" readonly>
+
+    <label>Sakit</label>
+    <select id="sakit${kelas}" multiple></select>
+    <label>Jumlah Sakit</label>
+    <input type="number" id="jumlahSakit${kelas}" readonly>
+
+    <label>Alpa</label>
+    <select id="alpa${kelas}" multiple></select>
+    <label>Jumlah Alpa</label>
+    <input type="number" id="jumlahAlpa${kelas}" readonly>
+  `;
+
+  const hadirSel = div.querySelector(`#hadir${kelas}`);
+  namaSantri.forEach(n => {
+    const opt = document.createElement('option');
+    opt.value = n;
+    opt.textContent = n;
+    hadirSel.appendChild(opt);
+  });
+
+  const pulangSel = div.querySelector(`#pulang${kelas}`);
+  const sakitSel = div.querySelector(`#sakit${kelas}`);
+  const alpaSel = div.querySelector(`#alpa${kelas}`);
+
+  function isiOpsi(selectEl, list) {
+    const selected = [...selectEl.selectedOptions].map(o=>o.value);
+    selectEl.innerHTML = '';
+    list.forEach(n => {
+      const opt = document.createElement('option');
+      opt.value = n; opt.textContent = n;
+      if (selected.includes(n)) opt.selected = true;
+      selectEl.appendChild(opt);
+    });
+  }
+
+  function updateFilteredLists() {
+    const hadir = [...hadirSel.selectedOptions].map(o => o.value);
+    const pulang = [...pulangSel.selectedOptions].map(o => o.value);
+    const sakit = [...sakitSel.selectedOptions].map(o => o.value);
+    div.querySelector(`#jumlahHadir${kelas}`).value = hadir.length;
+    div.querySelector(`#jumlahPulang${kelas}`).value = pulang.length;
+    div.querySelector(`#jumlahSakit${kelas}`).value = sakit.length;
+    div.querySelector(`#jumlahAlpa${kelas}`).value = alpaSel.selectedOptions.length;
+    isiOpsi(pulangSel, namaSantri.filter(n => !hadir.includes(n)));
+    isiOpsi(sakitSel, namaSantri.filter(n => !hadir.includes(n) && !pulang.includes(n)));
+    isiOpsi(alpaSel, namaSantri.filter(n => !hadir.includes(n) && !pulang.includes(n) && !sakit.includes(n)));
+  }
+
+  hadirSel.addEventListener('change', updateFilteredLists);
+  pulangSel.addEventListener('change', updateFilteredLists);
+  sakitSel.addEventListener('change', updateFilteredLists);
+  alpaSel.addEventListener('change', updateFilteredLists);
+
+  return div;
+}
+
+// Ambil data dari server dan buat form dinamis
+fetch(WEB_APP_URL)
+  .then(r => r.json())
+  .then(data => {
+    const form = document.getElementById('absensiForm');
+    ['VII','VIII','IX','X','XI','XII'].forEach(k => form.appendChild(buatBlokKelas(k, data[k])));
+
+    const submitBtn = document.createElement('button');
+    submitBtn.textContent = 'Kirim Kehadiran';
+    form.appendChild(submitBtn);
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+
+      const payload = {
+        guru: document.getElementById('Ustadz').value,
+        jenisAbsensi: document.getElementById('jenisAbsensi').value
+      };
+
+      ['VII','VIII','IX','X','XI','XII'].forEach(k => {
+        payload[k] = {
+          hadir: [...document.querySelector(`#hadir${k}`).selectedOptions].map(o=>o.value),
+          jumlahHadir: document.querySelector(`#jumlahHadir${k}`).value,
+          pulang: [...document.querySelector(`#pulang${k}`).selectedOptions].map(o=>o.value),
+          jumlahPulang: document.querySelector(`#jumlahPulang${k}`).value,
+          sakit: [...document.querySelector(`#sakit${k}`).selectedOptions].map(o=>o.value),
+          jumlahSakit: document.querySelector(`#jumlahSakit${k}`).value,
+          alpa: [...document.querySelector(`#alpa${k}`).selectedOptions].map(o=>o.value),
+          jumlahAlpa: document.querySelector(`#jumlahAlpa${k}`).value
+        };
+      });
+
+      await fetch(WEB_APP_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+      });
+
+      document.getElementById('successMsg').style.display = 'block';
+      setTimeout(()=>location.reload(),1500);
+    });
+  });
+</script>
+</body>
+</html>
