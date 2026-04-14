@@ -1,635 +1,529 @@
+<!-- // Created with Chatimproject -->
+<!-- // Frontend Refactored for GitHub Pages & Google Apps Script API -->
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="light">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Presensi PPTQ Hidayatullah Ternate</title>
- 
-  <!-- Tailwind CSS -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+  <title>Portal Pelajar Malut Arab Saudi</title>
+  
+  <!-- CSS SECTION -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { moe: '#1db1a2', moehover: '#168e82' }
+        }
+      }
+    }
+  </script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Phosphor Icons -->
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
-
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f8fafc;
-    }
-    
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: #f1f1f1; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-    /* Loader Animation */
-    .loader {
-      border: 3px solid #f3f3f3;
-      border-radius: 50%;
-      border-top: 3px solid #3b82f6;
-      width: 24px;
-      height: 24px;
-      -webkit-animation: spin 1s linear infinite;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* Transition utilities */
-    .fade-in { animation: fadeIn 0.3s ease-in-out; }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    html[data-theme="light"] { --p: 66.4% 0.117 174.5; --pf: 56.4% 0.117 174.5; --pc: 100% 0 0; }
+    html, body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; user-select: none; }
+    *::-webkit-scrollbar { display: none; }
+    * { -ms-overflow-style: none; scrollbar-width: none; }
+    [v-cloak] { display: none; }
+    .dynamic-island { animation: slideDown 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+    @keyframes slideDown { from { transform: translate(-50%, -100%); } to { transform: translate(-50%, 0); } }
+    .copy-active:active { background-color: rgba(29, 177, 162, 0.1); transform: scale(0.98); }
+    .moe-link { color: #1db1a2; text-decoration: underline; }
   </style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen pb-24 flex flex-col">
-
-  <!-- Global Header Section -->
-  <div class="bg-gradient-to-r from-blue-700 to-indigo-800 pb-16 pt-8 px-6 shadow-lg rounded-b-[2rem] transition-all duration-300" id="mainHeader">
-    <div class="max-w-3xl mx-auto text-center relative">
-      <!-- Back Button (Hidden on Dashboard) -->
-      <button id="btnBack" class="hidden absolute left-0 top-1/2 -translate-y-1/2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-xl transition-all">
-        <i class="ph ph-caret-left text-2xl"></i>
-      </button>
-
-      <div class="inline-flex items-center justify-center p-3 bg-white/20 rounded-2xl backdrop-blur-sm mb-4" id="headerIconContainer">
-        <i class="ph ph-squares-four text-4xl text-white" id="headerIcon"></i>
-      </div>
-      <h2 class="text-2xl md:text-3xl font-bold text-white tracking-tight" id="headerTitle">اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ العَفْوَ فَاعْفُ عَنَّا</h2>
-      <h1 class="text-2xl md:text-3xl font-bold text-white tracking-tight" id="headerTitle">Dashboard Presensi</h1>
-      <p class="text-blue-100 mt-2 text-sm md:text-base">PPTQ Hidayatullah Ternate</p>
-    </div>
-  </div>
-
-  <!-- Main Container -->
-  <div class="max-w-3xl mx-auto w-full px-4 -mt-8 relative z-10 flex-1">
+<body class="bg-slate-50 text-slate-900">
+  
+  <!-- TEMPLATE SECTION -->
+  <div id="app" v-cloak>
     
-    <!-- Global Loading State -->
-    <div id="loadingState" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-10 flex flex-col items-center justify-center space-y-4">
-      <div class="loader"></div>
-      <p class="text-slate-500 font-medium animate-pulse">Menghubungkan ke sistem...</p>
+    <!-- Splash Screen -->
+    <div v-if="showSplash" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center p-6 text-center">
+      <div class="w-28 mb-6 animate-bounce">
+        <img :src="appLogo" class="w-full h-full object-contain">
+      </div>
+      <h3 class="text-center text-slate-700 font-bold">
+         <span class="block text-xl mb-1 font-black">نظام الدخول الموحد</span>
+         <span class="block text-sm font-normal text-slate-500 uppercase tracking-widest">Single Sign On</span>
+      </h3>
+      <div class="mt-8 loading loading-dots loading-md text-primary"></div>
     </div>
 
-    <!-- VIEW 1: DASHBOARD MENU -->
-    <div id="viewDashboard" class="hidden space-y-4 fade-in">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
-        <!-- Card: Sholat -->
-        <button onclick="openForm('sholat')" class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md hover:border-emerald-300 transition-all text-left flex items-start gap-4">
-          <div class="bg-emerald-100 p-3 rounded-xl text-emerald-600 group-hover:scale-110 transition-transform">
-            <i class="ph-fill ph-mosque text-3xl"></i>
-          </div>
-          <div>
-            <h3 class="text-lg font-bold text-slate-800">Absensi Sholat</h3>
-            <p class="text-sm text-slate-500 mt-1">Presensi gabungan seluruh kelas (VII-XII).</p>
-          </div>
-        </button>
-
-        <!-- Card: Sekolah SMP -->
-        <button onclick="openForm('sekolah_smp')" class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md hover:border-blue-300 transition-all text-left flex items-start gap-4">
-          <div class="bg-blue-100 p-3 rounded-xl text-blue-600 group-hover:scale-110 transition-transform">
-            <i class="ph-fill ph-student text-3xl"></i>
-          </div>
-          <div>
-            <h3 class="text-lg font-bold text-slate-800">Absensi Sekolah SMP</h3>
-            <p class="text-sm text-slate-500 mt-1">Presensi KBM khusus kelas VII, VIII, IX.</p>
-          </div>
-        </button>
-
-        <!-- Card: Sekolah SMA -->
-        <button onclick="openForm('sekolah_sma')" class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md hover:border-cyan-300 transition-all text-left flex items-start gap-4">
-          <div class="bg-cyan-100 p-3 rounded-xl text-cyan-600 group-hover:scale-110 transition-transform">
-            <i class="ph-fill ph-graduation-cap text-3xl"></i>
-          </div>
-          <div>
-            <h3 class="text-lg font-bold text-slate-800">Absensi Sekolah SMA</h3>
-            <p class="text-sm text-slate-500 mt-1">Presensi KBM khusus kelas X, XI, XII.</p>
-          </div>
-        </button>
-
-        <!-- Card: Diniah -->
-        <button onclick="openForm('diniah')" class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md hover:border-purple-300 transition-all text-left flex items-start gap-4">
-          <div class="bg-purple-100 p-3 rounded-xl text-purple-600 group-hover:scale-110 transition-transform">
-            <i class="ph-fill ph-books text-3xl"></i>
-          </div>
-          <div>
-            <h3 class="text-lg font-bold text-slate-800">Absensi Diniah</h3>
-            <p class="text-sm text-slate-500 mt-1">Presensi kajian/diniyah difilter per kelas.</p>
-          </div>
-        </button>
-
-        <!-- Card: Tahfizh -->
-        <button onclick="openForm('tahfizh')" class="group bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md hover:border-amber-300 transition-all text-left flex items-start gap-4 md:col-span-2">
-          <div class="bg-amber-100 p-3 rounded-xl text-amber-600 group-hover:scale-110 transition-transform">
-            <i class="ph-fill ph-book-open text-3xl"></i>
-          </div>
-          <div>
-            <h3 class="text-lg font-bold text-slate-800">Absensi Tahfizh</h3>
-            <p class="text-sm text-slate-500 mt-1">Presensi difilter per kelompok halaqoh.</p>
-          </div>
-        </button>
-
-      </div>
+    <!-- Notification / Dynamic Island -->
+    <div v-if="toast.show" class="fixed top-4 left-1/2 -translate-x-1/2 z-[50] dynamic-island w-fit max-w-[90%] px-6 py-3 bg-slate-900 text-white rounded-full shadow-2xl flex items-center gap-3">
+      <span class="text-sm font-medium">{{ toast.msg }}</span>
     </div>
 
-    <!-- VIEW 2: FORM PRESENSI -->
-    <form id="viewForm" class="hidden fade-in">
-      <div class="space-y-6">
-        
-        <!-- Metadata Info Section -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-6 space-y-5">
-          <h2 class="text-lg font-semibold text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-3" id="formSubtitle">
-            <i class="ph ph-info text-blue-600"></i> Informasi Presensi
-          </h2>
-          
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div class="space-y-2">
-              <label for="Ustadz" class="text-sm font-medium text-slate-600 block">Nama Ustadz</label>
-              <div class="relative">
-                <i class="ph ph-user absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                <input type="text" id="Ustadz" placeholder="Tulis nama Anda" required
-                  class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 text-sm">
-              </div>
-            </div>
-
-            <div class="space-y-2">
-              <label for="jenisAbsensi" class="text-sm font-medium text-slate-600 block" id="labelJenisAbsensi">Waktu / Sesi</label>
-              <div class="relative">
-                <i class="ph ph-clock absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg z-10"></i>
-                <select id="jenisAbsensi" required
-                  class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl appearance-none focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 text-sm">
-                  <!-- Options injected via JS based on category -->
-                </select>
-                <i class="ph ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
-              </div>
-            </div>
-
-            <div class="space-y-2" id="wrapperPilihGrup">
-              <label for="pilihGrup" class="text-sm font-medium text-slate-600 block" id="labelPilihGrup">Pilih Kelas/Halaqoh</label>
-              <div class="relative">
-                <i class="ph ph-users absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg z-10"></i>
-                <select id="pilihGrup" required
-                  class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl appearance-none focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 text-sm">
-                  <!-- Options injected via JS based on category -->
-                </select>
-                <i class="ph ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
-              </div>
-            </div>
-          </div>
+    <div class="w-full max-w-md mx-auto min-h-[100dvh] bg-slate-50 shadow-xl relative overflow-x-hidden flex flex-col">
+      
+      <!-- AUTH VIEW (MOE Saudi Style) -->
+      <div v-if="!user" class="flex-1 flex flex-col p-8 justify-center bg-white">
+        <div class="text-center mb-10">
+          <img :src="appLogo" class="w-24 mx-auto mb-6 object-contain">
+          <h3 class="text-center text-slate-700 font-bold">
+             <span class="block text-2xl mb-1 font-black">نظام الدخول الموحد</span>
+             <span class="block text-base font-normal text-slate-500 uppercase tracking-widest">Single Sign On</span>
+          </h3>
+          <p class="text-sm text-slate-600 font-bold mt-10" dir="rtl">الرجاء ادخال اسم المستخدم وكلمة المرور</p>
         </div>
-
-        <!-- Dynamic Classes Container -->
-        <div id="kelasContainer" class="space-y-4">
-          <!-- Inject kelas/halaqoh here -->
-        </div>
-
-      </div>
-
-      <!-- Sticky Submit Button -->
-      <div id="submitContainer" class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-200 p-4 z-50 transition-transform duration-300 translate-y-full">
-        <div class="max-w-3xl mx-auto">
-          <button type="submit" id="btnSubmit" 
-            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 px-6 rounded-xl shadow-lg shadow-blue-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
-            <i class="ph ph-paper-plane-right text-xl"></i>
-            Kirim Data Kehadiran
+        <div class="space-y-4">
+          <input v-model="authForm.email" type="email" placeholder="Email / اسم المستخدم" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-xl h-12 text-center" dir="rtl">
+          <input v-model="authForm.password" :type="showPass ? 'text' : 'password'" placeholder="Kata Sandi / كلمة المرور" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-xl h-12 text-center" dir="rtl">
+          <button @click="handleAuth" :disabled="isLoading" class="btn bg-moe hover:bg-moehover border-none w-full rounded-xl text-white font-bold h-12 text-lg">
+            <span v-if="isLoading" class="loading loading-spinner"></span>
+            {{ authMode === 'login' ? 'دخول' : 'تسجيل' }}
           </button>
-        </div>
-      </div>
-    </form>
-
-  </div>
-
-  <!-- Footer -->
-  <div class="mt-auto pt-10 pb-6 text-center text-xs text-slate-400">
-    <p>Created by <span class="font-semibold text-slate-500">Chatimgrafika</span> & <span class="font-semibold text-slate-500">Aks Amir</span></p>
-  </div>
-
-  <!-- Toast Notification -->
-  <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 transform -translate-y-24 opacity-0">
-    <div class="bg-emerald-500 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-3 font-medium">
-      <i class="ph-fill ph-check-circle text-xl"></i>
-      Data Kehadiran Berhasil Dikirim!
-    </div>
-  </div>
-
-<script>
-// URL App Script Terbaru
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz98mOfOxzJi49U8WArPRUUN4l1Y6LaFMkbRM18FfNK8XJI9n2m2QnPPWxVU2VIm58x1Q/exec";
-
-// App State
-let studentData = null;
-let currentCategory = null;
-let activeGroups = [];
-
-// Konfigurasi Kategori Absensi
-const categoryConfig = {
-  sholat: {
-    title: "Absensi Sholat",
-    icon: "ph-mosque",
-    label: "Pilih Waktu Sholat",
-    options: ["Tahajjud","Subuh", "Dhuha", "Dzuhur", "Ashar", "Maghrib", "Isya"]
-  },
-  sekolah_smp: {
-    title: "Absensi Sekolah SMP",
-    icon: "ph-student",
-    label: "Pilih Sesi/Jam",
-    options: ["Jam ke-1", "Jam ke-2", "Jam ke-3", "Jam ke-4", "Evaluasi / Lainnya"]
-  },
-  sekolah_sma: {
-    title: "Absensi Sekolah SMA",
-    icon: "ph-graduation-cap",
-    label: "Pilih Sesi/Jam",
-    options: ["Jam ke-1", "Jam ke-2", "Jam ke-3", "Jam ke-4", "Evaluasi / Lainnya"]
-  },
-  diniah: {
-    title: "Absensi Diniah",
-    icon: "ph-books",
-    label: "Pilih Mapel",
-    options: ["Sesi Pagi", "Sesi Siang", "Sesi Sore", "Sesi Malam"]
-  },
-  tahfizh: {
-    title: "Absensi Tahfizh",
-    icon: "ph-book-open",
-    label: "Pilih Waktu Halaqoh",
-    options: ["Ziyadah (Ba'da Subuh)","Ziyadah (Ba'da Dzuhur)","Ziyadah (Ba'da Ashar)", "Murojaah (Ba'da Ashar)", "Murojaah (Ba'da Maghrib)","Murojaah (Ba'da Isya)"]
-  }
-};
-
-// Toggle Accordion Function
-function toggleAccordion(kelasId) {
-  const content = document.getElementById(`content-${kelasId}`);
-  const icon = document.getElementById(`icon-${kelasId}`);
-  
-  if (content.classList.contains('hidden')) {
-    content.classList.remove('hidden');
-    icon.style.transform = 'rotate(180deg)';
-  } else {
-    content.classList.add('hidden');
-    icon.style.transform = 'rotate(0deg)';
-  }
-}
-
-// Function to reset all radio buttons
-function resetForm() {
-  const radios = document.querySelectorAll('input[type="radio"]');
-  radios.forEach(r => {
-    if (r.value === 'hadir') r.checked = true;
-    else r.checked = false;
-  });
-  document.getElementById('Ustadz').value = '';
-  document.getElementById('jenisAbsensi').value = '';
-  document.getElementById('pilihGrup').value = '';
-  
-  // Kembalikan form ke status default (harus isi kelas)
-  document.getElementById('wrapperPilihGrup').classList.remove('hidden');
-  document.getElementById('pilihGrup').required = true;
-}
-
-// Function to open specific form
-function openForm(category) {
-  currentCategory = category;
-  const config = categoryConfig[category];
-  
-  // Update Header
-  document.getElementById('headerTitle').innerText = config.title;
-  document.getElementById('headerIcon').className = `ph ${config.icon} text-4xl text-white`;
-  document.getElementById('btnBack').classList.remove('hidden');
-  
-  // Update Form Details
-  document.getElementById('labelJenisAbsensi').innerText = config.label;
-  const selectEl = document.getElementById('jenisAbsensi');
-  selectEl.innerHTML = `<option value="" disabled selected>Pilih salah satu...</option>`;
-  config.options.forEach(opt => {
-    selectEl.innerHTML += `<option value="${opt}">${opt}</option>`;
-  });
-
-  const wrapperGrup = document.getElementById('wrapperPilihGrup');
-  const selectGrup = document.getElementById('pilihGrup');
-  const container = document.getElementById('kelasContainer');
-
-  // Switch Views
-  document.getElementById('viewDashboard').classList.add('hidden');
-  document.getElementById('viewForm').classList.remove('hidden');
-
-  // LOGIKA KHUSUS ABSEN SHOLAT (GABUNGAN SEMUA KELAS)
-  if (category === 'sholat') {
-    wrapperGrup.classList.add('hidden');
-    selectGrup.required = false;
-
-    // Ambil semua kelas yang valid (Abaikan Kelas I, II, dan Putri)
-    const availableKelas = Object.keys(studentData.kelas || {});
-    const forbiddenKelas = ['I', 'II', '1', '2'];
-    const filteredKelas = availableKelas.filter(k => {
-      const kUpper = k.trim().toUpperCase();
-      if (forbiddenKelas.includes(kUpper)) return false; 
-      if (kUpper.includes('PUTRI')) return false; 
-      return true;
-    });
-
-    // Urutkan kelas sesuai jenjang
-    const orderedKelas = ['VII','VIII','IX','X','XI','XII'].filter(k => filteredKelas.includes(k));
-    filteredKelas.forEach(k => { if(!orderedKelas.includes(k)) orderedKelas.push(k); });
-    
-    activeGroups = orderedKelas;
-    container.innerHTML = '';
-    
-    // Render semua kelas ke layar
-    activeGroups.forEach(k => {
-      container.appendChild(buatBlokKelas(k, studentData.kelas[k], false));
-    });
-
-    // Buka accordion pertama otomatis
-    if(activeGroups.length > 0) {
-      const safeFirstId = activeGroups[0].replace(/\s+/g, '_');
-      setTimeout(() => toggleAccordion(safeFirstId), 200);
-    }
-
-    // Tampilkan tombol submit langsung (karena form sudah dimuat)
-    document.getElementById('submitContainer').classList.remove('translate-y-full');
-
-  } else {
-    // LOGIKA SELAIN SHOLAT (TERPISAH PER KELAS / HALAQOH)
-    wrapperGrup.classList.remove('hidden');
-    selectGrup.required = true;
-    selectGrup.innerHTML = `<option value="" disabled selected>Pilih...</option>`;
-    
-    let groups = [];
-    if (category === 'tahfizh') {
-      document.getElementById('labelPilihGrup').innerText = "Pilih Halaqoh";
-      groups = Object.keys(studentData.halaqoh || {});
-      // Mengurutkan Halaqoh secara angka natural
-      groups.sort((a, b) => {
-        const numA = parseInt(a.match(/\d+/)?.[0] || 0);
-        const numB = parseInt(b.match(/\d+/)?.[0] || 0);
-        return numA - numB;
-      });
-    } else {
-      document.getElementById('labelPilihGrup').innerText = "Pilih Kelas";
-      const availableKelas = Object.keys(studentData.kelas || {});
-      
-      const forbiddenKelas = ['I', 'II', '1', '2'];
-      let filteredKelas = availableKelas.filter(k => {
-        const kUpper = k.trim().toUpperCase();
-        if (forbiddenKelas.includes(kUpper)) return false; 
-        if (kUpper.includes('PUTRI')) return false; 
-        return true;
-      });
-
-      // FILTER KHUSUS SMP DAN SMA
-      if (category === 'sekolah_smp') {
-        const smpKelas = ['VII', 'VIII', 'IX'];
-        filteredKelas = filteredKelas.filter(k => smpKelas.includes(k.trim().toUpperCase()));
-      } else if (category === 'sekolah_sma') {
-        const smaKelas = ['X', 'XI', 'XII'];
-        filteredKelas = filteredKelas.filter(k => smaKelas.includes(k.trim().toUpperCase()));
-      }
-
-      const orderedKelas = ['VII','VIII','IX','X','XI','XII'].filter(k => filteredKelas.includes(k));
-      filteredKelas.forEach(k => { if(!orderedKelas.includes(k)) orderedKelas.push(k); });
-      groups = orderedKelas;
-    }
-
-    groups.forEach(g => {
-      selectGrup.innerHTML += `<option value="${g}">${g}</option>`;
-    });
-
-    // Sembunyikan Container Santri & Tombol Submit sampai Grup dipilih
-    container.innerHTML = ''; 
-    document.getElementById('submitContainer').classList.add('translate-y-full');
-  }
-}
-
-// Listener saat Kelas / Halaqoh dipilih (Khusus untuk NON-SHOLAT)
-document.getElementById('pilihGrup').addEventListener('change', (e) => {
-  const selectedGroup = e.target.value;
-  const container = document.getElementById('kelasContainer');
-  container.innerHTML = ''; // Clear sebelumnya
-
-  const isTahfizh = currentCategory === 'tahfizh';
-  const dataSantri = isTahfizh ? studentData.halaqoh[selectedGroup] : studentData.kelas[selectedGroup];
-
-  // Render HANYA kelas/halaqoh yang dipilih
-  container.appendChild(buatBlokKelas(selectedGroup, dataSantri, isTahfizh));
-  
-  // Buka accordion secara otomatis
-  const safeId = selectedGroup.replace(/\s+/g, '_');
-  setTimeout(() => toggleAccordion(safeId), 50);
-
-  // Tampilkan tombol submit
-  document.getElementById('submitContainer').classList.remove('translate-y-full');
-});
-
-// Function to go back to dashboard
-function backToDashboard() {
-  currentCategory = null;
-  resetForm();
-
-  // Reset Header
-  document.getElementById('headerTitle').innerText = "Dashboard Presensi";
-  document.getElementById('headerIcon').className = `ph ph-squares-four text-4xl text-white`;
-  document.getElementById('btnBack').classList.add('hidden');
-
-  // Hide Submit Button
-  document.getElementById('submitContainer').classList.add('translate-y-full');
-
-  // Switch Views
-  setTimeout(() => {
-    document.getElementById('viewForm').classList.add('hidden');
-    document.getElementById('viewDashboard').classList.remove('hidden');
-  }, 150);
-}
-
-document.getElementById('btnBack').addEventListener('click', (e) => {
-  e.preventDefault();
-  backToDashboard();
-});
-
-// Function to build student rows
-function buatBlokKelas(groupName, namaSantri, isTahfizh) {
-  const div = document.createElement('div');
-  div.className = 'bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-200';
-  
-  // ID tidak boleh mengandung spasi (misal "Halaqoh 1" -> "Halaqoh_1")
-  const safeGroupName = groupName.replace(/\s+/g, '_');
-  const title = isTahfizh ? groupName : `Kelas ${groupName} - PUTRA`;
-  const shortBadge = isTahfizh ? (groupName.split(' ')[1] || 'H') : groupName;
-
-  const headerHTML = `
-    <div class="px-5 py-4 flex items-center justify-between cursor-pointer bg-slate-50 hover:bg-slate-100 transition-colors" onclick="toggleAccordion('${safeGroupName}')">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm">
-          ${shortBadge}
-        </div>
-        <h3 class="font-semibold text-slate-800">${title}</h3>
-      </div>
-      <div class="flex items-center gap-3">
-        <span class="text-xs font-medium bg-slate-200 text-slate-600 px-2 py-1 rounded-md" id="badge-${safeGroupName}">${namaSantri.length} Santri</span>
-        <i class="ph ph-caret-down text-slate-500 transition-transform duration-300" id="icon-${safeGroupName}"></i>
-      </div>
-    </div>
-  `;
-
-  let studentsHTML = `<div class="p-5 space-y-4 hidden border-t border-slate-100" id="content-${safeGroupName}">`;
-  
-  if(namaSantri.length === 0) {
-    studentsHTML += `<div class="text-center text-sm text-slate-400 py-4">Tidak ada data santri</div>`;
-  } else {
-    namaSantri.forEach((nama, index) => {
-      const safeId = `${safeGroupName}_${index}`;
-      studentsHTML += `
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-slate-50/50 rounded-xl border border-slate-100 student-row" data-group="${groupName}" data-name="${nama}">
-          <span class="font-medium text-slate-700 text-sm sm:text-base">${index + 1}. ${nama}</span>
-          
-          <div class="grid grid-cols-4 gap-1.5 sm:gap-2">
-            <!-- Hadir -->
-            <label class="cursor-pointer text-center">
-              <input type="radio" name="${safeId}" value="hadir" class="peer sr-only" checked>
-              <div class="px-2 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 bg-white border border-slate-200 text-slate-500 peer-checked:bg-emerald-500 peer-checked:text-white peer-checked:border-emerald-500 peer-checked:shadow-sm">
-                Hadir
-              </div>
-            </label>
-            <!-- Pulang -->
-            <label class="cursor-pointer text-center">
-              <input type="radio" name="${safeId}" value="pulang" class="peer sr-only">
-              <div class="px-2 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 bg-white border border-slate-200 text-slate-500 peer-checked:bg-amber-500 peer-checked:text-white peer-checked:border-amber-500 peer-checked:shadow-sm">
-                Pulang
-              </div>
-            </label>
-            <!-- Sakit -->
-            <label class="cursor-pointer text-center">
-              <input type="radio" name="${safeId}" value="sakit" class="peer sr-only">
-              <div class="px-2 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 bg-white border border-slate-200 text-slate-500 peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-500 peer-checked:shadow-sm">
-                Sakit
-              </div>
-            </label>
-            <!-- Alpa -->
-            <label class="cursor-pointer text-center">
-              <input type="radio" name="${safeId}" value="alpa" class="peer sr-only">
-              <div class="px-2 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 bg-white border border-slate-200 text-slate-500 peer-checked:bg-rose-500 peer-checked:text-white peer-checked:border-rose-500 peer-checked:shadow-sm">
-                Alpa
-              </div>
-            </label>
+          <div class="flex flex-col gap-4 mt-8 text-center">
+            <a @click="toggleAuthMode" class="moe-link text-xs font-black cursor-pointer uppercase tracking-tighter">
+               {{ authMode === 'login' ? 'إنشاء حساب جديد (Daftar Akun Baru)' : 'تسجيل الدخول (Sudah Punya Akun)' }}
+            </a>
+            <a class="moe-link text-xs font-bold cursor-pointer opacity-60">استعادة كلمة المرور (Lupa Sandi?)</a>
           </div>
         </div>
-      `;
-    });
-  }
+      </div>
 
-  studentsHTML += `</div>`;
-  div.innerHTML = headerHTML + studentsHTML;
-  return div;
-}
+      <!-- MAIN APP -->
+      <template v-else>
+        <header class="sticky top-0 z-20 bg-white/95 backdrop-blur-md p-4 flex items-center justify-between border-b border-slate-100 shadow-sm">
+          <div class="flex items-center gap-3">
+            <img :src="appLogo" class="w-10 h-10 object-contain">
+            <div>
+              <h1 class="text-xs font-black text-slate-800 tracking-tighter">{{ appName }}</h1>
+              <p class="text-[9px] text-moe uppercase font-black tracking-widest">{{ user.role }}</p>
+            </div>
+          </div>
+          <button @click="logout" class="btn btn-ghost btn-xs text-slate-400 font-black hover:text-red-500 transition-colors">LOGOUT</button>
+        </header>
 
-// Tampilkan Toast Notifikasi
-function showToast() {
-  const toast = document.getElementById('toast');
-  toast.classList.remove('-translate-y-24', 'opacity-0');
-  toast.classList.add('translate-y-0', 'opacity-100');
-  
-  setTimeout(() => {
-    toast.classList.remove('translate-y-0', 'opacity-100');
-    toast.classList.add('-translate-y-24', 'opacity-0');
-  }, 3000);
-}
+        <main class="flex-1 pb-24 overflow-y-auto">
+          
+          <!-- HOME TAB -->
+          <div v-if="activeTab === 'home'" class="p-5 space-y-6">
+            
+            <!-- ADMIN PANEL -->
+            <div v-if="user.role === 'ADMIN'" class="space-y-4">
+              <h3 class="font-bold text-slate-800 px-1 text-xs uppercase tracking-widest opacity-40">Admin Control Panel</h3>
+              <div v-for="st in students" :key="st.id" @click="viewDetail(st)" class="p-4 bg-white border border-slate-100 rounded-3xl shadow-sm flex items-center gap-4 active:scale-95 transition-all cursor-pointer">
+                <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-moe border border-slate-100">{{ st.nama_lengkap_id ? st.nama_lengkap_id.charAt(0) : '?' }}</div>
+                <div class="flex-1 overflow-hidden">
+                  <h4 class="font-bold text-sm truncate text-slate-700">{{ st.nama_lengkap_id || 'Tanpa Nama' }}</h4>
+                  <p class="text-[10px] text-slate-400 font-medium">{{ st.email }}</p>
+                </div>
+                <div class="badge text-[9px] font-black tracking-tighter" :class="st.status_dok === 'Disetujui' ? 'badge-success text-white' : st.status_dok === 'Ditolak' ? 'badge-error text-white' : 'badge-ghost'">{{ st.status_dok || 'PENDING' }}</div>
+              </div>
+            </div>
 
-// Inisialisasi Aplikasi (Fetch Data 1 Kali di Awal)
-fetch(WEB_APP_URL)
-  .then(r => r.json())
-  .then(data => {
-    studentData = data;
-    
-    // Sembunyikan Loading, Tampilkan Dashboard Menu
-    document.getElementById('loadingState').style.display = 'none';
-    document.getElementById('viewDashboard').classList.remove('hidden');
+            <!-- USER FORM -->
+            <div v-else class="space-y-6">
+              <div class="flex items-center justify-between bg-slate-100 p-1.5 rounded-2xl shadow-inner">
+                <button @click="isViewMode = true" :class="isViewMode ? 'bg-white text-moe shadow-sm' : 'text-slate-400'" class="flex-1 py-2 rounded-xl text-[10px] font-black uppercase transition-all">Mode Lihat</button>
+                <button @click="isViewMode = false" :class="!isViewMode ? 'bg-white text-moe shadow-sm' : 'text-slate-400'" class="flex-1 py-2 rounded-xl text-[10px] font-black uppercase transition-all">Mode Ubah</button>
+              </div>
 
-    // Proses Submit Data
-    document.getElementById('viewForm').addEventListener('submit', async e => {
-      e.preventDefault();
-      
-      const btnSubmit = document.getElementById('btnSubmit');
-      const originalText = btnSubmit.innerHTML;
-      btnSubmit.innerHTML = `<div class="loader w-5 h-5 border-2 border-t-white border-white/30"></div> Mengirim...`;
-      btnSubmit.disabled = true;
+              <!-- Banner Status -->
+              <div class="p-5 rounded-[2rem] flex items-center justify-between border" :class="formData.status_dok === 'Disetujui' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : formData.status_dok === 'Ditolak' ? 'bg-red-50 border-red-100 text-red-700' : 'bg-moe/10 border-moe/20 text-moe shadow-lg shadow-moe/5'">
+                <div>
+                   <p class="text-[9px] font-black uppercase opacity-60 tracking-widest">Status Verifikasi</p>
+                   <h4 class="text-sm font-black">{{ formData.status_dok || 'Belum Diverifikasi' }}</h4>
+                </div>
+                <span class="text-2xl">{{ formData.status_dok === 'Disetujui' ? '✅' : formData.status_dok === 'Ditolak' ? '❌' : '⏳' }}</span>
+              </div>
 
-      const payload = {
-        kategori: categoryConfig[currentCategory].title, 
-        guru: document.getElementById('Ustadz').value,
-        jenisAbsensi: document.getElementById('jenisAbsensi').value
-      };
+              <div class="tabs tabs-boxed bg-slate-100 rounded-2xl p-1 overflow-x-auto flex-nowrap scrollbar-hide">
+                <a v-for="t in ['identitas', 'akademik', 'berkas', 'dokumen']" @click="formTab = t" :class="{'tab-active !bg-white !text-moe shadow-sm': formTab === t}" class="tab flex-1 font-bold text-[9px] uppercase min-w-fit">{{ t }}</a>
+              </div>
 
-      let groupsToSubmit = [];
+              <!-- Tab Content Identitas -->
+              <div v-if="formTab === 'identitas'" class="space-y-6 animate-in fade-in">
+                <section class="space-y-4">
+                  <h4 class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] px-1">Informasi Identitas</h4>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div v-for="n in [{k:'nama_p1_id', l:'Nama Pertama'}, {k:'nama_p2_id', l:'Nama Kedua'}, {k:'nama_p3_id', l:'Nama Ketiga'}, {k:'nama_p4_id', l:'Nama Keempat'}]" :key="n.k">
+                       <label class="label text-[9px] font-bold text-slate-400 uppercase">Indo - {{ n.l }}</label>
+                       <div v-if="isViewMode" @click="copy(formData[n.k], n.l)" class="p-3 bg-white border border-slate-100 rounded-2xl text-[13px] font-medium copy-active truncate shadow-sm">{{ formData[n.k] || '-' }}</div>
+                       <input v-else v-model="formData[n.k]" @input="formatIDName(n.k)" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs shadow-sm">
+                    </div>
+                  </div>
+                  <div class="divider"></div>
+                  <div class="grid grid-cols-2 gap-3" dir="rtl">
+                    <div v-for="n in [{k:'nama_p1_ar', l:'الأول'}, {k:'nama_p2_ar', l:'الثاني'}, {k:'nama_p3_ar', l:'الثالث'}, {k:'nama_p4_ar', l:'الرابع'}]" :key="n.k">
+                       <label class="label text-[9px] font-bold text-slate-400 text-right uppercase">AR - {{ n.l }}</label>
+                       <div v-if="isViewMode" @click="copy(formData[n.k], n.l)" class="p-3 bg-white border border-slate-100 rounded-2xl text-base font-black font-serif text-right copy-active shadow-sm">{{ formData[n.k] || '-' }}</div>
+                       <input v-else v-model="formData[n.k]" @input="formatARName(n.k)" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-right font-serif text-base shadow-sm">
+                    </div>
+                  </div>
+                </section>
 
-      // Tentukan grup mana saja yang akan dikirim ke backend
-      if (currentCategory === 'sholat') {
-        payload.grupSpesifik = 'Semua Kelas';
-        groupsToSubmit = activeGroups; // activeGroups berisi array [VII, VIII, IX, X, XI, XII]
-      } else {
-        const selectedGroup = document.getElementById('pilihGrup').value;
-        payload.grupSpesifik = selectedGroup;
-        groupsToSubmit = [selectedGroup]; // Hanya satu grup spesifik
-      }
+                <section class="space-y-4">
+                  <h4 class="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1">Tempat & Tanggal Lahir</h4>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div v-for="f in [{k:'tpt_lahir_id', l:'Tpt Lahir Indo'}, {k:'tpt_lahir_ar', l:'مكان الميلاد', ar:true}, {k:'tgl_lahir_id', l:'Tgl Lahir Indo', d:true}, {k:'tgl_lahir_ar', l:'تاريخ الميلاد', ar:true, ro:true}]" :key="f.k" :dir="f.ar ? 'rtl' : 'ltr'">
+                       <label class="label text-[9px] font-bold text-slate-400 uppercase" :class="{'text-right': f.ar}">{{ f.l }}</label>
+                       <div v-if="isViewMode" @click="copy(formData[f.k], f.l)" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs copy-active shadow-sm" :class="{'text-right font-serif font-black': f.ar}">{{ formData[f.k] || '-' }}</div>
+                       <input v-else-if="f.d" v-model="formData[f.k]" @change="generateHijri" type="date" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
+                       <input v-else-if="f.ro" v-model="formData[f.k]" readonly type="text" class="input input-bordered w-full bg-primary/5 border-primary/20 rounded-xl text-right font-serif text-base h-11">
+                       <input v-else v-model="formData[f.k]" @input="f.ar ? formatARName(f.k) : formatIDName(f.k)" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm" :class="{'text-right font-serif': f.ar}">
+                    </div>
+                  </div>
+                </section>
+              </div>
 
-      // Kumpulkan data persentasi HANYA dari grup-grup yang ditentukan
-      groupsToSubmit.forEach(groupName => {
-        const result = { hadir: [], pulang: [], sakit: [], alpa: [] };
-        const studentRows = document.querySelectorAll(`.student-row[data-group="${groupName}"]`);
+              <!-- Tab Akademik -->
+              <div v-if="formTab === 'akademik'" class="space-y-6 animate-in fade-in">
+                <section class="space-y-4">
+                  <h4 class="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1">Pendidikan Terakhir</h4>
+                  <div v-for="edu in [{k:'asal_sek_id', l:'Asal Sekolah Indo'}, {k:'asal_sek_ar', l:'اسم المدرسة', ar:true}]" :key="edu.k" :dir="edu.ar ? 'rtl' : 'ltr'">
+                    <label class="label text-[9px] font-bold text-slate-400 uppercase">{{ edu.l }}</label>
+                    <div v-if="isViewMode" @click="copy(formData[edu.k], edu.l)" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs copy-active shadow-sm" :class="{'text-right font-serif font-black': edu.ar}">{{ formData[edu.k] || '-' }}</div>
+                    <input v-else v-model="formData[edu.k]" @input="edu.ar ? formatARName(edu.k) : formatIDName(edu.k)" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm" :class="{'text-right font-serif': edu.ar}">
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="label text-[9px] font-bold text-slate-400 uppercase">Tahun Lulus</label>
+                      <div v-if="isViewMode" @click="copy(formData.thn_lulus, 'Thn Lulus')" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs copy-active h-11 flex items-center shadow-sm">{{ formData.thn_lulus || '-' }}</div>
+                      <select v-else v-model="formData.thn_lulus" class="select select-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
+                        <option value="">Pilih</option>
+                        <option v-for="y in graduationYears" :key="y" :value="y">{{ y }}</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="label text-[9px] font-bold text-slate-400 uppercase">No. Daftar</label>
+                      <div v-if="isViewMode" @click="copy(formData.no_daftar, 'No Daftar')" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs copy-active h-11 flex items-center shadow-sm">{{ formData.no_daftar || '-' }}</div>
+                      <input v-else v-model="formData.no_daftar" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
+                    </div>
+                  </div>
+                </section>
+                <section class="space-y-3">
+                  <p class="text-[10px] font-black text-slate-300 uppercase px-1 tracking-widest">Kampus Tujuan</p>
+                  <div v-if="isViewMode" @click="copy(formData.kampus, 'Kampus')" class="p-4 bg-white border border-slate-200 rounded-[2rem] text-[11px] font-black text-moe copy-active shadow-sm">{{ formData.kampus || 'Belum Pilih Kampus' }}</div>
+                  <div v-else class="grid grid-cols-2 gap-2 bg-slate-100/50 p-4 rounded-[2rem] border border-slate-100">
+                    <label v-for="univ in universityList" :key="univ" class="flex items-center gap-2 p-3 bg-white rounded-2xl shadow-sm cursor-pointer active:bg-moe/5 border border-slate-50 transition-all">
+                      <input type="checkbox" :value="univ" v-model="selectedUnivs" class="checkbox checkbox-primary checkbox-xs rounded" />
+                      <span class="text-[10px] font-bold text-slate-600">{{ univ }}</span>
+                    </label>
+                  </div>
+                </section>
+              </div>
+
+              <!-- Tab Berkas -->
+              <div v-if="formTab === 'berkas'" class="space-y-3 animate-in fade-in">
+                <div v-for="file in fileList" :key="file.key" @click="isViewMode ? copy(formData[file.key] ? 'YA' : 'TIDAK', file.label) : (formData[file.key] = !formData[file.key])" class="flex justify-between items-center p-4 bg-white border border-slate-100 rounded-[1.5rem] active:bg-slate-50 copy-active cursor-pointer shadow-sm transition-transform active:scale-[0.98]">
+                  <span class="text-[11px] font-bold text-slate-700">{{ file.label }}</span>
+                  <input v-if="!isViewMode" v-model="formData[file.key]" type="checkbox" class="checkbox checkbox-primary checkbox-sm rounded-md" @click.stop />
+                  <span v-else class="badge text-[9px] font-black px-2 py-3" :class="formData[file.key] ? 'bg-moe text-white border-none' : 'bg-slate-100 text-slate-400 border-none'">{{ formData[file.key] ? 'LENGKAP' : 'BELUM' }}</span>
+                </div>
+              </div>
+
+              <!-- Tab Dokumen (External Drive Links) -->
+              <div v-if="formTab === 'dokumen'" class="space-y-6 animate-in slide-in-from-bottom-4">
+                <div class="bg-blue-50 text-blue-700 p-5 rounded-[2rem] text-[11px] font-medium leading-relaxed border border-blue-100 shadow-sm flex items-start gap-3">
+                  <span class="text-xl">ℹ️</span>
+                  <p>Silakan akses folder atau unduh template dokumen eksternal di bawah ini sesuai dengan panduan pendaftaran.</p>
+                </div>
+
+                <div class="space-y-3">
+                  <!-- Iterasi Dokumen External dari Setup -->
+                  <div v-for="d in docFields" :key="d.k" class="p-5 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex items-center justify-between gap-4 active:scale-[0.98] transition-transform cursor-pointer" @click="openLink(d.url)">
+                    <div class="flex-1">
+                      <h4 class="text-[11px] font-black text-slate-700 uppercase tracking-wide">{{ d.l }}</h4>
+                      <p class="text-[9px] font-bold text-slate-400 mt-1">Buka Dokumen/Folder Eksternal</p>
+                    </div>
+                    <button class="btn btn-square bg-moe/10 border-none text-moe rounded-2xl shadow-sm group-hover:bg-moe group-hover:text-white pointer-events-none">
+                      <span class="text-xl">📁</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="divider"></div>
+                <div class="flex flex-col gap-4 text-center">
+                   <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Finalisasi Seluruh Data</p>
+                   <button @click="formData.pengajuan_dok = 'YA'; saveData()" :disabled="isLoading || formData.status_dok === 'Disetujui'" class="btn bg-moe hover:bg-moehover border-none text-white rounded-[2rem] h-14 font-black shadow-lg shadow-moe/30 text-base">
+                     AJUKAN VERIFIKASI SEKARANG
+                   </button>
+                </div>
+              </div>
+
+              <button v-if="!isViewMode && formTab !== 'dokumen'" @click="saveData" :disabled="isLoading" class="btn bg-slate-800 hover:bg-slate-900 border-none w-full rounded-[2rem] text-white mt-6 h-14 shadow-xl text-base font-black">
+                <span v-if="isLoading" class="loading loading-spinner"></span> SIMPAN PERUBAHAN
+              </button>
+            </div>
+          </div>
+
+          <!-- INFO TAB (TIMELINE WIZARD) -->
+          <div v-if="activeTab === 'info'" class="p-5 space-y-6 bg-slate-50 min-h-[80vh]">
+             <!-- Header Panduan -->
+             <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl"></div>
+                <h3 class="font-black text-xl tracking-tighter mb-1 relative z-10">Pusat Panduan</h3>
+                <p class="text-[11px] font-medium opacity-70 tracking-wide relative z-10">Jejak langkah registrasi pelajar.</p>
+             </div>
+             
+             <!-- Tampilkan data info jika ada dengan konsep TIMELINE -->
+             <div v-if="displayInfo.length > 0" class="relative py-4 pb-12">
+               <!-- Garis Vertikal Timeline -->
+               <div class="absolute left-[27px] top-4 bottom-8 w-1 bg-slate-200 rounded-full z-0"></div>
+               
+               <div v-for="(info, index) in displayInfo" :key="info.id" class="relative flex items-start gap-4 mb-8 last:mb-0 group">
+                  <!-- Node Angka -->
+                  <div class="w-14 h-14 shrink-0 rounded-full bg-white border-4 border-slate-100 flex items-center justify-center font-black text-lg text-slate-400 shadow-sm relative z-10 group-hover:border-moe/30 group-hover:text-moe transition-colors">
+                    {{ index + 1 }}
+                  </div>
+                  <!-- Konten Info -->
+                  <div class="flex-1 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                    <span class="inline-block bg-moe/10 text-moe text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest mb-3">{{ info.step }}</span>
+                    <div class="text-[12.5px] font-medium text-slate-600 leading-relaxed space-y-2" v-html="info.info"></div>
+                    
+                    <div v-if="info.gambar" class="mt-5 w-full rounded-[1.5rem] overflow-hidden bg-slate-50 border border-slate-100">
+                      <img :src="formatDriveUrl(info.gambar)" class="w-full h-auto object-cover hover:scale-105 transition-transform duration-500">
+                    </div>
+                    
+                    <button v-if="info.link" @click="openLink(info.link)" class="mt-5 btn bg-slate-50 hover:bg-moe hover:text-white text-slate-500 border-none w-full rounded-2xl text-[10px] h-12 font-black tracking-widest transition-colors">
+                      BUKA TAUTAN EXTERNAL ➜
+                    </button>
+                  </div>
+               </div>
+             </div>
+             
+             <!-- Empty State Info -->
+             <div v-else class="text-center py-16 px-4 bg-white rounded-[2.5rem] border border-slate-100 border-dashed shadow-sm">
+               <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-4xl mx-auto mb-4">📭</div>
+               <h4 class="font-black text-slate-700 text-sm mb-1">Belum Ada Panduan</h4>
+               <p class="text-[10px] text-slate-400 font-medium tracking-wide">Informasi pendaftaran akan segera dirlis.</p>
+             </div>
+          </div>
+
+          <!-- ACCOUNT TAB -->
+          <div v-if="activeTab === 'profile'" class="p-10 flex flex-col items-center justify-center min-h-[70vh]">
+             <div class="w-32 h-32 bg-white rounded-[3rem] flex items-center justify-center text-5xl mb-6 shadow-2xl text-moe font-black relative">
+               <div class="absolute inset-0 bg-moe/10 rounded-[3rem] animate-pulse"></div>
+               <span class="relative z-10">{{ user.email.charAt(0).toUpperCase() }}</span>
+             </div>
+             <h3 class="text-xl font-black text-slate-800 tracking-tighter">{{ user.email }}</h3>
+             <p class="text-[10px] font-black text-moe uppercase tracking-[0.4em] mt-2 bg-moe/10 px-4 py-1 rounded-full">{{ user.role }}</p>
+             <div class="w-full h-[1px] bg-slate-200 my-12"></div>
+             <button @click="logout" class="btn btn-error btn-outline w-full rounded-3xl h-14 border-slate-200 hover:bg-red-50 hover:text-red-500 font-black tracking-widest bg-white">KELUAR APLIKASI</button>
+          </div>
+        </main>
+
+        <!-- Bottom Nav -->
+        <nav v-if="!isInputFocused" class="fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-xl border-t border-slate-200 px-6 py-4 flex justify-around items-center rounded-t-[2.5rem] shadow-[0_-15px_35px_rgba(0,0,0,0.04)]">
+          <button v-for="tab in [{k:'home', i:'🏠', l:'Home'}, {k:'info', i:'📚', l:'Panduan'}, {k:'profile', i:'👤', l:'Profil'}]" @click="activeTab = tab.k" :class="{'text-moe scale-110': activeTab === tab.k, 'text-slate-400': activeTab !== tab.k}" class="flex flex-col items-center gap-1.5 transition-all">
+            <span class="text-2xl">{{ tab.i }}</span>
+            <span class="text-[8px] font-black uppercase tracking-[0.1em]">{{ tab.l }}</span>
+          </button>
+        </nav>
+      </template>
+
+      <!-- ADMIN MODAL DETAIL -->
+      <dialog :open="selectedStudent !== null" class="modal modal-bottom z-[40] transition-all">
+        <div v-if="selectedStudent" class="modal-box p-0 rounded-t-[3.5rem] bg-white border border-slate-100 shadow-2xl">
+          <div class="h-24 bg-moe relative flex items-end justify-center">
+             <button @click="selectedStudent = null" class="absolute right-8 top-8 w-10 h-10 bg-black/10 hover:bg-black/20 rounded-full text-white flex items-center justify-center transition-all font-black">✕</button>
+             <div class="w-24 h-24 bg-white rounded-[2rem] translate-y-12 shadow-2xl flex items-center justify-center text-4xl font-black text-moe border-4 border-white">{{ selectedStudent.nama_lengkap_id ? selectedStudent.nama_lengkap_id.charAt(0) : '?' }}</div>
+          </div>
+          <div class="pt-16 px-8 pb-12 space-y-8">
+            <div class="text-center">
+              <h3 class="text-xl font-black text-slate-800 tracking-tighter">{{ selectedStudent.nama_lengkap_id }}</h3>
+              <p class="text-[11px] text-slate-400 font-bold uppercase tracking-widest">{{ selectedStudent.email }}</p>
+            </div>
+
+            <div class="bg-slate-50 p-6 rounded-[3rem] space-y-5 border border-slate-100">
+               <p class="text-center text-[11px] font-black uppercase text-slate-500 tracking-widest">Aksi Persetujuan</p>
+               <div class="flex gap-4">
+                  <button @click="verifyDoc(selectedStudent.user_id, 'Disetujui')" class="btn flex-1 bg-emerald-500 border-none text-white rounded-2xl h-14 font-black shadow-lg shadow-emerald-500/20">SETUJUI</button>
+                  <button @click="verifyDoc(selectedStudent.user_id, 'Ditolak')" class="btn flex-1 bg-red-500 border-none text-white rounded-2xl h-14 font-black shadow-lg shadow-red-500/20">TOLAK</button>
+               </div>
+               <p class="text-center text-[9px] text-slate-400 font-bold mt-2">Status Saat Ini: {{ selectedStudent.status_dok || 'PENDING' }}</p>
+            </div>
+          </div>
+        </div>
+      </dialog>
+
+    </div>
+  </div>
+
+  <!-- JS LOGIC SECTION -->
+  <script>
+    const { createApp, ref, onMounted, watch, computed } = Vue;
+
+    // --- API BACKEND (DIHUBUNGKAN KE APPS SCRIPT) ---
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbzrVhJu_vO6lYUqBUvYSAVjDLDCH31rFwULqyjDBLdPtuFTnl9fmoFl1zUmGvya8Tek/exec";
+
+    createApp({
+      setup() {
+        const isGAS = typeof google !== 'undefined' && google.script && google.script.run;
+        const appName = "Portal Pelajar Malut Arab Saudi";
+        const appLogo = "https://lh3.googleusercontent.com/d/16B2pmzKZ3Belonfsl4-5wvZHNmI1gBvr";
         
-        studentRows.forEach(row => {
-          const name = row.dataset.name;
-          const status = row.querySelector('input[type="radio"]:checked').value;
-          result[status].push(name);
+        const showSplash = ref(true);
+        const isLoading = ref(false);
+        const isViewMode = ref(true);
+        const user = ref(null);
+        const authMode = ref('login');
+        const showPass = ref(false);
+        const isInputFocused = ref(false);
+        const activeTab = ref('home');
+        const formTab = ref('identitas');
+        const students = ref([]);
+        const infoData = ref([]);
+        const selectedStudent = ref(null);
+        const toast = ref({ show: false, msg: '' });
+        const authForm = ref({ email: '', password: '' });
+        
+        const universityList = ["UIM", "KSU", "KAU", "IU", "PNU", "KFUPM", "KAUST", "QU", "KFU", "TAIBAHU"];
+        const graduationYears = Array.from({length: 21}, (_, i) => (new Date().getFullYear() - i).toString());
+        const selectedUnivs = ref([]);
+
+        // MENDIFINISIKAN TAUTAN EKSTERNAL DRIVE DI SINI
+        const docFields = [
+          { k: 'tazkiyah_immit', l: 'Format Tazkiyah IMMIT', url: 'https://drive.google.com/drive/my-drive' },
+          { k: 'skkb_sma_lh', l: 'Format SKKB SMA LH', url: 'https://drive.google.com/drive/my-drive' },
+          { k: 'cv', l: 'Template Curriculum Vitae', url: 'https://drive.google.com/drive/my-drive' },
+          { k: 'tazkiyah_hidayatullah', l: 'Format Tazkiyah Hidayatullah', url: 'https://drive.google.com/drive/my-drive' }
+        ];
+
+        const fileList = [
+          { key: 'tazkiyah_1', label: 'Tazkiyah 1' }, { key: 'tazkiyah_2', label: 'Tazkiyah 2' },
+          { key: 'skkb', label: 'SKKB' }, { key: 'skck', label: 'SKCK' }, { key: 'ijazah', label: 'Ijazah' },
+          { key: 'transkip', label: 'Transkip Nilai' }, { key: 'foto', label: 'Foto Profil' }, { key: 'paspor', label: 'Paspor' }
+        ];
+
+        const formData = ref({
+          id: '', user_id: '', email: '', gender: 'Laki-laki', status_dok: '', pengajuan_dok: 'TIDAK',
+          nama_p1_id: '', nama_p2_id: '', nama_p3_id: '', nama_p4_id: '',
+          nama_p1_ar: '', nama_p2_ar: '', nama_p3_ar: '', nama_p4_ar: '',
+          nama_lengkap_id: '', nama_lengkap_ar: '', asal_sek_id: '', asal_sek_ar: '',
+          tpt_lahir_id: '', tpt_lahir_ar: '', tgl_lahir_id: '', tgl_lahir_ar: '',
+          wa: '', hp: '', thn_lulus: '', no_daftar: '', kampus: ''
         });
 
-        payload[groupName] = {
-          hadir: result.hadir, jumlahHadir: result.hadir.length,
-          pulang: result.pulang, jumlahPulang: result.pulang.length,
-          sakit: result.sakit, jumlahSakit: result.sakit.length,
-          alpa: result.alpa, jumlahAlpa: result.alpa.length
+        const callGAS = (action, data) => {
+          return new Promise((resolve, reject) => {
+            if (isGAS) {
+              google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[action + "GAS"] 
+                ? google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[action + "GAS"](data) 
+                : google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[action](data);
+            } else {
+              if (!webAppUrl) return reject("Web App URL belum dikonfigurasi.");
+              fetch(webAppUrl, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action, data })
+              })
+              .then(res => res.json())
+              .then(resolve)
+              .catch(err => reject(err));
+            }
+          });
         };
-      });
 
-      try {
-        await fetch(WEB_APP_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(payload)
+        const displayInfo = computed(() => infoData.value);
+        
+        const formatDriveUrl = (id) => (!id || id.includes('http')) ? id : `https://lh3.googleusercontent.com/d/${id}`;
+
+        const copy = (text, label) => {
+          if (!text) return;
+          const textArea = document.createElement("textarea");
+          textArea.value = text; document.body.appendChild(textArea);
+          textArea.select(); 
+          try { 
+              document.execCommand('copy'); 
+              showToast(`${label} Berhasil Disalin!`); 
+          } catch (err) { 
+              showToast("Gagal menyalin."); 
+          }
+          document.body.removeChild(textArea);
+        };
+
+        const generateHijri = () => {
+          if (!formData.value.tgl_lahir_id) return;
+          try {
+            const hijri = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-uma-nu-arab', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(formData.value.tgl_lahir_id));
+            formData.value.tgl_lahir_ar = hijri;
+          } catch (e) { console.error(e); }
+        };
+
+        const formatIDName = (k) => { if (formData.value[k]) formData.value[k] = formData.value[k].split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '); };
+        const formatARName = (k) => { if (formData.value[k]) formData.value[k] = formData.value[k].replace(/[^\u0600-\u06FF\s]/g, ''); };
+
+        watch(() => [formData.value.nama_p1_id, formData.value.nama_p2_id, formData.value.nama_p3_id, formData.value.nama_p4_id], (n) => formData.value.nama_lengkap_id = n.filter(x => x).join(' '));
+        watch(() => [formData.value.nama_p1_ar, formData.value.nama_p2_ar, formData.value.nama_p3_ar, formData.value.nama_p4_ar], (n) => formData.value.nama_lengkap_ar = n.filter(x => x).join(' '));
+
+        const showToast = (msg) => { toast.value = { show: true, msg }; setTimeout(() => { toast.value.show = false }, 3000); };
+        const openLink = (url) => url && window.open(url, '_blank');
+        const toggleAuthMode = () => authMode.value = authMode.value === 'login' ? 'register' : 'login';
+
+        const handleAuth = async () => {
+          if (!authForm.value.email || !authForm.value.password) return showToast("Lengkapi form!");
+          isLoading.value = true;
+          try {
+            const res = await callGAS('handleAuth', { mode: authMode.value, email: authForm.value.email, password: authForm.value.password });
+            isLoading.value = false;
+            if (res.success) {
+              user.value = res.user; infoData.value = res.infoData || [];
+              localStorage.setItem('portal_malut_session', JSON.stringify(res.user));
+              if (res.data) {
+                 fileList.forEach(f => { if(res.data[f.key]) res.data[f.key] = res.data[f.key] === 'YA'; });
+                 formData.value = { ...formData.value, ...res.data };
+                 if (res.data.kampus) selectedUnivs.value = res.data.kampus.split(', ');
+              }
+              if (res.students) students.value = res.students;
+              showToast("Berhasil!");
+            } else showToast(res.msg);
+          } catch (e) { isLoading.value = false; showToast("Error: " + e.toString()); }
+        };
+
+        const saveData = async () => {
+          isLoading.value = true;
+          formData.value.kampus = selectedUnivs.value.join(', ');
+          const payload = JSON.parse(JSON.stringify(formData.value));
+          payload.user_id = user.value.id;
+          try {
+            await callGAS('saveData', payload);
+            isLoading.value = false; showToast("Data Tersimpan!"); isViewMode.value = true;
+          } catch (e) { isLoading.value = false; showToast("Error Simpan"); }
+        };
+
+        const verifyDoc = async (uid, status) => {
+           try {
+             await callGAS('updateStatus', { uid, status });
+             showToast(`Status: ${status}`); selectedStudent.value = null; handleAuth();
+           } catch (e) { showToast("Gagal Update"); }
+        };
+
+        const logout = () => { localStorage.removeItem('portal_malut_session'); user.value = null; showToast("Berhasil Keluar"); };
+        const viewDetail = (st) => selectedStudent.value = st;
+
+        onMounted(() => {
+          setTimeout(() => showSplash.value = false, 2500);
+          window.addEventListener('focusin', () => isInputFocused.value = true);
+          window.addEventListener('focusout', () => isInputFocused.value = false);
+          const session = localStorage.getItem('portal_malut_session');
+          if (session) { 
+            const p = JSON.parse(session); 
+            user.value = p; 
+            callGAS('fetchInitial', p).then(res => {
+              if (res.success) {
+                infoData.value = res.infoData || [];
+                if (res.data) {
+                  fileList.forEach(f => { if(res.data[f.key]) res.data[f.key] = res.data[f.key] === 'YA'; });
+                  formData.value = { ...formData.value, ...res.data };
+                  if (res.data.kampus) selectedUnivs.value = res.data.kampus.split(', ');
+                }
+                if (res.students) students.value = res.students;
+              }
+            });
+          }
         });
 
-        showToast();
-        
-        // Kembalikan ke dashboard setelah sukses
-        setTimeout(() => {
-          backToDashboard();
-          btnSubmit.innerHTML = originalText;
-          btnSubmit.disabled = false;
-        }, 1500);
-        
-      } catch (error) {
-        alert("Terjadi kesalahan jaringan saat mengirim data!");
-        btnSubmit.innerHTML = originalText;
-        btnSubmit.disabled = false;
+        return {
+          appName, appLogo, showSplash, isLoading, isViewMode, user, authMode, authForm, showPass,
+          isInputFocused, activeTab, formTab, formData, toast, students, docFields, fileList, universityList, graduationYears, selectedUnivs, displayInfo, selectedStudent,
+          toggleAuthMode, handleAuth, saveData, verifyDoc, viewDetail, logout, openLink, copy, generateHijri, formatIDName, formatARName, formatDriveUrl
+        };
       }
-    });
-  })
-  .catch(err => {
-    document.getElementById('loadingState').innerHTML = `
-      <div class="text-rose-500 text-center space-y-2">
-        <i class="ph-fill ph-warning-circle text-4xl"></i>
-        <p class="font-medium">Gagal memuat data dari server.</p>
-        <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-slate-100 rounded-lg text-sm text-slate-700 hover:bg-slate-200">Coba Ulangi</button>
-      </div>`;
-  });
-</script>
+    }).mount('#app');
+  </script>
 </body>
 </html>
-
-
-
