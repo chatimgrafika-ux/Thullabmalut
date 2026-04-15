@@ -1,0 +1,9 @@
+html[data-theme="light"] { --p: 66.4% 0.117 174.5; --pf: 56.4% 0.117 174.5; --pc: 100% 0 0; }
+html, body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; user-select: none; }
+*::-webkit-scrollbar { display: none; }
+* { -ms-overflow-style: none; scrollbar-width: none; }
+[v-cloak] { display: none; }
+.dynamic-island { animation: slideDown 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+@keyframes slideDown { from { transform: translate(-50%, -100%); } to { transform: translate(-50%, 0); } }
+.copy-active:active { background-color: rgba(29, 177, 162, 0.1); transform: scale(0.98); }
+.moe-link { color: #1db1a2; text-decoration: underline; }
