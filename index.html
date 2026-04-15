@@ -68,8 +68,18 @@
           <p class="text-sm text-slate-600 font-bold mt-10" dir="rtl">الرجاء ادخال اسم المستخدم وكلمة المرور</p>
         </div>
         <div class="space-y-4">
+          <template v-if="authMode === 'register'">
+            <input v-model="authForm.nama" type="text" placeholder="Nama Lengkap / الاسم الكامل" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-xl h-12 text-center" dir="rtl">
+            <input v-model="authForm.asal" type="text" placeholder="Daerah Asal / المنطقة" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-xl h-12 text-center" dir="rtl">
+          </template>
+          
           <input v-model="authForm.email" type="email" placeholder="Email / اسم المستخدم" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-xl h-12 text-center" dir="rtl">
           <input v-model="authForm.password" :type="showPass ? 'text' : 'password'" placeholder="Kata Sandi / كلمة المرور" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-xl h-12 text-center" dir="rtl">
+          
+          <template v-if="authMode === 'register'">
+            <input v-model="authForm.confirmPassword" :type="showPass ? 'text' : 'password'" placeholder="Konfirmasi Sandi / تأكيد كلمة المرور" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-xl h-12 text-center" dir="rtl">
+          </template>
+
           <button @click="handleAuth" :disabled="isLoading" class="btn bg-moe hover:bg-moehover border-none w-full rounded-xl text-white font-bold h-12 text-lg">
             <span v-if="isLoading" class="loading loading-spinner"></span>
             {{ authMode === 'login' ? 'دخول' : 'تسجيل' }}
@@ -78,7 +88,6 @@
             <a @click="toggleAuthMode" class="moe-link text-xs font-black cursor-pointer uppercase tracking-tighter">
                {{ authMode === 'login' ? 'إنشاء حساب جديد (Daftar Akun Baru)' : 'تسجيل الدخول (Sudah Punya Akun)' }}
             </a>
-            <a class="moe-link text-xs font-bold cursor-pointer opacity-60">استعادة كلمة المرور (Lupa Sandi?)</a>
           </div>
         </div>
       </div>
@@ -86,17 +95,20 @@
       <!-- MAIN APP -->
       <template v-else>
         <header class="sticky top-0 z-20 bg-white/95 backdrop-blur-md p-4 flex items-center justify-between border-b border-slate-100 shadow-sm">
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-3 cursor-pointer" @click="activeTab = 'home'">
             <img :src="appLogo" class="w-10 h-10 object-contain">
             <div>
               <h1 class="text-xs font-black text-slate-800 tracking-tighter">{{ appName }}</h1>
               <p class="text-[9px] text-moe uppercase font-black tracking-widest">{{ user.role }}</p>
             </div>
           </div>
-          <button @click="logout" class="btn btn-ghost btn-xs text-slate-400 font-black hover:text-red-500 transition-colors">LOGOUT</button>
+          <div class="flex items-center gap-2">
+            <button v-if="activeTab !== 'info'" @click="activeTab = 'info'" class="btn btn-circle btn-sm bg-slate-100 hover:bg-slate-200 border-none text-lg">📚</button>
+            <button v-if="activeTab !== 'profile'" @click="activeTab = 'profile'" class="btn btn-circle btn-sm bg-slate-100 hover:bg-slate-200 border-none text-lg">👤</button>
+          </div>
         </header>
 
-        <main class="flex-1 pb-24 overflow-y-auto">
+        <main class="flex-1 pb-10 overflow-y-auto">
           
           <!-- HOME TAB -->
           <div v-if="activeTab === 'home'" class="p-5 space-y-6">
@@ -188,50 +200,118 @@
                       </select>
                     </div>
                     <div>
-                      <label class="label text-[9px] font-bold text-slate-400 uppercase">No. Daftar</label>
+                      <label class="label text-[9px] font-bold text-slate-400 uppercase">No. Daftar Portal</label>
                       <div v-if="isViewMode" @click="copy(formData.no_daftar, 'No Daftar')" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs copy-active h-11 flex items-center shadow-sm">{{ formData.no_daftar || '-' }}</div>
                       <input v-else v-model="formData.no_daftar" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
                     </div>
                   </div>
                 </section>
                 <section class="space-y-3">
-                  <p class="text-[10px] font-black text-slate-300 uppercase px-1 tracking-widest">Kampus Tujuan</p>
-                  <div v-if="isViewMode" @click="copy(formData.kampus, 'Kampus')" class="p-4 bg-white border border-slate-200 rounded-[2rem] text-[11px] font-black text-moe copy-active shadow-sm">{{ formData.kampus || 'Belum Pilih Kampus' }}</div>
-                  <div v-else class="grid grid-cols-2 gap-2 bg-slate-100/50 p-4 rounded-[2rem] border border-slate-100">
-                    <label v-for="univ in universityList" :key="univ" class="flex items-center gap-2 p-3 bg-white rounded-2xl shadow-sm cursor-pointer active:bg-moe/5 border border-slate-50 transition-all">
-                      <input type="checkbox" :value="univ" v-model="selectedUnivs" class="checkbox checkbox-primary checkbox-xs rounded" />
-                      <span class="text-[10px] font-bold text-slate-600">{{ univ }}</span>
-                    </label>
+                  <p class="text-[10px] font-black text-slate-300 uppercase px-1 tracking-widest border-b border-slate-100 pb-2">Riwayat Pendaftaran Kampus</p>
+                  
+                  <!-- Mode Lihat: List Pendaftaran Kampus -->
+                  <div v-if="isViewMode" class="space-y-3">
+                    <div v-if="pendaftaranKampus.length === 0" class="p-4 bg-slate-50 border border-slate-200 border-dashed rounded-[1.5rem] text-[11px] font-black text-slate-400 text-center shadow-sm">Belum Ada Data Pendaftaran</div>
+                    <div v-for="(pk, idx) in pendaftaranKampus" :key="pk.id" class="p-4 bg-white border border-slate-100 rounded-[1.5rem] shadow-sm flex flex-col gap-2 relative">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[12px] font-black text-slate-700">{{ pk.nama_kampus || 'Kampus Belum Dipilih' }}</span>
+                            <span class="badge text-[9px] font-bold px-3 py-2" :class="statusColor(pk.status)">{{ pk.status }}</span>
+                        </div>
+                        <div class="text-[10px] font-bold text-slate-400 mt-1">No. Pendaftaran: <span @click="copy(pk.no_daftar, 'No Pendaftaran Kampus')" class="text-moe cursor-pointer active:scale-95 inline-block">{{ pk.no_daftar || 'Belum Diisi' }}</span></div>
+                    </div>
+                  </div>
+
+                  <!-- Mode Ubah: Form Pendaftaran Kampus -->
+                  <div v-else class="space-y-4">
+                    <div v-for="(pk, idx) in pendaftaranKampus" :key="pk.id" class="p-4 bg-slate-50 border border-slate-200 rounded-[1.5rem] relative space-y-3 shadow-inner">
+                        <button @click="hapusKampus(idx)" class="absolute top-3 right-3 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center font-bold text-xs hover:bg-red-500 hover:text-white transition-colors">✕</button>
+                        
+                        <div>
+                            <label class="label text-[9px] font-bold text-slate-400 uppercase">Nama Kampus</label>
+                            <select v-model="pk.nama_kampus" class="select select-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
+                                <option disabled value="">Pilih Kampus</option>
+                                <option v-for="u in universityList" :key="u" :value="u">{{ u }}</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="label text-[9px] font-bold text-slate-400 uppercase">No. Pendaftaran</label>
+                                <input v-model="pk.no_daftar" type="text" placeholder="ID/No Daftar" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
+                            </div>
+                            <div>
+                                <label class="label text-[9px] font-bold text-slate-400 uppercase">Status</label>
+                                <select v-model="pk.status" class="select select-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
+                                    <option v-for="s in statusKampusList" :key="s" :value="s">{{ s }}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button @click="tambahKampus" class="btn btn-outline border-dashed border-2 border-slate-300 text-slate-500 hover:bg-slate-50 hover:border-moe hover:text-moe w-full rounded-[1.5rem] h-12 font-black text-[10px] tracking-widest bg-white">
+                        ➕ TAMBAH DATA KAMPUS
+                    </button>
                   </div>
                 </section>
               </div>
 
-              <!-- Tab Berkas -->
-              <div v-if="formTab === 'berkas'" class="space-y-3 animate-in fade-in">
-                <div v-for="file in fileList" :key="file.key" @click="isViewMode ? copy(formData[file.key] ? 'YA' : 'TIDAK', file.label) : (formData[file.key] = !formData[file.key])" class="flex justify-between items-center p-4 bg-white border border-slate-100 rounded-[1.5rem] active:bg-slate-50 copy-active cursor-pointer shadow-sm transition-transform active:scale-[0.98]">
-                  <span class="text-[11px] font-bold text-slate-700">{{ file.label }}</span>
-                  <input v-if="!isViewMode" v-model="formData[file.key]" type="checkbox" class="checkbox checkbox-primary checkbox-sm rounded-md" @click.stop />
-                  <span v-else class="badge text-[9px] font-black px-2 py-3" :class="formData[file.key] ? 'bg-moe text-white border-none' : 'bg-slate-100 text-slate-400 border-none'">{{ formData[file.key] ? 'LENGKAP' : 'BELUM' }}</span>
-                </div>
+              <!-- Tab Berkas (Checkbox List Berdasarkan Kategori) -->
+              <div v-if="formTab === 'berkas'" class="space-y-6 animate-in fade-in">
+                <!-- Berkas Wajib -->
+                <section class="space-y-3">
+                  <h4 class="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1 border-b border-slate-100 pb-2">- Berkas Wajib -</h4>
+                  <div v-for="file in berkasWajib" :key="file.key" @click="isViewMode ? copy(formData[file.key] ? 'YA' : 'TIDAK', file.label) : (formData[file.key] = !formData[file.key])" class="flex justify-between items-center p-4 bg-white border border-slate-100 rounded-[1.5rem] active:bg-slate-50 copy-active cursor-pointer shadow-sm transition-transform active:scale-[0.98]">
+                    <span class="text-[11px] font-bold text-slate-700">{{ file.label }}</span>
+                    <input v-if="!isViewMode" v-model="formData[file.key]" type="checkbox" class="checkbox checkbox-primary checkbox-sm rounded-md" @click.stop />
+                    <span v-else class="badge text-[9px] font-black px-2 py-3" :class="formData[file.key] ? 'bg-moe text-white border-none' : 'bg-slate-100 text-slate-400 border-none'">{{ formData[file.key] ? 'LENGKAP' : 'BELUM' }}</span>
+                  </div>
+                </section>
+
+                <!-- Berkas Pendukung -->
+                <section class="space-y-3">
+                  <h4 class="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1 border-b border-slate-100 pb-2">- Berkas Pendukung -</h4>
+                  <div v-for="file in berkasPendukung" :key="file.key" @click="isViewMode ? copy(formData[file.key] ? 'YA' : 'TIDAK', file.label) : (formData[file.key] = !formData[file.key])" class="flex justify-between items-center p-4 bg-white border border-slate-100 rounded-[1.5rem] active:bg-slate-50 copy-active cursor-pointer shadow-sm transition-transform active:scale-[0.98]">
+                    <span class="text-[11px] font-bold text-slate-700">{{ file.label }}</span>
+                    <input v-if="!isViewMode" v-model="formData[file.key]" type="checkbox" class="checkbox checkbox-primary checkbox-sm rounded-md" @click.stop />
+                    <span v-else class="badge text-[9px] font-black px-2 py-3" :class="formData[file.key] ? 'bg-moe text-white border-none' : 'bg-slate-100 text-slate-400 border-none'">{{ formData[file.key] ? 'LENGKAP' : 'BELUM' }}</span>
+                  </div>
+                </section>
+
+                <!-- Berkas Tambahan -->
+                <section class="space-y-3">
+                  <h4 class="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1 border-b border-slate-100 pb-2">- Berkas Tambahan -</h4>
+                  <div v-for="file in berkasTambahan" :key="file.key" @click="isViewMode ? copy(formData[file.key] ? 'YA' : 'TIDAK', file.label) : (formData[file.key] = !formData[file.key])" class="flex justify-between items-center p-4 bg-white border border-slate-100 rounded-[1.5rem] active:bg-slate-50 copy-active cursor-pointer shadow-sm transition-transform active:scale-[0.98]">
+                    <span class="text-[11px] font-bold text-slate-700">{{ file.label }}</span>
+                    <input v-if="!isViewMode" v-model="formData[file.key]" type="checkbox" class="checkbox checkbox-primary checkbox-sm rounded-md" @click.stop />
+                    <span v-else class="badge text-[9px] font-black px-2 py-3" :class="formData[file.key] ? 'bg-moe text-white border-none' : 'bg-slate-100 text-slate-400 border-none'">{{ formData[file.key] ? 'LENGKAP' : 'BELUM' }}</span>
+                  </div>
+                </section>
               </div>
 
-              <!-- Tab Dokumen (External Drive Links) -->
+              <!-- Tab Dokumen (Read-Only DB Links) -->
               <div v-if="formTab === 'dokumen'" class="space-y-6 animate-in slide-in-from-bottom-4">
                 <div class="bg-blue-50 text-blue-700 p-5 rounded-[2rem] text-[11px] font-medium leading-relaxed border border-blue-100 shadow-sm flex items-start gap-3">
                   <span class="text-xl">ℹ️</span>
-                  <p>Silakan akses folder atau unduh template dokumen eksternal di bawah ini sesuai dengan panduan pendaftaran.</p>
+                  <div>
+                    <p>Daftar tautan dokumen di bawah ini diambil langsung dari database sistem. Klik tombol dokumen untuk membuka tautan tersebut.</p>
+                  </div>
                 </div>
 
                 <div class="space-y-3">
-                  <!-- Iterasi Dokumen External dari Setup -->
-                  <div v-for="d in docFields" :key="d.k" class="p-5 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex items-center justify-between gap-4 active:scale-[0.98] transition-transform cursor-pointer" @click="openLink(d.url)">
+                  <div v-for="d in docFields" :key="d.k" class="p-5 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex items-center justify-between gap-4 transition-transform">
                     <div class="flex-1">
                       <h4 class="text-[11px] font-black text-slate-700 uppercase tracking-wide">{{ d.l }}</h4>
-                      <p class="text-[9px] font-bold text-slate-400 mt-1">Buka Dokumen/Folder Eksternal</p>
+                      <p v-if="formData[d.k]" class="text-[9px] font-bold text-emerald-500 mt-1">Tautan Tersedia</p>
+                      <p v-else class="text-[9px] font-bold text-slate-400 mt-1">Belum Ada Tautan</p>
                     </div>
-                    <button class="btn btn-square bg-moe/10 border-none text-moe rounded-2xl shadow-sm group-hover:bg-moe group-hover:text-white pointer-events-none">
-                      <span class="text-xl">📁</span>
+                    
+                    <!-- Tombol buka dokumen jika link ada -->
+                    <button v-if="formData[d.k]" @click="openLink(formData[d.k])" class="btn btn-square bg-moe/10 hover:bg-moe hover:text-white border-none text-moe rounded-2xl shadow-sm transition-colors cursor-pointer">
+                      <span class="text-xl">📄</span>
                     </button>
+                    <!-- Tampilan dokumen non-aktif jika link kosong -->
+                    <div v-else class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-300">
+                      <span class="text-xl">📄</span>
+                    </div>
                   </div>
                 </div>
 
@@ -252,6 +332,11 @@
 
           <!-- INFO TAB (TIMELINE WIZARD) -->
           <div v-if="activeTab === 'info'" class="p-5 space-y-6 bg-slate-50 min-h-[80vh]">
+             <!-- Tombol Kembali Interaktif -->
+             <button @click="activeTab = 'home'" class="btn btn-sm bg-white border border-slate-200 text-slate-600 rounded-xl shadow-sm hover:bg-slate-50 px-4 font-black text-[10px] tracking-widest">
+               ⬅️ KEMBALI KE BERANDA
+             </button>
+
              <!-- Header Panduan -->
              <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
                 <div class="absolute -right-6 -top-6 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl"></div>
@@ -259,7 +344,7 @@
                 <p class="text-[11px] font-medium opacity-70 tracking-wide relative z-10">Jejak langkah registrasi pelajar.</p>
              </div>
              
-             <!-- Tampilkan data info jika ada dengan konsep TIMELINE -->
+             <!-- Tampilkan data info dengan konsep TIMELINE -->
              <div v-if="displayInfo.length > 0" class="relative py-4 pb-12">
                <!-- Garis Vertikal Timeline -->
                <div class="absolute left-[27px] top-4 bottom-8 w-1 bg-slate-200 rounded-full z-0"></div>
@@ -284,35 +369,157 @@
                   </div>
                </div>
              </div>
-             
-             <!-- Empty State Info -->
-             <div v-else class="text-center py-16 px-4 bg-white rounded-[2.5rem] border border-slate-100 border-dashed shadow-sm">
-               <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-4xl mx-auto mb-4">📭</div>
-               <h4 class="font-black text-slate-700 text-sm mb-1">Belum Ada Panduan</h4>
-               <p class="text-[10px] text-slate-400 font-medium tracking-wide">Informasi pendaftaran akan segera dirlis.</p>
-             </div>
           </div>
 
           <!-- ACCOUNT TAB -->
-          <div v-if="activeTab === 'profile'" class="p-10 flex flex-col items-center justify-center min-h-[70vh]">
-             <div class="w-32 h-32 bg-white rounded-[3rem] flex items-center justify-center text-5xl mb-6 shadow-2xl text-moe font-black relative">
-               <div class="absolute inset-0 bg-moe/10 rounded-[3rem] animate-pulse"></div>
-               <span class="relative z-10">{{ user.email.charAt(0).toUpperCase() }}</span>
+          <div v-if="activeTab === 'profile'" class="p-5 space-y-6 animate-in fade-in pb-8">
+             
+             <!-- Header Profil -->
+             <div class="flex justify-between items-center">
+                <h2 class="text-xl font-black text-slate-800 tracking-tighter">Profil Lengkap</h2>
+                <button @click="logout" class="btn btn-sm bg-red-50 text-red-500 hover:bg-red-500 hover:text-white border-none rounded-xl font-black text-[10px] tracking-widest shadow-sm">LOGOUT</button>
              </div>
-             <h3 class="text-xl font-black text-slate-800 tracking-tighter">{{ user.email }}</h3>
-             <p class="text-[10px] font-black text-moe uppercase tracking-[0.4em] mt-2 bg-moe/10 px-4 py-1 rounded-full">{{ user.role }}</p>
-             <div class="w-full h-[1px] bg-slate-200 my-12"></div>
-             <button @click="logout" class="btn btn-error btn-outline w-full rounded-3xl h-14 border-slate-200 hover:bg-red-50 hover:text-red-500 font-black tracking-widest bg-white">KELUAR APLIKASI</button>
+
+             <!-- Avatar Banner -->
+             <div class="bg-gradient-to-br from-moe to-moehover p-6 rounded-[2rem] text-white shadow-xl flex items-center gap-5 relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
+                <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl font-black backdrop-blur-sm border border-white/30 shadow-inner relative z-10">
+                  {{ user.email.charAt(0).toUpperCase() }}
+                </div>
+                <div class="flex-1 relative z-10 overflow-hidden">
+                   <h3 class="font-black text-lg truncate">{{ formData.nama_lengkap_id || user.email }}</h3>
+                   <p class="text-xs font-medium opacity-80 mt-0.5 truncate">{{ user.email }}</p>
+                   <div class="badge bg-white/20 border-none text-white text-[9px] font-black mt-2 tracking-widest uppercase">{{ user.role }}</div>
+                </div>
+             </div>
+
+             <!-- Toggle Edit Mode Profil -->
+             <div class="flex items-center justify-between bg-slate-100 p-1.5 rounded-2xl shadow-inner">
+                <button @click="isProfileViewMode = true" :class="isProfileViewMode ? 'bg-white text-moe shadow-sm' : 'text-slate-400'" class="flex-1 py-2 rounded-xl text-[10px] font-black uppercase transition-all">Lihat Profil</button>
+                <button @click="isProfileViewMode = false" :class="!isProfileViewMode ? 'bg-white text-moe shadow-sm' : 'text-slate-400'" class="flex-1 py-2 rounded-xl text-[10px] font-black uppercase transition-all">Ubah Data</button>
+             </div>
+
+             <!-- Form Profil Berdasarkan Aturan Baru -->
+             <div class="space-y-6">
+                
+                <!-- 1. Akun & Kontak -->
+                <section class="space-y-4">
+                  <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 border-b border-slate-200 pb-2">- Info Akun & Kontak -</h4>
+                  <div class="grid grid-cols-2 gap-3">
+                     <div class="col-span-2">
+                        <label class="label text-[9px] font-bold text-slate-400 uppercase">Email Terdaftar</label>
+                        <div class="p-3 bg-slate-100 border border-slate-200 rounded-2xl text-xs font-medium text-slate-500 shadow-inner truncate">{{ user.email }}</div>
+                     </div>
+                     <div>
+                        <label class="label text-[9px] font-bold text-slate-400 uppercase">Jenis Kelamin</label>
+                        <div v-if="isProfileViewMode" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs font-medium shadow-sm">{{ formData.gender || '-' }}</div>
+                        <select v-else v-model="formData.gender" class="select select-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
+                          <option value="Laki-laki">Laki-laki</option>
+                          <option value="Perempuan">Perempuan</option>
+                        </select>
+                     </div>
+                     <div>
+                        <label class="label text-[9px] font-bold text-slate-400 uppercase">Nomor WhatsApp</label>
+                        <div v-if="isProfileViewMode" @click="copy(formData.wa, 'No WA')" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs font-medium copy-active truncate shadow-sm">{{ formData.wa || '-' }}</div>
+                        <input v-else v-model="formData.wa" type="tel" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm" placeholder="Contoh: 0812...">
+                     </div>
+                     <div>
+                        <label class="label text-[9px] font-bold text-slate-400 uppercase">No. Handphone Pribadi</label>
+                        <div v-if="isProfileViewMode" @click="copy(formData.hp, 'No HP')" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs font-medium copy-active truncate shadow-sm">{{ formData.hp || '-' }}</div>
+                        <input v-else v-model="formData.hp" type="tel" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm" placeholder="Nomor Telepon">
+                     </div>
+                  </div>
+                </section>
+
+                <!-- 2. Domisili -->
+                <section class="space-y-4">
+                  <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 border-b border-slate-200 pb-2">- Wilayah & Domisili -</h4>
+                  <div class="grid grid-cols-2 gap-3">
+                     <div>
+                        <label class="label text-[9px] font-bold text-slate-400 uppercase">Kabupaten / Kota</label>
+                        <div v-if="isProfileViewMode" @click="copy(formData.kota_kab, 'Kota/Kab')" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs font-medium copy-active shadow-sm truncate">{{ formData.kota_kab || '-' }}</div>
+                        <input v-else v-model="formData.kota_kab" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm" placeholder="Contoh: Ternate">
+                     </div>
+                     <div>
+                        <label class="label text-[9px] font-bold text-slate-400 uppercase">Provinsi</label>
+                        <div v-if="isProfileViewMode" @click="copy(formData.provinsi, 'Provinsi')" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs font-medium copy-active shadow-sm truncate">{{ formData.provinsi || '-' }}</div>
+                        <input v-else v-model="formData.provinsi" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm" placeholder="Contoh: Maluku Utara">
+                     </div>
+                     <div class="col-span-2">
+                        <label class="label text-[9px] font-bold text-slate-400 uppercase">Alamat Domisili Lengkap</label>
+                        <div v-if="isProfileViewMode" @click="copy(formData.domisili, 'Domisili')" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs font-medium copy-active shadow-sm min-h-[3rem]">{{ formData.domisili || '-' }}</div>
+                        <textarea v-else v-model="formData.domisili" class="textarea textarea-bordered w-full bg-white border-slate-200 rounded-2xl text-xs shadow-sm" rows="2" placeholder="Masukkan alamat lengkap..."></textarea>
+                     </div>
+                  </div>
+                </section>
+
+                <!-- 3. Identitas Nama -->
+                <section class="space-y-4">
+                  <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1 border-b border-slate-200 pb-2">- Identitas Nama Paspor -</h4>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div v-for="n in [{k:'nama_p1_id', l:'Pertama'}, {k:'nama_p2_id', l:'Kedua'}, {k:'nama_p3_id', l:'Ketiga'}, {k:'nama_p4_id', l:'Keempat'}]" :key="n.k">
+                       <label class="label text-[9px] font-bold text-slate-400 uppercase">Indo - {{ n.l }}</label>
+                       <div v-if="isProfileViewMode" @click="copy(formData[n.k], n.l)" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs font-medium copy-active truncate shadow-sm">{{ formData[n.k] || '-' }}</div>
+                       <input v-else v-model="formData[n.k]" @input="formatIDName(n.k)" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs shadow-sm h-11">
+                    </div>
+                  </div>
+                  <div class="divider my-1"></div>
+                  <div class="grid grid-cols-2 gap-3" dir="rtl">
+                    <div v-for="n in [{k:'nama_p1_ar', l:'الأول'}, {k:'nama_p2_ar', l:'الثاني'}, {k:'nama_p3_ar', l:'الثالث'}, {k:'nama_p4_ar', l:'الرابع'}]" :key="n.k">
+                       <label class="label text-[9px] font-bold text-slate-400 text-right uppercase">AR - {{ n.l }}</label>
+                       <div v-if="isProfileViewMode" @click="copy(formData[n.k], n.l)" class="p-3 bg-white border border-slate-100 rounded-2xl text-sm font-black font-serif text-right copy-active shadow-sm">{{ formData[n.k] || '-' }}</div>
+                       <input v-else v-model="formData[n.k]" @input="formatARName(n.k)" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-right font-serif text-sm h-11 shadow-sm">
+                    </div>
+                  </div>
+                </section>
+
+                <!-- 4. Tempat & Tanggal Lahir -->
+                <section class="space-y-4">
+                  <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 border-b border-slate-200 pb-2">- Tempat & Tanggal Lahir -</h4>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div v-for="f in [{k:'tpt_lahir_id', l:'Tpt Lahir Indo'}, {k:'tpt_lahir_ar', l:'مكان الميلاد', ar:true}, {k:'tgl_lahir_id', l:'Tgl Lahir Indo', d:true}, {k:'tgl_lahir_ar', l:'تاريخ الميلاد', ar:true, ro:true}]" :key="f.k" :dir="f.ar ? 'rtl' : 'ltr'">
+                       <label class="label text-[9px] font-bold text-slate-400 uppercase" :class="{'text-right': f.ar}">{{ f.l }}</label>
+                       <div v-if="isProfileViewMode" @click="copy(formData[f.k], f.l)" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs copy-active shadow-sm" :class="{'text-right font-serif font-black': f.ar}">{{ formData[f.k] || '-' }}</div>
+                       <input v-else-if="f.d" v-model="formData[f.k]" @change="generateHijri" type="date" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
+                       <input v-else-if="f.ro" v-model="formData[f.k]" readonly type="text" class="input input-bordered w-full bg-primary/5 border-primary/20 rounded-xl text-right font-serif text-base h-11">
+                       <input v-else v-model="formData[f.k]" @input="f.ar ? formatARName(f.k) : formatIDName(f.k)" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm" :class="{'text-right font-serif': f.ar}">
+                    </div>
+                  </div>
+                </section>
+
+                <!-- 5. Akademik Dasar -->
+                <section class="space-y-4">
+                  <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 border-b border-slate-200 pb-2">- Info Sekolah Menengah Dasar -</h4>
+                  <div v-for="edu in [{k:'asal_sek_id', l:'Asal Sekolah Indo'}, {k:'asal_sek_ar', l:'اسم المدرسة', ar:true}]" :key="edu.k" :dir="edu.ar ? 'rtl' : 'ltr'">
+                    <label class="label text-[9px] font-bold text-slate-400 uppercase">{{ edu.l }}</label>
+                    <div v-if="isProfileViewMode" @click="copy(formData[edu.k], edu.l)" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs copy-active shadow-sm" :class="{'text-right font-serif font-black': edu.ar}">{{ formData[edu.k] || '-' }}</div>
+                    <input v-else v-model="formData[edu.k]" @input="edu.ar ? formatARName(edu.k) : formatIDName(edu.k)" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm" :class="{'text-right font-serif': edu.ar}">
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="label text-[9px] font-bold text-slate-400 uppercase">Tahun Lulus</label>
+                      <div v-if="isProfileViewMode" @click="copy(formData.thn_lulus, 'Thn Lulus')" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs copy-active h-11 flex items-center shadow-sm">{{ formData.thn_lulus || '-' }}</div>
+                      <select v-else v-model="formData.thn_lulus" class="select select-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
+                        <option value="">Pilih</option>
+                        <option v-for="y in graduationYears" :key="y" :value="y">{{ y }}</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="label text-[9px] font-bold text-slate-400 uppercase">No. Daftar Portal</label>
+                      <div v-if="isProfileViewMode" @click="copy(formData.no_daftar, 'No Daftar')" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs copy-active h-11 flex items-center shadow-sm">{{ formData.no_daftar || '-' }}</div>
+                      <input v-else v-model="formData.no_daftar" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
+                    </div>
+                  </div>
+                </section>
+
+                <!-- Tombol Simpan Profil -->
+                <button v-if="!isProfileViewMode" @click="saveData" :disabled="isLoading" class="btn bg-slate-800 hover:bg-slate-900 border-none w-full rounded-[2rem] text-white mt-8 h-14 shadow-xl text-base font-black">
+                  <span v-if="isLoading" class="loading loading-spinner"></span> SIMPAN PERUBAHAN PROFIL
+                </button>
+
+             </div>
           </div>
         </main>
-
-        <!-- Bottom Nav -->
-        <nav v-if="!isInputFocused" class="fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-xl border-t border-slate-200 px-6 py-4 flex justify-around items-center rounded-t-[2.5rem] shadow-[0_-15px_35px_rgba(0,0,0,0.04)]">
-          <button v-for="tab in [{k:'home', i:'🏠', l:'Home'}, {k:'info', i:'📚', l:'Panduan'}, {k:'profile', i:'👤', l:'Profil'}]" @click="activeTab = tab.k" :class="{'text-moe scale-110': activeTab === tab.k, 'text-slate-400': activeTab !== tab.k}" class="flex flex-col items-center gap-1.5 transition-all">
-            <span class="text-2xl">{{ tab.i }}</span>
-            <span class="text-[8px] font-black uppercase tracking-[0.1em]">{{ tab.l }}</span>
-          </button>
-        </nav>
       </template>
 
       <!-- ADMIN MODAL DETAIL -->
@@ -354,40 +561,56 @@
       setup() {
         const isGAS = typeof google !== 'undefined' && google.script && google.script.run;
         const appName = "Portal Pelajar Malut Arab Saudi";
-        const appLogo = "https://lh3.googleusercontent.com/d/16B2pmzKZ3Belonfsl4-5wvZHNmI1gBvr";
+        const appLogo = "https://lh3.googleusercontent.com/d/1T_gjbh4D8xTkoE3zVF0WoQl5xdhb3nCJ";
         
         const showSplash = ref(true);
         const isLoading = ref(false);
         const isViewMode = ref(true);
+        const isProfileViewMode = ref(true);
         const user = ref(null);
         const authMode = ref('login');
         const showPass = ref(false);
-        const isInputFocused = ref(false);
         const activeTab = ref('home');
         const formTab = ref('identitas');
         const students = ref([]);
         const infoData = ref([]);
         const selectedStudent = ref(null);
         const toast = ref({ show: false, msg: '' });
-        const authForm = ref({ email: '', password: '' });
+        const authForm = ref({ email: '', password: '', nama: '', asal: '', confirmPassword: '' });
         
         const universityList = ["UIM", "KSU", "KAU", "IU", "PNU", "KFUPM", "KAUST", "QU", "KFU", "TAIBAHU"];
         const graduationYears = Array.from({length: 21}, (_, i) => (new Date().getFullYear() - i).toString());
-        const selectedUnivs = ref([]);
+        
+        const statusKampusList = ["Belum Mendaftar", "Sedang Mendaftar", "Diterima", "Ditolak", "Cadangan"];
+        const pendaftaranKampus = ref([]);
 
-        // MENDIFINISIKAN TAUTAN EKSTERNAL DRIVE DI SINI
+        // MENDIFINISIKAN TAUTAN DOKUMEN DATABASE DI SINI
         const docFields = [
-          { k: 'tazkiyah_immit', l: 'Format Tazkiyah IMMIT', url: 'https://drive.google.com/drive/my-drive' },
-          { k: 'skkb_sma_lh', l: 'Format SKKB SMA LH', url: 'https://drive.google.com/drive/my-drive' },
-          { k: 'cv', l: 'Template Curriculum Vitae', url: 'https://drive.google.com/drive/my-drive' },
-          { k: 'tazkiyah_hidayatullah', l: 'Format Tazkiyah Hidayatullah', url: 'https://drive.google.com/drive/my-drive' }
+          { k: 'sertifikat_hafalan', l: 'Sertifikat Hafalan' },
+          { k: 'tazkiyah_immit', l: 'Tazkiyah IMMIT' },
+          { k: 'skkb_sma_lh', l: 'SKKB SMA LH' },
+          { k: 'tazkiyah_hidayatullah', l: 'Tazkiyah Hidayatullah' }
         ];
 
-        const fileList = [
-          { key: 'tazkiyah_1', label: 'Tazkiyah 1' }, { key: 'tazkiyah_2', label: 'Tazkiyah 2' },
-          { key: 'skkb', label: 'SKKB' }, { key: 'skck', label: 'SKCK' }, { key: 'ijazah', label: 'Ijazah' },
-          { key: 'transkip', label: 'Transkip Nilai' }, { key: 'foto', label: 'Foto Profil' }, { key: 'paspor', label: 'Paspor' }
+        const berkasWajib = [
+          { key: 'ijazah', label: 'Ijazah' }, { key: 'ijazah_tr', label: 'Ijazah Terjemah' },
+          { key: 'transkip', label: 'Transkip Nilai' }, { key: 'transkip_tr', label: 'Transkip Nilai Terjemah' },
+          { key: 'foto', label: 'Foto Latar Putih (4:6)' }, { key: 'paspor', label: 'Paspor' }
         ];
+
+        const berkasPendukung = [
+          { key: 'tazkiyah_1', label: 'Tazkiyah 1' }, { key: 'tazkiyah_2', label: 'Tazkiyah 2' },
+          { key: 'skkb', label: 'SKKB' }, { key: 'skck', label: 'SKCK' },
+          { key: 'skck_tr', label: 'SKCK Terjemah' }, { key: 'sks', label: 'SKS' },
+          { key: 'sks_tr', label: 'SKS Terjemah' }, { key: 'cv', label: 'CV' },
+          { key: 'toafl_toefl', label: 'TOAFL / TOEFL' }
+        ];
+
+        const berkasTambahan = [
+          { key: 'piagam', label: 'Piagam Penghargaan' }
+        ];
+
+        const fileList = [...berkasWajib, ...berkasPendukung, ...berkasTambahan];
 
         const formData = ref({
           id: '', user_id: '', email: '', gender: 'Laki-laki', status_dok: '', pengajuan_dok: 'TIDAK',
@@ -395,7 +618,8 @@
           nama_p1_ar: '', nama_p2_ar: '', nama_p3_ar: '', nama_p4_ar: '',
           nama_lengkap_id: '', nama_lengkap_ar: '', asal_sek_id: '', asal_sek_ar: '',
           tpt_lahir_id: '', tpt_lahir_ar: '', tgl_lahir_id: '', tgl_lahir_ar: '',
-          wa: '', hp: '', thn_lulus: '', no_daftar: '', kampus: ''
+          wa: '', hp: '', thn_lulus: '', no_daftar: '', kampus: '',
+          kota_kab: '', provinsi: '', domisili: ''
         });
 
         const callGAS = (action, data) => {
@@ -418,7 +642,15 @@
           });
         };
 
-        const displayInfo = computed(() => infoData.value);
+        // Data Default Apabila Database Info (Panduan) Masih Kosong
+        const defaultInfoData = [
+          { id: 1, step: 'Langkah 1', info: '<b>Siapkan Dokumen Eksternal</b><br>Pastikan Anda telah mengunduh dan mengisi format template dokumen resmi yang disediakan pada menu Dokumen.', link: 'https://drive.google.com/', gambar: '' },
+          { id: 2, step: 'Langkah 2', info: '<b>Lengkapi Biodata Anda</b><br>Isi seluruh informasi identitas dan riwayat pendidikan Anda dengan benar dan valid sesuai Paspor.', link: '', gambar: '' },
+          { id: 3, step: 'Langkah 3', info: '<b>Finalisasi & Pengajuan</b><br>Periksa kembali kelengkapan seluruh berkas Anda, lalu klik tombol <i>Ajukan Verifikasi Sekarang</i> agar diproses oleh Tim Admin.', link: '', gambar: '' }
+        ];
+
+        // Jika data dari spreadsheet ada maka pakai, jika tidak tampilkan default
+        const displayInfo = computed(() => (infoData.value && infoData.value.length > 0) ? infoData.value : defaultInfoData);
         
         const formatDriveUrl = (id) => (!id || id.includes('http')) ? id : `https://lh3.googleusercontent.com/d/${id}`;
 
@@ -452,21 +684,73 @@
 
         const showToast = (msg) => { toast.value = { show: true, msg }; setTimeout(() => { toast.value.show = false }, 3000); };
         const openLink = (url) => url && window.open(url, '_blank');
-        const toggleAuthMode = () => authMode.value = authMode.value === 'login' ? 'register' : 'login';
+        
+        const tambahKampus = () => {
+            pendaftaranKampus.value.push({
+                id: 'KMP-' + Date.now().toString(),
+                no_daftar: '',
+                nama_kampus: '',
+                status: 'Belum Mendaftar'
+            });
+        };
+
+        const hapusKampus = (idx) => {
+            pendaftaranKampus.value.splice(idx, 1);
+        };
+
+        const statusColor = (status) => {
+            if(status === 'Diterima') return 'bg-emerald-100 text-emerald-700';
+            if(status === 'Ditolak') return 'bg-red-100 text-red-700';
+            if(status === 'Sedang Mendaftar') return 'bg-blue-100 text-blue-700';
+            if(status === 'Cadangan') return 'bg-orange-100 text-orange-700';
+            return 'bg-slate-100 text-slate-500';
+        };
+
+        const toggleAuthMode = () => { 
+            authMode.value = authMode.value === 'login' ? 'register' : 'login';
+            authForm.value = { email: '', password: '', nama: '', asal: '', confirmPassword: '' };
+        };
 
         const handleAuth = async () => {
-          if (!authForm.value.email || !authForm.value.password) return showToast("Lengkapi form!");
+          if (authMode.value === 'register') {
+            if (!authForm.value.nama || !authForm.value.asal || !authForm.value.email || !authForm.value.password || !authForm.value.confirmPassword) {
+              return showToast("Lengkapi semua form pendaftaran!");
+            }
+            if (authForm.value.password !== authForm.value.confirmPassword) {
+              return showToast("Kata sandi tidak cocok!");
+            }
+          } else {
+            if (!authForm.value.email || !authForm.value.password) return showToast("Lengkapi form!");
+          }
+          
           isLoading.value = true;
           try {
-            const res = await callGAS('handleAuth', { mode: authMode.value, email: authForm.value.email, password: authForm.value.password });
+            const res = await callGAS('handleAuth', { 
+               mode: authMode.value, 
+               email: authForm.value.email, 
+               password: authForm.value.password,
+               nama: authForm.value.nama,
+               asal: authForm.value.asal
+            });
             isLoading.value = false;
             if (res.success) {
               user.value = res.user; infoData.value = res.infoData || [];
               localStorage.setItem('portal_malut_session', JSON.stringify(res.user));
               if (res.data) {
-                 fileList.forEach(f => { if(res.data[f.key]) res.data[f.key] = res.data[f.key] === 'YA'; });
                  formData.value = { ...formData.value, ...res.data };
-                 if (res.data.kampus) selectedUnivs.value = res.data.kampus.split(', ');
+                 if (res.data.kampus) {
+                    try {
+                        pendaftaranKampus.value = JSON.parse(res.data.kampus);
+                    } catch(e) {
+                        // Fallback handling legacy data
+                        pendaftaranKampus.value = res.data.kampus.split(', ').map(k => ({
+                            id: 'KMP-' + Math.random().toString(36).substr(2, 9),
+                            no_daftar: '',
+                            nama_kampus: k,
+                            status: 'Belum Mendaftar'
+                        }));
+                    }
+                 }
               }
               if (res.students) students.value = res.students;
               showToast("Berhasil!");
@@ -476,12 +760,12 @@
 
         const saveData = async () => {
           isLoading.value = true;
-          formData.value.kampus = selectedUnivs.value.join(', ');
+          formData.value.kampus = JSON.stringify(pendaftaranKampus.value);
           const payload = JSON.parse(JSON.stringify(formData.value));
           payload.user_id = user.value.id;
           try {
             await callGAS('saveData', payload);
-            isLoading.value = false; showToast("Data Tersimpan!"); isViewMode.value = true;
+            isLoading.value = false; showToast("Data Tersimpan!"); isViewMode.value = true; isProfileViewMode.value = true;
           } catch (e) { isLoading.value = false; showToast("Error Simpan"); }
         };
 
@@ -497,8 +781,6 @@
 
         onMounted(() => {
           setTimeout(() => showSplash.value = false, 2500);
-          window.addEventListener('focusin', () => isInputFocused.value = true);
-          window.addEventListener('focusout', () => isInputFocused.value = false);
           const session = localStorage.getItem('portal_malut_session');
           if (session) { 
             const p = JSON.parse(session); 
@@ -507,9 +789,20 @@
               if (res.success) {
                 infoData.value = res.infoData || [];
                 if (res.data) {
-                  fileList.forEach(f => { if(res.data[f.key]) res.data[f.key] = res.data[f.key] === 'YA'; });
                   formData.value = { ...formData.value, ...res.data };
-                  if (res.data.kampus) selectedUnivs.value = res.data.kampus.split(', ');
+                  if (res.data.kampus) {
+                    try {
+                        pendaftaranKampus.value = JSON.parse(res.data.kampus);
+                    } catch(e) {
+                        // Fallback handling legacy data
+                        pendaftaranKampus.value = res.data.kampus.split(', ').map(k => ({
+                            id: 'KMP-' + Math.random().toString(36).substr(2, 9),
+                            no_daftar: '',
+                            nama_kampus: k,
+                            status: 'Belum Mendaftar'
+                        }));
+                    }
+                  }
                 }
                 if (res.students) students.value = res.students;
               }
@@ -518,9 +811,9 @@
         });
 
         return {
-          appName, appLogo, showSplash, isLoading, isViewMode, user, authMode, authForm, showPass,
-          isInputFocused, activeTab, formTab, formData, toast, students, docFields, fileList, universityList, graduationYears, selectedUnivs, displayInfo, selectedStudent,
-          toggleAuthMode, handleAuth, saveData, verifyDoc, viewDetail, logout, openLink, copy, generateHijri, formatIDName, formatARName, formatDriveUrl
+          appName, appLogo, showSplash, isLoading, isViewMode, isProfileViewMode, user, authMode, authForm, showPass,
+          activeTab, formTab, formData, toast, students, docFields, fileList, berkasWajib, berkasPendukung, berkasTambahan, universityList, graduationYears, pendaftaranKampus, statusKampusList, displayInfo, selectedStudent,
+          toggleAuthMode, handleAuth, saveData, verifyDoc, viewDetail, logout, openLink, copy, generateHijri, formatIDName, formatARName, formatDriveUrl, tambahKampus, hapusKampus, statusColor
         };
       }
     }).mount('#app');
