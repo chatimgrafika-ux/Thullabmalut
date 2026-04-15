@@ -552,13 +552,50 @@
     let authMode = 'login';
     let photoDataUrl = null;
 
-    // Splash Screen Logic
+    // Fungsi transisi ke Main App
+    const proceedToMainApp = (userObj, dbData, inputNama, inputAsal, inputEmail) => {
+      user = userObj;
+      document.getElementById('auth-screen').classList.add('hidden');
+      document.getElementById('auth-screen').classList.remove('flex');
+      document.getElementById('main-app').classList.remove('hidden');
+      document.getElementById('main-app').classList.add('flex');
+
+      // Populate Defaults
+      document.getElementById('in-name').value = dbData.nama_lengkap_id || inputNama || '';
+      document.getElementById('in-name-ar').value = dbData.nama_lengkap_ar || '';
+      document.getElementById('in-dob').value = formatTanggalIndo(dbData.tgl_lahir_id) || '';
+      document.getElementById('in-email').value = userObj.email || inputEmail || '';
+      document.getElementById('in-address').value = dbData.domisili || inputAsal || '';
+      document.getElementById('in-nationality').value = "Indonesia";
+      document.getElementById('in-nationality-ar').value = "إندونيسيا";
+      
+      // Sync UI
+      syncCV();
+    };
+
+    // Splash Screen Logic & Auto Login
     setTimeout(() => {
       document.getElementById('splash-screen').style.opacity = '0';
       setTimeout(() => {
         document.getElementById('splash-screen').classList.add('hidden');
-        document.getElementById('auth-screen').classList.remove('hidden');
-        document.getElementById('auth-screen').classList.add('flex');
+        
+        // Cek sesi login di localStorage
+        const savedSession = localStorage.getItem('cvAuthSession');
+        if (savedSession) {
+          try {
+            const sessionData = JSON.parse(savedSession);
+            // Langsung masuk ke Main App menggunakan data tersimpan
+            proceedToMainApp(sessionData.user, sessionData.data, sessionData.nama, sessionData.asal, sessionData.email);
+          } catch (e) {
+            // Jika data sesi bermasalah, tampilkan layar login
+            document.getElementById('auth-screen').classList.remove('hidden');
+            document.getElementById('auth-screen').classList.add('flex');
+          }
+        } else {
+          // Jika belum ada sesi, tampilkan layar login
+          document.getElementById('auth-screen').classList.remove('hidden');
+          document.getElementById('auth-screen').classList.add('flex');
+        }
       }, 500);
     }, 2500);
 
@@ -668,26 +705,16 @@
         const res = await response.json();
 
         if (res.success) {
-          user = res.user;
-          const dbData = res.data || {};
+          // Simpan sesi ke localStorage agar tetap login saat direfresh
+          localStorage.setItem('cvAuthSession', JSON.stringify({
+            user: res.user,
+            data: res.data || {},
+            nama: nama,
+            asal: asal,
+            email: email
+          }));
           
-          // Switch to Main App
-          document.getElementById('auth-screen').classList.add('hidden');
-          document.getElementById('auth-screen').classList.remove('flex');
-          document.getElementById('main-app').classList.remove('hidden');
-          document.getElementById('main-app').classList.add('flex');
-
-          // Populate Defaults
-          document.getElementById('in-name').value = dbData.nama_lengkap_id || nama || '';
-          document.getElementById('in-name-ar').value = dbData.nama_lengkap_ar || '';
-          document.getElementById('in-dob').value = formatTanggalIndo(dbData.tgl_lahir_id) || '';
-          document.getElementById('in-email').value = user.email || email;
-          document.getElementById('in-address').value = dbData.domisili || asal || '';
-          document.getElementById('in-nationality').value = "Indonesia";
-          document.getElementById('in-nationality-ar').value = "إندونيسيا";
-          
-          // Sync UI
-          syncCV();
+          proceedToMainApp(res.user, res.data || {}, nama, asal, email);
         } else {
           alert(res.msg || "Gagal otentikasi. Silakan periksa kembali data Anda.");
         }
@@ -702,10 +729,14 @@
 
     const handleLogout = () => {
       user = null;
+      localStorage.removeItem('cvAuthSession'); // Hapus data sesi dari browser
       document.getElementById('main-app').classList.add('hidden');
       document.getElementById('main-app').classList.remove('flex');
       document.getElementById('auth-screen').classList.remove('hidden');
       document.getElementById('auth-screen').classList.add('flex');
+      
+      // Kembalikan ke form login bersih
+      if(authMode === 'register') toggleAuthMode(); 
     };
 
     // Photo Upload
@@ -799,7 +830,22 @@
 
     // EXPORT PDF NATIVE METHOD
     const exportPDF = () => {
+      // Menyimpan judul asli halaman
+      const originalTitle = document.title;
+      
+      // Mengambil nama dari input, atau gunakan 'User' jika kosong
+      const userName = document.getElementById('in-name').value.trim() || 'User';
+      
+      // Mengubah judul dokumen sementara menjadi format "CV-NamaLengkap"
+      // Browser menggunakan tag <title> sebagai nama default saat print/save PDF
+      document.title = `CV-${userName}`;
+      
       window.print();
+      
+      // Mengembalikan judul dokumen seperti semula setelah print dialog terbuka
+      setTimeout(() => {
+        document.title = originalTitle;
+      }, 500);
     };
   </script>
 </body>
