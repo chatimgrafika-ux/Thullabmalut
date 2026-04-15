@@ -172,9 +172,15 @@
             <i data-lucide="user" class="text-[#1db1a2] w-4 h-4"></i> Data Pribadi
           </h2>
           <div class="grid grid-cols-1 gap-4">
-            <div>
-              <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Nama Lengkap (Max 40)</label>
-              <input type="text" id="in-name" maxlength="40" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#1db1a2] focus:ring-1 focus:ring-[#1db1a2] outline-none shadow-sm font-medium" />
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Nama Lengkap (Max 40)</label>
+                <input type="text" id="in-name" maxlength="40" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#1db1a2] focus:ring-1 focus:ring-[#1db1a2] outline-none shadow-sm font-medium" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Nama Arab (الاسم الكامل)</label>
+                <input type="text" id="in-name-ar" maxlength="40" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm text-right font-serif focus:border-[#1db1a2] focus:ring-1 focus:ring-[#1db1a2] outline-none shadow-sm font-medium" dir="rtl" />
+              </div>
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
@@ -603,6 +609,7 @@
 
           // Populate Defaults
           document.getElementById('in-name').value = dbData.nama_lengkap_id || nama || '';
+          document.getElementById('in-name-ar').value = dbData.nama_lengkap_ar || '';
           document.getElementById('in-dob').value = formatTanggalIndo(dbData.tgl_lahir_id) || '';
           document.getElementById('in-email').value = user.email || email;
           document.getElementById('in-address').value = dbData.domisili || asal || '';
@@ -648,34 +655,31 @@
       }
     };
 
-    // Sync Input to Preview Utility
-    const syncVal = (inputId, outArId, outEnId, isDual = false) => {
+    // Sync Input to Preview Utility (Dioptimasi tanpa parameter isDual)
+    const syncVal = (inputId, outArId, outEnId) => {
       const val = document.getElementById(inputId).value || '';
-      if (isDual) {
-        if(outArId) document.getElementById(outArId).innerText = val;
-        if(outEnId) document.getElementById(outEnId).innerText = val;
-      } else {
-        if(outArId) document.getElementById(outArId).innerText = val;
-      }
+      if (outArId) document.getElementById(outArId).innerText = val;
+      if (outEnId) document.getElementById(outEnId).innerText = val;
     };
 
     // Sync Master Function
     const syncCV = () => {
       // Personal
-      syncVal('in-name', 'out-name-ar', 'out-name-en', true);
-      syncVal('in-dob', 'out-dob-ar', 'out-dob-en', true);
-      syncVal('in-nationality', 'out-nat-ar', 'out-nat-en', true);
-      syncVal('in-phone', 'out-phone-ar', 'out-phone-en', true);
-      syncVal('in-email', 'out-email-ar', 'out-email-en', true);
-      syncVal('in-address', 'out-address-ar', 'out-address-en', true);
+      syncVal('in-name', null, 'out-name-en');
+      syncVal('in-name-ar', 'out-name-ar', null);
+      syncVal('in-dob', 'out-dob-ar', 'out-dob-en');
+      syncVal('in-nationality', 'out-nat-ar', 'out-nat-en');
+      syncVal('in-phone', 'out-phone-ar', 'out-phone-en');
+      syncVal('in-email', 'out-email-ar', 'out-email-en');
+      syncVal('in-address', 'out-address-ar', 'out-address-en');
 
       // Summary
       syncVal('in-summary-ar', 'out-summary-ar');
       syncVal('in-summary-en', 'out-summary-en');
 
       // Education
-      syncVal('in-edu-year', 'out-edu-year-ar', 'out-edu-year-en', true);
-      syncVal('in-edu-gpa', 'out-edu-gpa-ar', 'out-edu-gpa-en', true);
+      syncVal('in-edu-year', 'out-edu-year-ar', 'out-edu-year-en');
+      syncVal('in-edu-gpa', 'out-edu-gpa-ar', 'out-edu-gpa-en');
       syncVal('in-edu-inst-ar', 'out-edu-inst-ar');
       syncVal('in-edu-inst-en', 'out-edu-inst-en');
       syncVal('in-edu-deg-ar', 'out-edu-deg-ar');
@@ -688,14 +692,14 @@
       syncVal('in-rel-desc-en', 'out-rel-desc-en');
 
       // Awards
-      syncVal('in-awd-year', 'out-awd-year-ar', 'out-awd-year-en', true);
+      syncVal('in-awd-year', 'out-awd-year-ar', 'out-awd-year-en');
       syncVal('in-awd-title-ar', 'out-awd-title-ar');
       syncVal('in-awd-title-en', 'out-awd-title-en');
       syncVal('in-awd-desc-ar', 'out-awd-desc-ar');
       syncVal('in-awd-desc-en', 'out-awd-desc-en');
 
       // Experience
-      syncVal('in-exp-year', 'out-exp-year-ar', 'out-exp-year-en', true);
+      syncVal('in-exp-year', 'out-exp-year-ar', 'out-exp-year-en');
       syncVal('in-exp-role-ar', 'out-exp-role-ar');
       syncVal('in-exp-role-en', 'out-exp-role-en');
       syncVal('in-exp-org-ar', 'out-exp-org-ar');
