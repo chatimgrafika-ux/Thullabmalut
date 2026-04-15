@@ -4,4 +4,4 @@
   <img src="Logo.png" width="120"/>
 </p>
 
-## Ikatan Mahasiswa Madinah Indonesia Timur 
+<h3 align="center">Ikatan Mahasiswa Madinah Indonesia Timur  (IMMIT) </h3>
