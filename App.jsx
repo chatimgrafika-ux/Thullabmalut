@@ -88,14 +88,19 @@ const App = () => {
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
     script.async = true;
     document.body.appendChild(script);
-    return () => document.body.removeChild(script);
+    
+    // Safety check for cleanup to prevent errors in some React environments
+    return () => {
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
   }, []);
 
   // --- LOGIC AUTENTIKASI API GOOGLE APPS SCRIPT ---
   const webAppUrl = "https://script.google.com/macros/s/AKfycbzrVhJu_vO6lYUqBUvYSAVjDLDCH31rFwULqyjDBLdPtuFTnl9fmoFl1zUmGvya8Tek/exec";
 
   const handleAuth = async () => {
-    // Validasi Form
     if (authMode === 'register') {
       if (!authForm.nama || !authForm.asal || !authForm.email || !authForm.password || !authForm.confirmPassword) {
          alert("Mohon lengkapi semua form pendaftaran!");
@@ -115,7 +120,6 @@ const App = () => {
     setIsAuthLoading(true);
 
     try {
-      // Fetch ke Google Apps Script
       const response = await fetch(webAppUrl, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -136,7 +140,6 @@ const App = () => {
       if (res.success) {
         setUser(res.user);
         
-        // Memuat data dari database GAS ke CV Builder
         const dbData = res.data || {};
         setCvData(prev => ({
           ...prev,
@@ -211,7 +214,10 @@ const App = () => {
     setLoadingAI(prev => ({ ...prev, [loadingKey]: true }));
 
     try {
-      const apiKey = "";
+      // NOTE: Saat men-deploy ke environment Anda sendiri (seperti Github Pages via Vite), 
+      // isikan string di bawah dengan API Key Gemini Anda atau gunakan env variables 
+      // (misalnya: import.meta.env.VITE_GEMINI_API_KEY).
+      const apiKey = ""; 
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
       const payload = {
         contents: [{ parts: [{ text: textToTranslate }] }],
@@ -299,7 +305,7 @@ const App = () => {
     return (
       <div className="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center p-6 text-center">
         <div className="w-28 mb-6 animate-bounce">
-          <img src={appLogo} alt="Logo" className="w-full h-full object-contain" />
+          <img src={appLogo} alt="Logo" className="w-full h-full object-contain" onError={(e) => e.target.style.display = 'none'} />
         </div>
         <h3 className="text-center text-slate-700 font-bold">
           <span className="block text-xl mb-1 font-black" dir="rtl">نظام الدخول الموحد</span>
@@ -320,7 +326,7 @@ const App = () => {
       <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-center py-10 px-4 sm:px-6 lg:px-8 font-sans">
         <div className="w-full max-w-md mx-auto bg-white shadow-xl rounded-[2rem] p-8 border border-slate-100 relative overflow-hidden">
           <div className="text-center mb-10">
-            <img src={appLogo} alt="Logo" className="w-24 mx-auto mb-6 object-contain" />
+            <img src={appLogo} alt="Logo" className="w-24 mx-auto mb-6 object-contain" onError={(e) => e.target.style.display = 'none'} />
             <h3 className="text-center text-slate-700 font-bold">
                <span className="block text-2xl mb-1 font-black" dir="rtl">نظام الدخول الموحد</span>
                <span className="block text-base font-normal text-slate-500 uppercase tracking-widest">Single Sign On</span>
@@ -410,7 +416,7 @@ const App = () => {
         {/* Header App */}
         <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-md p-6 flex items-center justify-between border-b border-slate-100 shadow-sm">
           <div className="flex items-center gap-3">
-            <img src={appLogo} className="w-10 h-10 object-contain" alt="Logo" />
+            <img src={appLogo} className="w-10 h-10 object-contain" alt="Logo" onError={(e) => e.target.style.display = 'none'} />
             <div>
               <h1 className="text-[13px] font-black text-slate-800 tracking-tighter uppercase">Portal Pelajar</h1>
               <p className="text-[9px] text-[#1db1a2] uppercase font-black tracking-widest">CV Builder Terintegrasi</p>
