@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PDF Guide Book</title>
+
+  <!-- PDF.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    canvas {
+      max-width: 100%;
+      height: auto;
+      margin-top: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    .controls {
+      position: fixed;
+      bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #00c853;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #009624;
+    }
+  </style>
+</head>
+
+<body>
+
+  <canvas id="pdf-render"></canvas>
+
+  <div class="controls">
+    <button onclick="prevPage()">⬅ Prev</button>
+    <span id="page-info"></span>
+    <button onclick="nextPage()">Next ➡</button>
+  </div>
+
+  <script>
+    const url = 'Guidebook_SIS25.pdf'; // Ganti dengan nama file PDF kamu
+
+    let pdfDoc = null,
+        pageNum = 1,
+        canvas = document.getElementById('pdf-render'),
+        ctx = canvas.getContext('2d');
+
+    const renderPage = num => {
+      pdfDoc.getPage(num).then(page => {
+        const viewport = page.getViewport({ scale: 1.5 });
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        page.render({
+          canvasContext: ctx,
+          viewport: viewport
+        });
+
+        document.getElementById('page-info').textContent =
+          `Page ${num} / ${pdfDoc.numPages}`;
+      });
+    };
+
+    const queueRenderPage = num => {
+      if (num < 1 || num > pdfDoc.numPages) return;
+      pageNum = num;
+      renderPage(pageNum);
+    };
+
+    const prevPage = () => queueRenderPage(pageNum - 1);
+    const nextPage = () => queueRenderPage(pageNum + 1);
+
+    pdfjsLib.getDocument(url).promise.then(pdf => {
+      pdfDoc = pdf;
+      renderPage(pageNum);
+    });
+  </script>
+
+</body>
+</html>
