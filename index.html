@@ -292,7 +292,7 @@
                 <div class="bg-blue-50 text-blue-700 p-5 rounded-[2rem] text-[11px] font-medium leading-relaxed border border-blue-100 shadow-sm flex items-start gap-3">
                   <span class="text-xl">ℹ️</span>
                   <div>
-                    <p>Daftar tautan dokumen di bawah ini diambil langsung dari database sistem. Klik tombol dokumen untuk membuka tautan tersebut.</p>
+                    <p>Daftar tautan dokumen di bawah ini diambil langsung dari database sistem. Klik ikon dokumen jika tersedia untuk mengunduh berkasnya.</p>
                   </div>
                 </div>
 
@@ -304,11 +304,11 @@
                       <p v-else class="text-[9px] font-bold text-slate-400 mt-1">Belum Ada Tautan</p>
                     </div>
                     
-                    <!-- Tombol buka dokumen jika link ada -->
+                    <!-- Tombol buka dokumen jika link ada di database -->
                     <button v-if="formData[d.k]" @click="openLink(formData[d.k])" class="btn btn-square bg-moe/10 hover:bg-moe hover:text-white border-none text-moe rounded-2xl shadow-sm transition-colors cursor-pointer">
                       <span class="text-xl">📄</span>
                     </button>
-                    <!-- Tampilan dokumen non-aktif jika link kosong -->
+                    <!-- Tampilan dokumen non-aktif jika link kosong di database -->
                     <div v-else class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-300">
                       <span class="text-xl">📄</span>
                     </div>
@@ -344,19 +344,19 @@
                 <p class="text-[11px] font-medium opacity-70 tracking-wide relative z-10">Jejak langkah registrasi pelajar.</p>
              </div>
              
-             <!-- Tampilkan data info dengan konsep TIMELINE -->
+             <!-- Tampilkan data info dengan konsep TIMELINE (DIFILTER AGAR BEBAS BARIS KOSONG) -->
              <div v-if="displayInfo.length > 0" class="relative py-4 pb-12">
                <!-- Garis Vertikal Timeline -->
                <div class="absolute left-[27px] top-4 bottom-8 w-1 bg-slate-200 rounded-full z-0"></div>
                
-               <div v-for="(info, index) in displayInfo" :key="info.id" class="relative flex items-start gap-4 mb-8 last:mb-0 group">
+               <div v-for="(info, index) in displayInfo" :key="index" class="relative flex items-start gap-4 mb-8 last:mb-0 group">
                   <!-- Node Angka -->
                   <div class="w-14 h-14 shrink-0 rounded-full bg-white border-4 border-slate-100 flex items-center justify-center font-black text-lg text-slate-400 shadow-sm relative z-10 group-hover:border-moe/30 group-hover:text-moe transition-colors">
                     {{ index + 1 }}
                   </div>
                   <!-- Konten Info -->
                   <div class="flex-1 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                    <span class="inline-block bg-moe/10 text-moe text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest mb-3">{{ info.step }}</span>
+                    <span v-if="info.step" class="inline-block bg-moe/10 text-moe text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest mb-3">{{ info.step }}</span>
                     <div class="text-[12.5px] font-medium text-slate-600 leading-relaxed space-y-2" v-html="info.info"></div>
                     
                     <div v-if="info.gambar" class="mt-5 w-full rounded-[1.5rem] overflow-hidden bg-slate-50 border border-slate-100">
@@ -649,8 +649,11 @@
           { id: 3, step: 'Langkah 3', info: '<b>Finalisasi & Pengajuan</b><br>Periksa kembali kelengkapan seluruh berkas Anda, lalu klik tombol <i>Ajukan Verifikasi Sekarang</i> agar diproses oleh Tim Admin.', link: '', gambar: '' }
         ];
 
-        // Jika data dari spreadsheet ada maka pakai, jika tidak tampilkan default
-        const displayInfo = computed(() => (infoData.value && infoData.value.length > 0) ? infoData.value : defaultInfoData);
+        // Filter data kosong dari Spreadsheet (mengabaikan baris yang terlanjur diformat tapi kosong isinya)
+        const displayInfo = computed(() => {
+            const validData = infoData.value ? infoData.value.filter(item => item.step || item.info) : [];
+            return validData.length > 0 ? validData : defaultInfoData;
+        });
         
         const formatDriveUrl = (id) => (!id || id.includes('http')) ? id : `https://lh3.googleusercontent.com/d/${id}`;
 
@@ -764,9 +767,21 @@
           const payload = JSON.parse(JSON.stringify(formData.value));
           payload.user_id = user.value.id;
           try {
-            await callGAS('saveData', payload);
-            isLoading.value = false; showToast("Data Tersimpan!"); isViewMode.value = true; isProfileViewMode.value = true;
-          } catch (e) { isLoading.value = false; showToast("Error Simpan"); }
+            const res = await callGAS('saveData', payload);
+            isLoading.value = false;
+            
+            if (res && res.success === false) {
+               showToast("Gagal: " + res.msg);
+            } else {
+               showToast("Data Tersimpan!"); 
+               isViewMode.value = true; 
+               isProfileViewMode.value = true;
+            }
+          } catch (e) { 
+            isLoading.value = false; 
+            showToast("Sistem Error: " + e.message); 
+            console.error(e);
+          }
         };
 
         const verifyDoc = async (uid, status) => {
