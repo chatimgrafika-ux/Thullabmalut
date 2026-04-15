@@ -179,17 +179,23 @@
               </div>
               <div>
                 <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Nama Arab (الاسم الكامل)</label>
-                <input type="text" id="in-name-ar" maxlength="40" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm text-right font-serif focus:border-[#1db1a2] focus:ring-1 focus:ring-[#1db1a2] outline-none shadow-sm font-medium" dir="rtl" />
+                <input type="text" id="in-name-ar" maxlength="40" oninput="forceArabic(this)" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm text-right font-serif focus:border-[#1db1a2] focus:ring-1 focus:ring-[#1db1a2] outline-none shadow-sm font-medium" dir="rtl" />
               </div>
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Tanggal Lahir</label>
-                <input type="text" id="in-dob" maxlength="30" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#1db1a2] focus:ring-1 focus:ring-[#1db1a2] outline-none shadow-sm font-medium" />
+                <input type="text" id="in-dob" maxlength="30" oninput="syncCV()" placeholder="ex: 15 Januari 2000" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#1db1a2] focus:ring-1 focus:ring-[#1db1a2] outline-none shadow-sm font-medium" />
               </div>
-              <div>
-                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Kewarganegaraan</label>
-                <input type="text" id="in-nationality" maxlength="30" value="Indonesia" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#1db1a2] focus:ring-1 focus:ring-[#1db1a2] outline-none shadow-sm font-medium" />
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Warga Negara</label>
+                  <input type="text" id="in-nationality" maxlength="30" value="Indonesia" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#1db1a2] focus:ring-1 focus:ring-[#1db1a2] outline-none shadow-sm font-medium" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">الجنسية</label>
+                  <input type="text" id="in-nationality-ar" maxlength="30" value="إندونيسيا" oninput="forceArabic(this)" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm text-right font-serif focus:border-[#1db1a2] outline-none shadow-sm font-medium" dir="rtl" />
+                </div>
               </div>
             </div>
             <div class="grid grid-cols-2 gap-4">
@@ -202,9 +208,15 @@
                 <input type="email" id="in-email" maxlength="40" oninput="syncCV()" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none shadow-sm font-medium text-slate-500" readonly />
               </div>
             </div>
-            <div>
-              <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Alamat Sekarang (Max 60)</label>
-              <input type="text" id="in-address" maxlength="60" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#1db1a2] focus:ring-1 focus:ring-[#1db1a2] outline-none shadow-sm font-medium" />
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Alamat (Latin)</label>
+                <input type="text" id="in-address" maxlength="60" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#1db1a2] outline-none shadow-sm font-medium" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Alamat (Arab)</label>
+                <input type="text" id="in-address-ar" maxlength="60" oninput="forceArabic(this)" dir="rtl" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-serif text-right focus:border-[#1db1a2] outline-none shadow-sm font-medium" />
+              </div>
             </div>
           </div>
         </section>
@@ -214,7 +226,7 @@
           <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 mb-4 pb-2 border-b border-slate-100 uppercase tracking-wider">
             <i data-lucide="star" class="text-[#1db1a2] w-4 h-4"></i> Ringkasan Profesional
           </h2>
-          <textarea id="in-summary-ar" maxlength="200" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl h-24 text-sm focus:border-[#1db1a2] outline-none shadow-sm font-medium mb-3 font-serif text-right" dir="rtl" placeholder="الملخص المهني (Arab) - Max 200 char"></textarea>
+          <textarea id="in-summary-ar" maxlength="200" oninput="forceArabic(this)" class="w-full p-3 bg-white border border-slate-200 rounded-xl h-24 text-sm focus:border-[#1db1a2] outline-none shadow-sm font-medium mb-3 font-serif text-right" dir="rtl" placeholder="الملخص المهني (Arab) - Max 200 char"></textarea>
           <textarea id="in-summary-en" maxlength="200" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl h-24 text-sm focus:border-[#1db1a2] outline-none shadow-sm font-medium" placeholder="Professional Summary (English) - Max 200 char"></textarea>
         </section>
 
@@ -226,11 +238,11 @@
           <div class="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-200 shadow-sm space-y-3 mt-1">
             <input type="text" id="in-edu-year" maxlength="20" oninput="syncCV()" placeholder="Tahun (ex: 2019 - 2022)" value="2019 - 2022" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[#1db1a2]" />
             <div class="grid grid-cols-2 gap-2">
-              <input type="text" id="in-edu-inst-ar" maxlength="60" oninput="syncCV()" placeholder="Institusi (Arab)" value="مدرسة لقمان الحكيم الثانوية تيرنات" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[#1db1a2]" dir="rtl" />
+              <input type="text" id="in-edu-inst-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Institusi (Arab)" value="مدرسة لقمان الحكيم الثانوية تيرنات" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[#1db1a2]" dir="rtl" />
               <input type="text" id="in-edu-inst-en" maxlength="60" oninput="syncCV()" placeholder="Institution (English)" value="SMA Lukmanul Hakim Kota Ternate" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[#1db1a2]" />
             </div>
             <div class="grid grid-cols-2 gap-2">
-              <input type="text" id="in-edu-deg-ar" maxlength="60" oninput="syncCV()" placeholder="Jurusan (Arab)" value="العلوم الطبيعية" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[#1db1a2]" dir="rtl" />
+              <input type="text" id="in-edu-deg-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Jurusan (Arab)" value="العلوم الطبيعية" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[#1db1a2]" dir="rtl" />
               <input type="text" id="in-edu-deg-en" maxlength="60" oninput="syncCV()" placeholder="Major (English)" value="Ilmu Pengetahuan Alam (IPA)" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[#1db1a2]" />
             </div>
             <input type="text" id="in-edu-gpa" maxlength="20" oninput="syncCV()" placeholder="Nilai / GPA" value="90/100" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[#1db1a2]" />
@@ -244,10 +256,10 @@
           </div>
           <div class="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-200 shadow-sm space-y-3 mt-1">
             <div class="grid grid-cols-2 gap-2">
-              <input type="text" id="in-rel-title-ar" maxlength="60" oninput="syncCV()" placeholder="Judul (Arab)" value="حفظ القرآن 30 جزءًا والمتون" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[#1db1a2]" dir="rtl" />
+              <input type="text" id="in-rel-title-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Judul (Arab)" value="حفظ القرآن ٣٠ جزءًا والمتون" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[#1db1a2]" dir="rtl" />
               <input type="text" id="in-rel-title-en" maxlength="60" oninput="syncCV()" placeholder="Title (English)" value="30 Juz Quran & Mutun" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[#1db1a2]" />
             </div>
-            <textarea id="in-rel-desc-ar" maxlength="150" oninput="syncCV()" placeholder="Deskripsi (Arab) - Max 150 Char" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[#1db1a2]" dir="rtl" rows="2">حفظ القرآن كاملاً، والأجرومية، وتحفة الأطفال</textarea>
+            <textarea id="in-rel-desc-ar" maxlength="150" oninput="forceArabic(this)" placeholder="Deskripsi (Arab) - Max 150 Char" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[#1db1a2]" dir="rtl" rows="2">حفظ القرآن كاملاً، والأجرومية، وتحفة الأطفال</textarea>
             <textarea id="in-rel-desc-en" maxlength="150" oninput="syncCV()" placeholder="Description (English) - Max 150 Char" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[#1db1a2]" rows="2">Memorized 30 Juz, Al-Jurumiyah, and Tuhfatul Athfal</textarea>
           </div>
         </section>
@@ -260,11 +272,11 @@
           <div class="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-200 shadow-sm space-y-3 mt-1">
             <input type="text" id="in-awd-year" maxlength="20" oninput="syncCV()" placeholder="Tahun" value="2023" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[#1db1a2]" />
             <div class="grid grid-cols-2 gap-2">
-              <input type="text" id="in-awd-title-ar" maxlength="60" oninput="syncCV()" placeholder="Penghargaan (Arab)" value="بطل مسابقة تلاوة القرآن" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[#1db1a2]" dir="rtl" />
+              <input type="text" id="in-awd-title-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Penghargaan (Arab)" value="بطل مسابقة تلاوة القرآن" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[#1db1a2]" dir="rtl" />
               <input type="text" id="in-awd-title-en" maxlength="60" oninput="syncCV()" placeholder="Award (English)" value="1st Place Provincial MTQ" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[#1db1a2]" />
             </div>
             <div class="grid grid-cols-2 gap-2">
-              <input type="text" id="in-awd-desc-ar" maxlength="60" oninput="syncCV()" placeholder="Penyelenggara (Arab)" value="على مستوى المحافظة" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[#1db1a2]" dir="rtl" />
+              <input type="text" id="in-awd-desc-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Penyelenggara (Arab)" value="على مستوى المحافظة" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[#1db1a2]" dir="rtl" />
               <input type="text" id="in-awd-desc-en" maxlength="60" oninput="syncCV()" placeholder="Issuer (English)" value="Provincial Level Championship" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[#1db1a2]" />
             </div>
           </div>
@@ -278,14 +290,14 @@
           <div class="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-200 shadow-sm space-y-3 mt-1">
             <input type="text" id="in-exp-year" maxlength="20" oninput="syncCV()" placeholder="Tahun (ex: 2020 - 2022)" value="2022 - Sekarang" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[#1db1a2]" />
             <div class="grid grid-cols-2 gap-2">
-              <input type="text" id="in-exp-role-ar" maxlength="60" oninput="syncCV()" placeholder="Posisi (Arab)" value="مدرس وإمام" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[#1db1a2]" dir="rtl" />
+              <input type="text" id="in-exp-role-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Posisi (Arab)" value="مدرس وإمام" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[#1db1a2]" dir="rtl" />
               <input type="text" id="in-exp-role-en" maxlength="60" oninput="syncCV()" placeholder="Role (English)" value="Pengajar & Imam" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[#1db1a2]" />
             </div>
             <div class="grid grid-cols-2 gap-2">
-              <input type="text" id="in-exp-org-ar" maxlength="60" oninput="syncCV()" placeholder="Organisasi (Arab)" value="مؤسسة هداية الله ومسجد المنور" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[#1db1a2]" dir="rtl" />
+              <input type="text" id="in-exp-org-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Organisasi (Arab)" value="مؤسسة هداية الله ومسجد المنور" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[#1db1a2]" dir="rtl" />
               <input type="text" id="in-exp-org-en" maxlength="60" oninput="syncCV()" placeholder="Organization (English)" value="Yayasan Hidayatullah & Masjid Al Munawwar" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[#1db1a2]" />
             </div>
-            <textarea id="in-exp-desc-ar" maxlength="150" oninput="syncCV()" placeholder="Deskripsi (Arab) - Max 150 Char" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[#1db1a2]" dir="rtl" rows="2">تدريس العلوم الإسلامية للطلاب وإمامة الصلوات الخمس.</textarea>
+            <textarea id="in-exp-desc-ar" maxlength="150" oninput="forceArabic(this)" placeholder="Deskripsi (Arab) - Max 150 Char" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[#1db1a2]" dir="rtl" rows="2">تدريس العلوم الإسلامية للطلاب وإمامة الصلوات الخمس.</textarea>
             <textarea id="in-exp-desc-en" maxlength="150" oninput="syncCV()" placeholder="Description (English) - Max 150 Char" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[#1db1a2]" rows="2">Mengajar ilmu-ilmu keislaman kepada santri dan mengimami shalat 5 waktu.</textarea>
           </div>
         </section>
@@ -296,19 +308,46 @@
           <div class="grid grid-cols-1 gap-4">
             <div>
               <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Bahasa Arab</label>
-              <input type="text" id="in-skill-ar" maxlength="40" oninput="syncCV()" value="ممتاز / Fluent" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#1db1a2] outline-none shadow-sm font-medium" />
+              <input type="text" id="in-skill-ar" list="lang-levels" maxlength="40" oninput="syncCV()" placeholder="Pilih atau ketik sendiri..." value="ممتاز / Fluent" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#1db1a2] outline-none shadow-sm font-medium" autocomplete="off" />
+              <datalist id="lang-levels">
+                <option value="مبتدئ / Beginner"></option>
+                <option value="متوسط / Intermediate"></option>
+                <option value="جيد / Good"></option>
+                <option value="جيد جداً / Very Good"></option>
+                <option value="ممتاز / Fluent"></option>
+                <option value="اللغة الأم / Native"></option>
+              </datalist>
             </div>
             <div>
               <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Bahasa Inggris</label>
-              <input type="text" id="in-skill-en" maxlength="40" oninput="syncCV()" value="جيد جداً / Very Good" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#1db1a2] outline-none shadow-sm font-medium" />
+              <input type="text" id="in-skill-en" list="lang-levels" maxlength="40" oninput="syncCV()" placeholder="Pilih atau ketik sendiri..." value="جيد جداً / Very Good" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#1db1a2] outline-none shadow-sm font-medium" autocomplete="off" />
             </div>
             <div>
               <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Teknis (Komputer, dll)</label>
-              <input type="text" id="in-skill-tech" maxlength="60" oninput="syncCV()" value="MS Office, Academic Research" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#1db1a2] outline-none shadow-sm font-medium" />
+              <input type="text" id="in-skill-tech" list="tech-list" maxlength="60" oninput="syncCV()" placeholder="Pilih atau ketik sendiri..." value="MS Office, Academic Research" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#1db1a2] outline-none shadow-sm font-medium" autocomplete="off" />
+              <datalist id="tech-list">
+                <option value="MS Office (Word, Excel, PowerPoint)"></option>
+                <option value="Graphic Design (Photoshop, Illustrator)"></option>
+                <option value="Video Editing (Premiere, CapCut)"></option>
+                <option value="Web Development"></option>
+                <option value="Academic Research & Writing"></option>
+                <option value="Data Analysis"></option>
+                <option value="Social Media Management"></option>
+                <option value="Programming (Python, JS, etc)"></option>
+              </datalist>
             </div>
             <div>
               <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Soft Skills</label>
-              <input type="text" id="in-skill-soft" maxlength="60" oninput="syncCV()" value="Leadership, Public Speaking" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#1db1a2] outline-none shadow-sm font-medium" />
+              <input type="text" id="in-skill-soft" list="soft-list" maxlength="60" oninput="syncCV()" placeholder="Pilih atau ketik sendiri..." value="Leadership, Public Speaking" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#1db1a2] outline-none shadow-sm font-medium" autocomplete="off" />
+              <datalist id="soft-list">
+                <option value="Leadership & Teamwork"></option>
+                <option value="Public Speaking & Presentation"></option>
+                <option value="Problem Solving & Critical Thinking"></option>
+                <option value="Time Management"></option>
+                <option value="Adaptability & Flexibility"></option>
+                <option value="Effective Communication"></option>
+                <option value="Project Management"></option>
+              </datalist>
             </div>
           </div>
         </section>
@@ -354,7 +393,7 @@
                 <div class="text-right whitespace-pre-wrap break-words"><span dir="rtl" class="font-serif text-[13px] font-bold">تاريخ الميلاد: <span id="out-dob-ar" class="font-normal">-</span></span></div>
                 <div class="text-left border-l border-slate-300 pl-3 whitespace-pre-wrap break-words font-semibold">DOB: <span id="out-dob-en" class="font-normal">-</span></div>
 
-                <div class="text-right whitespace-pre-wrap break-words"><span dir="rtl" class="font-serif text-[13px] font-bold">الجنسية: <span id="out-nat-ar" class="font-normal">Indonesia</span></span></div>
+                <div class="text-right whitespace-pre-wrap break-words"><span dir="rtl" class="font-serif text-[13px] font-bold">الجنسية: <span id="out-nat-ar" class="font-normal">إندونيسيا</span></span></div>
                 <div class="text-left border-l border-slate-300 pl-3 whitespace-pre-wrap break-words font-semibold">Nationality: <span id="out-nat-en" class="font-normal">Indonesia</span></div>
 
                 <div class="text-right whitespace-pre-wrap break-words"><span dir="rtl" class="font-serif text-[13px] font-bold">الهاتف: <span id="out-phone-ar" class="font-normal">-</span></span></div>
@@ -532,6 +571,37 @@
       return `${d.getDate()} ${bulanArr[d.getMonth()]} ${d.getFullYear()}`;
     };
 
+    // Translator Format Arab (Hanya Dipakai Saat Sync ke Output)
+    const toArabicNumerals = (str) => {
+      if (!str) return '';
+      return str.toString().replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+    };
+
+    const translateDateToArabic = (dateStr) => {
+      if (!dateStr) return '';
+      const months = {
+        'januari': 'يناير', 'februari': 'فبراير', 'maret': 'مارس', 'april': 'أبريل',
+        'mei': 'مايو', 'juni': 'يونيو', 'juli': 'يوليو', 'agustus': 'أغسطس',
+        'september': 'سبتمبر', 'oktober': 'أكتوبر', 'november': 'نوفمبر', 'desember': 'ديسمبر'
+      };
+      let result = dateStr.toLowerCase();
+      for (const [id, ar] of Object.entries(months)) {
+        result = result.replace(id, ar);
+      }
+      return toArabicNumerals(result);
+    };
+
+    // Filter Khusus Input Arab (Hapus Huruf Latin A-Z, Ubah Angka ke Angka Arab)
+    const forceArabic = (elem) => {
+      let val = elem.value;
+      // Menghapus huruf alphabet Latin a-z & A-Z
+      val = val.replace(/[a-zA-Z]/g, '');
+      // Mengonversi angka 0-9 langsung menjadi ٠-٩ saat diketik
+      val = val.replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+      elem.value = val;
+      syncCV();
+    };
+
     // Toggle Login/Register
     const toggleAuthMode = () => {
       authMode = authMode === 'login' ? 'register' : 'login';
@@ -613,6 +683,8 @@
           document.getElementById('in-dob').value = formatTanggalIndo(dbData.tgl_lahir_id) || '';
           document.getElementById('in-email').value = user.email || email;
           document.getElementById('in-address').value = dbData.domisili || asal || '';
+          document.getElementById('in-nationality').value = "Indonesia";
+          document.getElementById('in-nationality-ar').value = "إندونيسيا";
           
           // Sync UI
           syncCV();
@@ -655,63 +727,71 @@
       }
     };
 
-    // Sync Input to Preview Utility (Dioptimasi tanpa parameter isDual)
-    const syncVal = (inputId, outArId, outEnId) => {
-      const val = document.getElementById(inputId).value || '';
-      if (outArId) document.getElementById(outArId).innerText = val;
-      if (outEnId) document.getElementById(outEnId).innerText = val;
+    // Fungsi Sync Cerdas
+    const syncSplit = (inputArId, inputEnId, outArId, outEnId) => {
+      if(outEnId && document.getElementById(inputEnId)) {
+        document.getElementById(outEnId).innerText = document.getElementById(inputEnId).value || '-';
+      }
+      if(outArId && document.getElementById(inputArId)) {
+        // Teks dari input Arab mungkin sudah mengandung angka Arab akibat fungsi forceArabic(), 
+        // tapi kita timpa lagi toArabicNumerals untuk memastikan tidak ada angka tertinggal.
+        let arVal = document.getElementById(inputArId).value || '-';
+        document.getElementById(outArId).innerText = toArabicNumerals(arVal);
+      }
+    };
+
+    const syncShared = (inputId, outArId, outEnId, isDate = false) => {
+      let val = document.getElementById(inputId)?.value || '-';
+      if(outEnId) {
+        document.getElementById(outEnId).innerText = val;
+      }
+      if(outArId) {
+        let arVal = isDate ? translateDateToArabic(val) : toArabicNumerals(val);
+        document.getElementById(outArId).innerText = arVal;
+      }
     };
 
     // Sync Master Function
     const syncCV = () => {
-      // Personal
-      syncVal('in-name', null, 'out-name-en');
-      syncVal('in-name-ar', 'out-name-ar', null);
-      syncVal('in-dob', 'out-dob-ar', 'out-dob-en');
-      syncVal('in-nationality', 'out-nat-ar', 'out-nat-en');
-      syncVal('in-phone', 'out-phone-ar', 'out-phone-en');
-      syncVal('in-email', 'out-email-ar', 'out-email-en');
-      syncVal('in-address', 'out-address-ar', 'out-address-en');
+      // Personal (Pecah)
+      syncSplit('in-name-ar', 'in-name', 'out-name-ar', 'out-name-en');
+      syncSplit('in-nationality-ar', 'in-nationality', 'out-nat-ar', 'out-nat-en');
+      syncSplit('in-address-ar', 'in-address', 'out-address-ar', 'out-address-en');
+      
+      // Personal (Shared)
+      syncShared('in-dob', 'out-dob-ar', 'out-dob-en', true); // isDate = true (translate bulan ke Arab)
+      syncShared('in-phone', 'out-phone-ar', 'out-phone-en');
+      syncShared('in-email', 'out-email-ar', 'out-email-en'); // Email tidak perlu angka arab
 
       // Summary
-      syncVal('in-summary-ar', 'out-summary-ar');
-      syncVal('in-summary-en', 'out-summary-en');
+      syncSplit('in-summary-ar', 'in-summary-en', 'out-summary-ar', 'out-summary-en');
 
       // Education
-      syncVal('in-edu-year', 'out-edu-year-ar', 'out-edu-year-en');
-      syncVal('in-edu-gpa', 'out-edu-gpa-ar', 'out-edu-gpa-en');
-      syncVal('in-edu-inst-ar', 'out-edu-inst-ar');
-      syncVal('in-edu-inst-en', 'out-edu-inst-en');
-      syncVal('in-edu-deg-ar', 'out-edu-deg-ar');
-      syncVal('in-edu-deg-en', 'out-edu-deg-en');
+      syncShared('in-edu-year', 'out-edu-year-ar', 'out-edu-year-en'); // Tahun gabungan
+      syncShared('in-edu-gpa', 'out-edu-gpa-ar', 'out-edu-gpa-en');    // IPK gabungan
+      syncSplit('in-edu-inst-ar', 'in-edu-inst-en', 'out-edu-inst-ar', 'out-edu-inst-en');
+      syncSplit('in-edu-deg-ar', 'in-edu-deg-en', 'out-edu-deg-ar', 'out-edu-deg-en');
 
       // Religious
-      syncVal('in-rel-title-ar', 'out-rel-title-ar');
-      syncVal('in-rel-title-en', 'out-rel-title-en');
-      syncVal('in-rel-desc-ar', 'out-rel-desc-ar');
-      syncVal('in-rel-desc-en', 'out-rel-desc-en');
+      syncSplit('in-rel-title-ar', 'in-rel-title-en', 'out-rel-title-ar', 'out-rel-title-en');
+      syncSplit('in-rel-desc-ar', 'in-rel-desc-en', 'out-rel-desc-ar', 'out-rel-desc-en');
 
       // Awards
-      syncVal('in-awd-year', 'out-awd-year-ar', 'out-awd-year-en');
-      syncVal('in-awd-title-ar', 'out-awd-title-ar');
-      syncVal('in-awd-title-en', 'out-awd-title-en');
-      syncVal('in-awd-desc-ar', 'out-awd-desc-ar');
-      syncVal('in-awd-desc-en', 'out-awd-desc-en');
+      syncShared('in-awd-year', 'out-awd-year-ar', 'out-awd-year-en');
+      syncSplit('in-awd-title-ar', 'in-awd-title-en', 'out-awd-title-ar', 'out-awd-title-en');
+      syncSplit('in-awd-desc-ar', 'in-awd-desc-en', 'out-awd-desc-ar', 'out-awd-desc-en');
 
       // Experience
-      syncVal('in-exp-year', 'out-exp-year-ar', 'out-exp-year-en');
-      syncVal('in-exp-role-ar', 'out-exp-role-ar');
-      syncVal('in-exp-role-en', 'out-exp-role-en');
-      syncVal('in-exp-org-ar', 'out-exp-org-ar');
-      syncVal('in-exp-org-en', 'out-exp-org-en');
-      syncVal('in-exp-desc-ar', 'out-exp-desc-ar');
-      syncVal('in-exp-desc-en', 'out-exp-desc-en');
+      syncShared('in-exp-year', 'out-exp-year-ar', 'out-exp-year-en');
+      syncSplit('in-exp-role-ar', 'in-exp-role-en', 'out-exp-role-ar', 'out-exp-role-en');
+      syncSplit('in-exp-org-ar', 'in-exp-org-en', 'out-exp-org-ar', 'out-exp-org-en');
+      syncSplit('in-exp-desc-ar', 'in-exp-desc-en', 'out-exp-desc-ar', 'out-exp-desc-en');
 
-      // Skills
-      syncVal('in-skill-ar', 'out-skill-ar');
-      syncVal('in-skill-en', 'out-skill-en');
-      syncVal('in-skill-tech', 'out-skill-tech');
-      syncVal('in-skill-soft', 'out-skill-soft');
+      // Skills (Keahlian biasa ditampilkan apa adanya tanpa translate khusus)
+      document.getElementById('out-skill-ar').innerText = document.getElementById('in-skill-ar').value || '-';
+      document.getElementById('out-skill-en').innerText = document.getElementById('in-skill-en').value || '-';
+      document.getElementById('out-skill-tech').innerText = document.getElementById('in-skill-tech').value || '-';
+      document.getElementById('out-skill-soft').innerText = document.getElementById('in-skill-soft').value || '-';
     };
 
     // Initial Sync call to populate placeholders
@@ -719,8 +799,6 @@
 
     // EXPORT PDF NATIVE METHOD
     const exportPDF = () => {
-      // Fitur print bawaan browser menghasilkan PDF berupa Teks (bukan gambar)
-      // Jauh lebih tajam, profesional, ukuran file kecil, dan teks bisa di-copy.
       window.print();
     };
   </script>
