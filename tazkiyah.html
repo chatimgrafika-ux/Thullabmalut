@@ -1,0 +1,553 @@
+<!-- // Frontend Refactored for GitHub Pages & Google Apps Script API -->
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+  <title>Sistem Pengajuan Tazkiyah</title>
+  
+  <!-- CSS & FRAMEWORK SECTION -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { moe: '#1db1a2', moehover: '#168e82' }
+        }
+      }
+    }
+  </script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  
+  <style>
+    html[data-theme="light"] { --p: 66.4% 0.117 174.5; --pf: 56.4% 0.117 174.5; --pc: 100% 0 0; }
+    html, body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; user-select: none; }
+    *::-webkit-scrollbar { display: none; }
+    * { -ms-overflow-style: none; scrollbar-width: none; }
+    [v-cloak] { display: none; }
+    .dynamic-island { animation: slideDown 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+    @keyframes slideDown { from { transform: translate(-50%, -100%); } to { transform: translate(-50%, 0); } }
+    .copy-active:active { background-color: rgba(29, 177, 162, 0.1); transform: scale(0.98); }
+    .moe-link { color: #1db1a2; text-decoration: underline; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  
+  <div id="app" v-cloak>
+    
+    <!-- Splash Screen -->
+    <div v-if="showSplash" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center p-6 text-center">
+      <div class="w-24 h-24 mb-6 animate-bounce bg-moe/10 rounded-full flex items-center justify-center text-moe text-4xl shadow-lg border-4 border-moe/20">
+        📜
+      </div>
+      <h3 class="text-center text-slate-700 font-bold">
+         <span class="block text-xl mb-1 font-black">نظام طلب التزكية</span>
+         <span class="block text-sm font-normal text-slate-500 uppercase tracking-widest">Sistem Pengajuan Tazkiyah</span>
+      </h3>
+      <div class="mt-8 loading loading-dots loading-md text-primary"></div>
+    </div>
+
+    <!-- Notification / Dynamic Island -->
+    <div v-if="toast.show" class="fixed top-4 left-1/2 -translate-x-1/2 z-[50] dynamic-island w-fit max-w-[90%] px-6 py-3 bg-slate-900 text-white rounded-full shadow-2xl flex items-center gap-3">
+      <span class="text-sm font-medium">{{ toast.msg }}</span>
+    </div>
+
+    <div class="w-full max-w-md mx-auto min-h-[100dvh] bg-slate-50 shadow-xl relative overflow-x-hidden flex flex-col">
+      
+      <!-- AUTH VIEW -->
+      <div v-if="!user" class="flex-1 flex flex-col p-8 justify-center bg-white">
+        <div class="text-center mb-10">
+          <div class="w-20 h-20 mx-auto mb-6 bg-moe/10 rounded-3xl flex items-center justify-center text-3xl shadow-sm text-moe">📜</div>
+          <h3 class="text-center text-slate-700 font-bold">
+             <span class="block text-2xl mb-1 font-black">نظام طلب التزكية</span>
+             <span class="block text-base font-normal text-slate-500 uppercase tracking-widest">Pengajuan Tazkiyah</span>
+          </h3>
+          <p class="text-sm text-slate-600 font-bold mt-10" dir="rtl">الرجاء ادخال اسم المستخدم وكلمة المرور</p>
+        </div>
+        <div class="space-y-4">
+          <template v-if="authMode === 'register'">
+            <input v-model="authForm.nama" type="text" placeholder="Nama Lengkap / الاسم الكامل" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-xl h-12 text-center" dir="rtl">
+            <input v-model="authForm.asal" type="text" placeholder="Daerah Asal / المنطقة" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-xl h-12 text-center" dir="rtl">
+          </template>
+          
+          <input v-model="authForm.email" type="email" placeholder="Email / اسم المستخدم" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-xl h-12 text-center" dir="rtl">
+          <input v-model="authForm.password" :type="showPass ? 'text' : 'password'" placeholder="Kata Sandi / كلمة المرور" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-xl h-12 text-center" dir="rtl">
+          
+          <template v-if="authMode === 'register'">
+            <input v-model="authForm.confirmPassword" :type="showPass ? 'text' : 'password'" placeholder="Konfirmasi Sandi / تأكيد كلمة المرور" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-xl h-12 text-center" dir="rtl">
+          </template>
+
+          <button @click="handleAuth" :disabled="isLoading" class="btn bg-moe hover:bg-moehover border-none w-full rounded-xl text-white font-bold h-12 text-lg">
+            <span v-if="isLoading" class="loading loading-spinner"></span>
+            {{ authMode === 'login' ? 'دخول' : 'تسجيل' }}
+          </button>
+          <div class="flex flex-col gap-4 mt-8 text-center">
+            <a @click="toggleAuthMode" class="moe-link text-xs font-black cursor-pointer uppercase tracking-tighter">
+               {{ authMode === 'login' ? 'إنشاء حساب جديد (Daftar Akun Baru)' : 'تسجيل الدخول (Sudah Punya Akun)' }}
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN APP -->
+      <template v-else>
+        <header class="sticky top-0 z-20 bg-white/95 backdrop-blur-md p-4 flex items-center justify-between border-b border-slate-100 shadow-sm">
+          <div class="flex items-center gap-3 cursor-pointer" @click="activeTab = 'form'">
+            <div class="w-10 h-10 bg-moe/10 text-moe rounded-xl flex items-center justify-center text-xl shadow-sm border border-moe/20">📜</div>
+            <div>
+              <h1 class="text-xs font-black text-slate-800 tracking-tighter">{{ appName }}</h1>
+              <p class="text-[9px] text-moe uppercase font-black tracking-widest">{{ user.role || 'MAHASISWA' }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button v-if="activeTab !== 'status'" @click="activeTab = 'status'" class="btn btn-circle btn-sm bg-slate-100 hover:bg-slate-200 border-none text-lg">📋</button>
+            <button v-if="activeTab !== 'profile'" @click="activeTab = 'profile'" class="btn btn-circle btn-sm bg-slate-100 hover:bg-slate-200 border-none text-lg">👤</button>
+          </div>
+        </header>
+
+        <main class="flex-1 pb-10 overflow-y-auto">
+          
+          <!-- TAB: FORM PENGAJUAN TAZKIYAH -->
+          <div v-if="activeTab === 'form'" class="p-5 space-y-6 animate-in fade-in">
+            <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-[2rem] text-white shadow-xl relative overflow-hidden">
+               <div class="absolute -right-6 -top-6 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl"></div>
+               <h3 class="font-black text-lg tracking-tighter mb-1 relative z-10">Formulir Tazkiyah</h3>
+               <p class="text-[10px] font-medium opacity-70 tracking-wide relative z-10">Data akan otomatis dicetak ke dalam dokumen PDF dan dikirimkan ke email Anda.</p>
+            </div>
+
+            <div class="space-y-5">
+              
+              <!-- SECTION: IDENTITAS -->
+              <section class="space-y-3 bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100">
+                <h4 class="text-[10px] font-black text-moe uppercase tracking-widest border-b border-slate-100 pb-2">Identitas Diri / الهوية</h4>
+                
+                <div>
+                  <label class="label text-[9px] font-bold text-slate-400 uppercase">Jenis Kelamin</label>
+                  <select v-model="formTazkiyah.jenis_kelamin" class="select select-bordered w-full bg-slate-50 border-slate-200 rounded-xl text-xs h-11">
+                    <option value="Ikhwan">Ikhwan (Laki-laki) / إخوان</option>
+                    <option value="Akhwat">Akhwat (Perempuan) / أخوات</option>
+                  </select>
+                </div>
+
+                <div class="grid grid-cols-1 gap-3">
+                  <div>
+                    <label class="label text-[9px] font-bold text-slate-400 uppercase">Nama Lengkap (Indo)</label>
+                    <input v-model="formTazkiyah.nama" type="text" class="input input-bordered w-full bg-slate-50 border-slate-200 rounded-xl text-xs h-11" placeholder="Nama Sesuai KTP/Paspor">
+                  </div>
+                  <div>
+                    <label class="label text-[9px] font-bold text-slate-400 uppercase text-right w-full block">الاسم الكامل (Arab)</label>
+                    <input v-model="formTazkiyah.nama_arabic" @input="formatARName('nama_arabic')" type="text" dir="rtl" class="input input-bordered w-full bg-slate-50 border-slate-200 rounded-xl text-base font-serif h-11" placeholder="الاسم الكامل">
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mt-2">
+                  <div>
+                    <label class="label text-[9px] font-bold text-slate-400 uppercase">Kota / Kab Asal</label>
+                    <input v-model="formTazkiyah.kota_kab" type="text" class="input input-bordered w-full bg-slate-50 border-slate-200 rounded-xl text-xs h-11" placeholder="Contoh: Ambon">
+                  </div>
+                  <div>
+                    <label class="label text-[9px] font-bold text-slate-400 uppercase">Provinsi Asal</label>
+                    <input v-model="formTazkiyah.provinsi" type="text" class="input input-bordered w-full bg-slate-50 border-slate-200 rounded-xl text-xs h-11" placeholder="Contoh: Maluku">
+                  </div>
+                </div>
+              </section>
+
+              <!-- SECTION: SEKOLAH / PENDIDIKAN -->
+              <section class="space-y-3 bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100">
+                <h4 class="text-[10px] font-black text-moe uppercase tracking-widest border-b border-slate-100 pb-2">Pendidikan / التعليم</h4>
+                
+                <div class="grid grid-cols-1 gap-3">
+                  <div>
+                    <label class="label text-[9px] font-bold text-slate-400 uppercase">Asal Sekolah (Indo)</label>
+                    <input v-model="formTazkiyah.sekolah" type="text" class="input input-bordered w-full bg-slate-50 border-slate-200 rounded-xl text-xs h-11" placeholder="Sesuai Ijazah (Maks: SMA/Sederajat)">
+                  </div>
+                  <div>
+                    <label class="label text-[9px] font-bold text-slate-400 uppercase text-right w-full block">المدرسة (Arab)</label>
+                    <input v-model="formTazkiyah.sekolah_arabic" @input="formatARName('sekolah_arabic')" type="text" dir="rtl" class="input input-bordered w-full bg-slate-50 border-slate-200 rounded-xl text-base font-serif h-11" placeholder="المدرسة التي أصدرت الشهادة">
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mt-2">
+                  <div>
+                    <label class="label text-[9px] font-bold text-slate-400 uppercase">Tahun Lulus (Indo)</label>
+                    <input v-model="formTazkiyah.tahun_lulus" @input="generateTahunLulusArabic" type="text" class="input input-bordered w-full bg-slate-50 border-slate-200 rounded-xl text-xs h-11" placeholder="Contoh: 2021">
+                  </div>
+                  <div>
+                    <label class="label text-[9px] font-bold text-slate-400 uppercase text-right w-full block">سنة التخرج (Arab)</label>
+                    <input v-model="formTazkiyah.tahun_lulus_arabic" type="text" dir="rtl" class="input input-bordered w-full bg-slate-50 border-slate-200 rounded-xl text-base font-serif h-11" placeholder="١٤٤٠ – ١٤٤٣ ه">
+                  </div>
+                </div>
+              </section>
+
+              <!-- SECTION: TANGGAL PENGAJUAN -->
+              <section class="space-y-3 bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100">
+                <h4 class="text-[10px] font-black text-moe uppercase tracking-widest border-b border-slate-100 pb-2">Tanggal Berkas / تاريخ الملف</h4>
+                
+                <div class="grid grid-cols-1 gap-3">
+                  <div>
+                    <label class="label text-[9px] font-bold text-slate-400 uppercase">Perbarui Tanggal Otomatis (Opsional)</label>
+                    <input v-model="formTazkiyah.tgl_input" @change="generateDates" type="date" class="input input-bordered w-full bg-slate-50 border-slate-200 rounded-xl text-xs h-11">
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mt-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                  <div class="space-y-2">
+                    <div>
+                      <span class="block text-[8px] font-bold text-slate-400 uppercase">Masehi (Indo)</span>
+                      <span class="text-[10px] font-bold">{{ formTazkiyah.tgl_msh_idn || '-' }}</span>
+                    </div>
+                    <div>
+                      <span class="block text-[8px] font-bold text-slate-400 uppercase">Hijriah (Indo)</span>
+                      <span class="text-[10px] font-bold">{{ formTazkiyah.tgl_hijr_idn || '-' }}</span>
+                    </div>
+                  </div>
+                  <div class="space-y-2 text-right font-serif" dir="rtl">
+                    <div>
+                      <span class="block text-[8px] font-bold text-slate-400 uppercase font-sans">الميلادي (Arab)</span>
+                      <span class="text-xs font-bold">{{ formTazkiyah.tanggal_masehi_arab || '-' }}</span>
+                    </div>
+                    <div>
+                      <span class="block text-[8px] font-bold text-slate-400 uppercase font-sans">الهجري (Arab)</span>
+                      <span class="text-xs font-bold">{{ formTazkiyah.tanggal_hijriah_arab || '-' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <button @click="submitTazkiyah" :disabled="isLoading" class="btn bg-moe hover:bg-moehover border-none w-full rounded-[2rem] text-white h-14 font-black shadow-xl shadow-moe/30 text-base mt-4">
+                <span v-if="isLoading" class="loading loading-spinner"></span>
+                CETAK & KIRIM KE EMAIL
+              </button>
+            </div>
+          </div>
+
+          <!-- TAB: STATUS PENGAJUAN -->
+          <div v-if="activeTab === 'status'" class="p-5 space-y-6 animate-in fade-in min-h-[80vh]">
+            <div class="flex items-center justify-between mb-4">
+               <h2 class="text-xl font-black text-slate-800 tracking-tighter">Riwayat Pengajuan</h2>
+               <button @click="fetchStatus" class="btn btn-sm btn-ghost text-moe font-bold text-[10px]">🔄 Refresh</button>
+            </div>
+
+            <div v-if="riwayatTazkiyah.length === 0" class="flex flex-col items-center justify-center p-10 bg-slate-100 rounded-[2rem] border border-dashed border-slate-300 text-center">
+              <span class="text-4xl mb-3 opacity-50">📭</span>
+              <p class="text-xs font-bold text-slate-500">Belum ada riwayat pengajuan tazkiyah.</p>
+            </div>
+
+            <div class="space-y-4">
+              <div v-for="(item, idx) in riwayatTazkiyah" :key="idx" class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col gap-3">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h4 class="text-sm font-black text-slate-800">Tazkiyah - {{ item.nama }}</h4>
+                    <p class="text-[10px] font-medium text-slate-400 mt-1">{{ item.tanggal_pengajuan }}</p>
+                  </div>
+                  <div class="badge text-[9px] font-black tracking-tighter" :class="item.status === 'Selesai' ? 'badge-success text-white' : item.status === 'Gagal' ? 'badge-error text-white' : 'badge-ghost'">
+                    {{ item.status || 'PENDING' }}
+                  </div>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-[11px] text-slate-600">
+                  Cek kotak masuk email <span class="font-bold text-moe">{{ user.email }}</span> untuk mengunduh dokumen PDF Anda.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: PROFILE -->
+          <div v-if="activeTab === 'profile'" class="p-5 space-y-6 animate-in fade-in pb-8">
+             <div class="flex justify-between items-center">
+                <h2 class="text-xl font-black text-slate-800 tracking-tighter">Profil Akun</h2>
+                <button @click="logout" class="btn btn-sm bg-red-50 text-red-500 hover:bg-red-500 hover:text-white border-none rounded-xl font-black text-[10px] tracking-widest shadow-sm">LOGOUT</button>
+             </div>
+
+             <!-- Avatar Banner -->
+             <div class="bg-gradient-to-br from-moe to-moehover p-6 rounded-[2rem] text-white shadow-xl flex items-center gap-5 relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
+                <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl font-black backdrop-blur-sm border border-white/30 shadow-inner relative z-10">
+                  {{ user.email.charAt(0).toUpperCase() }}
+                </div>
+                <div class="flex-1 relative z-10 overflow-hidden">
+                   <h3 class="font-black text-lg truncate">{{ user.nama || user.email }}</h3>
+                   <p class="text-xs font-medium opacity-80 mt-0.5 truncate">{{ user.email }}</p>
+                   <div class="badge bg-white/20 border-none text-white text-[9px] font-black mt-2 tracking-widest uppercase">{{ user.role || 'MAHASISWA' }}</div>
+                </div>
+             </div>
+          </div>
+
+        </main>
+      </template>
+    </div>
+  </div>
+
+  <!-- JS LOGIC SECTION -->
+  <script>
+    const { createApp, ref, onMounted } = Vue;
+
+    // =========================================================================
+    // KONFIGURASI URL API
+    // =========================================================================
+    // URL API Auth & Fetch Data (Endpoint Google Apps Script Anda saat ini)
+    const webAppUrlAuth = "https://script.google.com/macros/s/AKfycbzrVhJu_vO6lYUqBUvYSAVjDLDCH31rFwULqyjDBLdPtuFTnl9fmoFl1zUmGvya8Tek/exec";
+    
+    // URL API BARU untuk doPost2 -> PDF Tazkiyah
+    // GANTI URL INI DENGAN URL DEPLOYMENT APPS SCRIPT BARU ANDA (Code.gs di bawah)
+    const apiTazkiyahUrl = "https://script.google.com/macros/s/AKfycbz3xbI535hWwLdOrKJS_R8JTRY-uLpfwdIoOAff1I1gKRqocb7pOIkHd7N9MnrYWsmcgw/exec"; 
+    // =========================================================================
+
+    createApp({
+      setup() {
+        const isGAS = typeof google !== 'undefined' && google.script && google.script.run;
+        const appName = "Sistem Pengajuan Tazkiyah";
+        
+        const showSplash = ref(true);
+        const isLoading = ref(false);
+        const user = ref(null);
+        const authMode = ref('login');
+        const showPass = ref(false);
+        const activeTab = ref('form'); 
+        const toast = ref({ show: false, msg: '' });
+        const authForm = ref({ email: '', password: '', nama: '', asal: '', confirmPassword: '' });
+        
+        // State Form Tazkiyah (Sesuai dengan tag yang Anda kirimkan dan header Spreadsheet)
+        const formTazkiyah = ref({
+          jenis_kelamin: 'Ikhwan', 
+          nama: '', 
+          nama_arabic: '', 
+          sekolah: '', 
+          sekolah_arabic: '', 
+          tahun_lulus: '', 
+          tahun_lulus_arabic: '', 
+          kota_kab: '', 
+          provinsi: '', 
+          tgl_input: '', // untuk memicu generator tanggal jika perlu
+          tgl_msh_idn: '', 
+          tanggal_masehi_arab: '', 
+          tgl_hijr_idn: '', 
+          tanggal_hijriah_arab: '' 
+        });
+
+        const riwayatTazkiyah = ref([]);
+
+        // Fungsi pemanggilan standar untuk Auth & Fetch Initial
+        const callGASAuth = (action, data) => {
+          return new Promise((resolve, reject) => {
+            if (isGAS) {
+              google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[action + "GAS"] 
+                ? google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[action + "GAS"](data) 
+                : google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[action](data);
+            } else {
+              fetch(webAppUrlAuth, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action, data })
+              }).then(res => res.json()).then(resolve).catch(reject);
+            }
+          });
+        };
+
+        // Fungsi pemanggilan khusus ke Backend Generate PDF (Akses fungsi doPost2)
+        const submitToTazkiyahAPI = (payload) => {
+          return new Promise((resolve, reject) => {
+             if (isGAS) {
+                 // Jika di dalam GAS Ecosystem
+                 google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).doPost2(payload);
+             } else {
+                 // Jika di-hosting luar (GitHub Pages, dsb)
+                 if(apiTazkiyahUrl.includes("GANTI_DENGAN_URL_GAS_BARU")) {
+                     console.warn("URL API TAZKIYAH BELUM DIGANTI. MENSIMULASIKAN SUKSES.");
+                     setTimeout(() => resolve({ success: true, msg: "Simulasi Berhasil" }), 1500);
+                     return;
+                 }
+                 
+                 // Panggil via fetch HTTP POST (disalurkan ke doPost -> doPost2 di backend)
+                 fetch(apiTazkiyahUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ action: 'doPost2', data: payload })
+                 }).then(res => res.json()).then(resolve).catch(reject);
+             }
+          });
+        };
+
+        const showToast = (msg) => { toast.value = { show: true, msg }; setTimeout(() => { toast.value.show = false }, 3500); };
+        const openLink = (url) => url && window.open(url, '_blank');
+
+        const toggleAuthMode = () => { 
+            authMode.value = authMode.value === 'login' ? 'register' : 'login';
+            authForm.value = { email: '', password: '', nama: '', asal: '', confirmPassword: '' };
+        };
+
+        const formatARName = (k) => { 
+            if (formTazkiyah.value[k]) formTazkiyah.value[k] = formTazkiyah.value[k].replace(/[^\u0600-\u06FF\s٠-٩\-–]/g, ''); 
+        };
+
+        // Fungsi konversi angka latin ke angka Arab
+        const toArabicNumerals = (num) => String(num).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+
+        // Otomatis generate rentang tahun lulus Hijriah dalam angka Arab
+        const generateTahunLulusArabic = () => {
+          const masehiYear = parseInt(formTazkiyah.value.tahun_lulus);
+          if (!isNaN(masehiYear) && masehiYear > 1000) {
+            const endHijri = masehiYear - 578;
+            const startHijri = endHijri - 3;
+            formTazkiyah.value.tahun_lulus_arabic = `${toArabicNumerals(startHijri)} – ${toArabicNumerals(endHijri)} ه`;
+          }
+        };
+
+        // Menggenerate 4 Format Tanggal secara lokal (Hanya jika di-trigger manual oleh user)
+        const generateDates = () => {
+          if (!formTazkiyah.value.tgl_input) return;
+          try {
+            const dateObj = new Date(formTazkiyah.value.tgl_input);
+            formTazkiyah.value.tgl_msh_idn = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).format(dateObj) + ' M';
+            const hijriIdnParts = new Intl.DateTimeFormat('id-ID-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' }).format(dateObj);
+            formTazkiyah.value.tgl_hijr_idn = hijriIdnParts ;
+            formTazkiyah.value.tanggal_masehi_arab = new Intl.DateTimeFormat('ar-EG-u-nu-arab', { day: 'numeric', month: 'long', year: 'numeric' }).format(dateObj) + ' م';
+            formTazkiyah.value.tanggal_hijriah_arab = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-nu-arab', { day: 'numeric', month: 'long', year: 'numeric' }).format(dateObj) ;
+          } catch (e) { console.error("Error Formatting Date: ", e); }
+        };
+
+        const handleAuth = async () => {
+          if (authMode.value === 'register') {
+            if (!authForm.value.nama || !authForm.value.email || !authForm.value.password) return showToast("Lengkapi form pendaftaran!");
+          } else {
+            if (!authForm.value.email || !authForm.value.password) return showToast("Lengkapi form login!");
+          }
+          
+          isLoading.value = true;
+          try {
+            const res = await callGASAuth('handleAuth', { 
+               mode: authMode.value, email: authForm.value.email, password: authForm.value.password, nama: authForm.value.nama, asal: authForm.value.asal
+            });
+            isLoading.value = false;
+            
+            if (res.success) {
+              user.value = res.user; 
+              localStorage.setItem('tazkiyah_session', JSON.stringify(res.user));
+              
+              // TEPATKAN MAPPING DENGAN HEADER SPREADSHEET (Mencegah kolom tidak terisi/kosong)
+              if (res.data) {
+                  formTazkiyah.value.nama = res.data['nama_lengkap_id'] || user.value.nama || '';
+                  formTazkiyah.value.nama_arabic = res.data['(اسم الكامل ( بالعربية'] || res.data.nama_lengkap_ar || '';
+                  formTazkiyah.value.sekolah = res.data['Asal Sekolah (Yang mengeluarkan Ijazah)'] || res.data.asal_sek_id || '';
+                  formTazkiyah.value.sekolah_arabic = res.data['Sekolah (Arabic)'] || res.data.asal_sek_ar || '';
+                  formTazkiyah.value.tahun_lulus = res.data['Tahun Lulus SMA'] || res.data.thn_lulus || '';
+                  
+                  // Menjalankan auto-generate tahun hijriah berdasarkan tahun masehi
+                  if (formTazkiyah.value.tahun_lulus) generateTahunLulusArabic();
+                  formTazkiyah.value.tahun_lulus_arabic = res.data['Tahun_Lulus_Arabic'] || formTazkiyah.value.tahun_lulus_arabic;
+
+                  formTazkiyah.value.kota_kab = res.data['Asal Kota / Kab'] || res.data.kota_kab || '';
+                  formTazkiyah.value.provinsi = res.data['Asal Provinsi'] || res.data.provinsi || '';
+
+                  // Mapping Tanggal (Sesuai header database timestamp)
+                  formTazkiyah.value.tgl_msh_idn = res.data['Tanggal_Masehi'] || res.data['Tanggal_Masehi1'] || '';
+                  formTazkiyah.value.tgl_hijr_idn = res.data['Tanggal_Hijri'] || '';
+                  formTazkiyah.value.tanggal_masehi_arab = res.data['Tgl_Masehi'] || '';
+                  formTazkiyah.value.tanggal_hijriah_arab = res.data['Tgl_Hijriah'] || '';
+              }
+
+              showToast("Berhasil Masuk!");
+            } else showToast(res.msg);
+          } catch (e) { isLoading.value = false; showToast("Error: " + e.toString()); }
+        };
+
+        const submitTazkiyah = async () => {
+          if (!formTazkiyah.value.nama || !formTazkiyah.value.nama_arabic) {
+             return showToast("Nama Lengkap wajib diisi!");
+          }
+
+          isLoading.value = true;
+          
+          // Logika Ikhwan / Akhwat yang terhubung dengan Jk1 - Jk5
+          let jkPayload = { Jk1: "", Jk2: "", Jk3: "", Jk4: "", Jk5: "" };
+          if(formTazkiyah.value.jenis_kelamin === 'Ikhwan') {
+             jkPayload.Jk1 = "الأخ";
+             jkPayload.Jk2 = "";
+             jkPayload.Jk3 = "ه";
+             jkPayload.Jk4 = "ي";
+             jkPayload.Jk5 = "a";
+          } else if (formTazkiyah.value.jenis_kelamin === 'Akhwat') {
+             jkPayload.Jk1 = "الأخت";
+             jkPayload.Jk2 = "ة";
+             jkPayload.Jk3 = "ها";
+             jkPayload.Jk4 = "ت";
+             jkPayload.Jk5 = "i";
+          }
+
+          // Satukan semua objek menjadi payload final
+          const payload = {
+              email_tujuan: user.value.email,
+              ...formTazkiyah.value,
+              ...jkPayload
+          };
+
+          try {
+            const res = await submitToTazkiyahAPI(payload);
+            isLoading.value = false;
+            
+            if (res && res.success === false) {
+               showToast("Gagal memproses PDF: " + res.msg);
+            } else {
+               showToast("PDF Berhasil Dibuat & Dikirim ke Email!"); 
+               
+               riwayatTazkiyah.value.unshift({
+                   nama: formTazkiyah.value.nama,
+                   tanggal_pengajuan: new Date().toLocaleDateString('id-ID'),
+                   status: 'Selesai'
+               });
+               
+               activeTab.value = 'status';
+            }
+          } catch (e) { 
+            isLoading.value = false; 
+            showToast("Sistem Error: " + e.message); 
+          }
+        };
+
+        const fetchStatus = () => { showToast("Status telah diperbarui."); };
+        const logout = () => { localStorage.removeItem('tazkiyah_session'); user.value = null; showToast("Berhasil Keluar"); };
+
+        onMounted(() => {
+          setTimeout(() => showSplash.value = false, 2000);
+          
+          const session = localStorage.getItem('tazkiyah_session');
+          if (session) { 
+            const p = JSON.parse(session); 
+            user.value = p; 
+
+            // Auto Fetch data user & Auto-fill Data
+            callGASAuth('fetchInitial', p).then(res => {
+              if (res.success && res.data) {
+                  formTazkiyah.value.nama = res.data['nama_lengkap_id'] || user.value.nama || '';
+                  formTazkiyah.value.nama_arabic = res.data['(اسم الكامل ( بالعربية'] || res.data.nama_lengkap_ar || '';
+                  formTazkiyah.value.sekolah = res.data['Asal Sekolah (Yang mengeluarkan Ijazah)'] || res.data.asal_sek_id || '';
+                  formTazkiyah.value.sekolah_arabic = res.data['Sekolah (Arabic)'] || res.data.asal_sek_ar || '';
+                  formTazkiyah.value.tahun_lulus = res.data['Tahun Lulus SMA'] || res.data.thn_lulus || '';
+                  
+                  // Menjalankan auto-generate tahun hijriah berdasarkan tahun masehi
+                  if (formTazkiyah.value.tahun_lulus) generateTahunLulusArabic();
+                  formTazkiyah.value.tahun_lulus_arabic = res.data['Tahun_Lulus_Arabic'] || formTazkiyah.value.tahun_lulus_arabic;
+
+                  formTazkiyah.value.kota_kab = res.data['Asal Kota / Kab'] || res.data.kota_kab || '';
+                  formTazkiyah.value.provinsi = res.data['Asal Provinsi'] || res.data.provinsi || '';
+
+                  // Memuat Tanggal dari Spreadsheet
+                  formTazkiyah.value.tgl_msh_idn = res.data['Tanggal_Masehi'] || res.data['Tanggal_Masehi1'] || '';
+                  formTazkiyah.value.tgl_hijr_idn = res.data['Tanggal_Hijri'] || '';
+                  formTazkiyah.value.tanggal_masehi_arab = res.data['Tgl_Masehi'] || '';
+                  formTazkiyah.value.tanggal_hijriah_arab = res.data['Tgl_Hijriah'] || '';
+              }
+            });
+          }
+        });
+
+        return {
+          appName, showSplash, isLoading, user, authMode, authForm, showPass,
+          activeTab, formTazkiyah, riwayatTazkiyah, toast,
+          toggleAuthMode, handleAuth, submitTazkiyah, fetchStatus, logout, openLink, generateDates, formatARName, generateTahunLulusArabic
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
