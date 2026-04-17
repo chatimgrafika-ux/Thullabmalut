@@ -579,11 +579,27 @@
         setTimeout(() => { modal.classList.add('hidden'); }, 300);
     }
 
+    // Fungsi khusus untuk mengatur nama file PDF saat dicetak
+    function executePrint() {
+        const originalTitle = document.title;
+        const pesertaName = document.getElementById('b_peserta').value.trim() || 'Peserta';
+        
+        // Ubah title document sesaat sebelum print (ini akan jadi nama default file PDF)
+        document.title = `Badal Umroh - ${pesertaName}`;
+        
+        window.print();
+        
+        // Kembalikan title asli setelah dialog print terbuka
+        setTimeout(() => {
+            document.title = originalTitle;
+        }, 1000);
+    }
+
     // 4. Periksa apakah boleh print
     function attemptPrint() {
         const isAuth = sessionStorage.getItem('is_auth_print') === 'true';
         if (isAuth) {
-            window.print(); // Jika sudah login di sesi ini, langsung print
+            executePrint(); // Jika sudah login di sesi ini, langsung panggil executePrint
         } else {
             showLoginModal(); // Jika belum, tampilkan modal login
         }
@@ -642,7 +658,7 @@
                 
                 // Delay sejenak biar animasi modal tertutup rapi sebelum kotak dialog print muncul
                 setTimeout(() => {
-                    window.print();
+                    executePrint();
                 }, 400);
 
             } else {
