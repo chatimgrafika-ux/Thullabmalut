@@ -53,7 +53,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 4mm;
+      padding: 0; /* Margin kertas putih dihilangkan agar Full A4 */
     }
 
     .cert-inner {
@@ -61,9 +61,9 @@
       height: 100%;
       position: relative;
       z-index: 10;
-      padding: 4mm;
+      padding: 6mm; /* Jarak antara tepian kertas full dan bingkai dalam */
       display: flex;
-      flex-col;
+      flex-direction: column;
       text-align: center;
       background-size: cover;
       background-position: center;
@@ -331,9 +331,7 @@
     let imgTtd = null;
 
     // --- Konfigurasi Keamanan Login ---
-    // Ganti URL_API dengan endpoint URL App Script Anda (di-encode base64 agar obfuscated)
-    // Cara encode: btoa('URL_APP_SCRIPT_ANDA'); pada console browser
-    const API_ENCODED = 'aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3MXJHbm5rcWtnZmFmODRlX1dmZ0hETmFIdVE3WUFXay1sa1h2Qjd0N0QxU0k5M2w0X3NzYlJlVno1RjdLenBrT18vZXhlYw'; // <--- MASUKKAN BASE64 API DISINI
+    const API_ENCODED = 'aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3MXJHbm5rcWtnZmFmODRlX1dmZ0hETmFIdVE3WUFXay1sa1h2Qjd0N0QxU0k5M2w0X3NzYlJlVno1RjdLenBrT18vZXhlYw'; 
     
     // --- Template Definitions (12 Premium Themes) ---
     const templates = [
@@ -564,11 +562,28 @@
             const hashedPwd = await hashPassword(pwdInput);
             
             // Decode API URL yang disembunyikan
-            const apiUrl = API_ENCODED !== 'YOUR_BASE64_ENCODED_API_URL_HERE' ? atob(API_ENCODED) : null;
+            let apiUrl = null;
+            if (API_ENCODED !== 'YOUR_BASE64_ENCODED_API_URL_HERE') {
+                if (API_ENCODED.startsWith('http')) {
+                    apiUrl = API_ENCODED;
+                } else {
+                    try {
+                        let base64Str = API_ENCODED;
+                        // Tambahkan padding '=' untuk menghindari InvalidCharacterError pada atob
+                        while (base64Str.length % 4 !== 0) {
+                            base64Str += '=';
+                        }
+                        apiUrl = atob(base64Str);
+                    } catch (e) {
+                        console.warn("Peringatan: URL API gagal di-decode, menggunakan URL secara langsung.");
+                        apiUrl = API_ENCODED;
+                    }
+                }
+            }
             
-            if(!apiUrl) {
+            if(!apiUrl || !apiUrl.startsWith('http')) {
                 alert("API Endpoint belum disetting dengan benar di source code.");
-                throw new Error("Missing API URL");
+                throw new Error("Missing or Invalid API URL");
             }
 
             const response = await fetch(apiUrl, {
@@ -597,7 +612,7 @@
 
         } catch (error) {
             console.error("Gagal verifikasi login:", error);
-            alert("Terjadi kesalahan sistem/jaringan saat memverifikasi sandi.");
+            alert("Terjadi kesalahan sistem/jaringan saat memverifikasi sandi. Silakan periksa koneksi Anda.");
         } finally {
             btn.innerHTML = originalText;
             btn.disabled = false;
