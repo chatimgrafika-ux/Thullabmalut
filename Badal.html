@@ -802,8 +802,8 @@
         // Logo
         const logoHtml = imgLogo ? `<img src="${imgLogo}" class="h-16 w-16 object-contain" />` : `<div class="w-16 h-16 border-2 border-dashed border-current opacity-30 flex items-center justify-center text-[8px]">LOGO</div>`;
         
-        // TTD
-        const ttdHtml = imgTtd ? `<img src="${imgTtd}" class="absolute bottom-6 left-1/2 -translate-x-1/2 h-16 w-32 object-contain mix-blend-multiply pointer-events-none z-10" />` : '';
+        // TTD - Diperbesar (h-32 w-56) dan diposisikan lebih ke bawah (-bottom-4) dengan z-index tinggi (z-30) agar menimpa teks nama
+        const ttdHtml = imgTtd ? `<img src="${imgTtd}" class="absolute -bottom-4 left-1/2 -translate-x-1/2 h-32 w-56 object-contain mix-blend-multiply pointer-events-none z-30" />` : '';
 
         // Patterns and Image Overlays
         const patternHtml = theme.pattern ? `<div class="pattern-overlay"></div>` : '';
