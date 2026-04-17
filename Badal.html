@@ -13,21 +13,28 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Great+Vibes&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;700&family=Cinzel:wght@400;700&family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400&display=swap');
     
     :root {
       --primary: #047857; /* Emerald 600 */
       --primary-dark: #064e3b; /* Emerald 900 */
       --primary-bg: #ecfdf5; /* Emerald 50 */
       --accent: #d97706; /* Amber 600 */
+
+      /* Variabel Font Dinamis */
+      --font-title: 'Playfair Display', serif;
+      --font-body: 'Inter', sans-serif;
+      --font-arabic: 'Amiri', serif;
+      --font-script: 'Great Vibes', cursive;
     }
 
     body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
     
-    /* Document Fonts */
-    .font-serif { font-family: 'Playfair Display', serif; }
-    .font-arabic { font-family: 'Amiri', serif; }
-    .font-script { font-family: 'Great Vibes', cursive; }
+    /* Document Fonts Override */
+    .cert-title-text { font-family: var(--font-title) !important; }
+    .cert-body-text { font-family: var(--font-body) !important; }
+    .cert-arabic-text { font-family: var(--font-arabic) !important; }
+    .cert-script-text { font-family: var(--font-script) !important; }
 
     /* Custom Scrollbars */
     .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -87,16 +94,16 @@
       }
 
       /* Sembunyikan semua UI dan Panel yang tidak perlu dicetak */
-      #form-container, header, #loginModal, #splash-screen, .print\:hidden {
+      header, #form-panel, #loginModal, #splash-screen, .print\:hidden {
         display: none !important;
       }
 
       /* Reset wrapper agar tidak mengganggu layout cetak dan menghilangkan warna hitam (slate-800) */
-      #main-app, #preview-section, #cert-wrapper {
+      #main-app, .flex-1, #preview-section, #preview-viewport, #cert-wrapper {
         display: block !important;
         position: static !important;
         width: 100% !important;
-        height: 100% !important;
+        height: auto !important;
         margin: 0 !important;
         padding: 0 !important;
         background: transparent !important;
@@ -197,163 +204,188 @@
   </div>
 
   <!-- ================= MAIN APP ================= -->
-  <div id="main-app" class="h-full w-full flex flex-col md:flex-row">
+  <div id="main-app" class="h-screen w-full flex flex-col">
     
-    <!-- LEFT: CONTROL PANEL (FORM) -->
-    <div class="w-full md:w-[450px] lg:w-[500px] h-full flex flex-col bg-white border-r border-slate-200 shadow-2xl z-20 flex-shrink-0">
+    <!-- HEADER GLOBAL -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-sm p-4 border-b border-slate-200 flex justify-between items-center shadow-sm flex-shrink-0">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 flex items-center justify-center">
+          <img src="https://lh3.googleusercontent.com/d/1LFYbCI1A83jrD4OA9NyuANANMmyZeePL" alt="Chatimgrafika" class="w-full h-full object-contain" />
+        </div>
+        <div>
+          <h1 class="text-sm font-black text-slate-800 tracking-tight uppercase">Chatimgrafika</h1>
+          <p class="text-[10px] text-emerald-600 font-bold uppercase tracking-widest" data-i18n="appTitle">Badal Umroh Gen</p>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <!-- Language Switcher -->
+        <button onclick="toggleLanguage()" class="flex items-center gap-1 p-2 text-slate-500 hover:text-emerald-600 bg-slate-100 hover:bg-emerald-50 border border-slate-200 rounded-lg transition-colors font-bold text-xs" title="Ganti Bahasa">
+          <i class="fas fa-language"></i> <span id="lang-text">ID</span>
+        </button>
+
+        <!-- Toggle Preview Button -->
+        <button onclick="togglePreview()" class="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors" title="Sembunyikan/Tampilkan Preview">
+          <i data-lucide="eye-off" id="toggle-preview-icon" class="w-5 h-5"></i>
+        </button>
+        <button onclick="resetData()" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors hidden sm:block" title="Reset Form">
+          <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+        </button>
+        <button onclick="attemptPrint()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-xs font-bold transition-colors shadow-md">
+          <i data-lucide="printer" class="w-4 h-4"></i> <span class="hidden sm:inline" data-i18n="btnCetak">CETAK PDF</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTENT SPLIT -->
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
       
-      <!-- HEADER -->
-      <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm p-5 border-b border-slate-100 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 flex items-center justify-center">
-            <img src="https://lh3.googleusercontent.com/d/1LFYbCI1A83jrD4OA9NyuANANMmyZeePL" alt="Chatimgrafika" class="w-full h-full object-contain" />
-          </div>
-          <div>
-            <h1 class="text-sm font-black text-slate-800 tracking-tight uppercase">Chatimgrafika</h1>
-            <p class="text-[10px] text-emerald-600 font-bold uppercase tracking-widest">Badal Umroh Gen</p>
-          </div>
-        </div>
-        <div class="flex gap-2">
-          <button onclick="resetData()" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Reset Form">
-            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-          </button>
-          <button onclick="attemptPrint()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-xs font-bold transition-colors shadow-md">
-            <i data-lucide="printer" class="w-4 h-4"></i> CETAK PDF
-          </button>
-        </div>
-      </header>
+      <!-- LEFT: CONTROL PANEL (FORM) -->
+      <div id="form-panel" class="w-full md:w-[450px] lg:w-[500px] flex-1 md:h-full flex flex-col bg-white md:border-r border-slate-200 shadow-2xl z-20 flex-shrink-0 order-2 md:order-1 overflow-y-auto">
+        <!-- FORM AREA -->
+        <div class="p-5 space-y-6 custom-scrollbar pb-24" id="form-container">
+          
+          <!-- Template Selector -->
+          <section>
+            <h2 class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+              <i data-lucide="layout" class="w-3 h-3 text-emerald-600"></i> <span data-i18n="secDesign">Desain Sertifikat (20 Tema)</span>
+            </h2>
+            <div class="grid grid-cols-4 md:grid-cols-5 gap-2" id="template-selector">
+              <!-- Thumbnails generated by JS -->
+            </div>
+          </section>
 
-      <!-- FORM AREA -->
-      <div class="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar pb-24" id="form-container">
-        
-        <!-- Template Selector -->
-        <section>
-          <h2 class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-            <i data-lucide="layout" class="w-3 h-3 text-emerald-600"></i> Desain Sertifikat (12 Tema)
-          </h2>
-          <div class="grid grid-cols-4 md:grid-cols-6 gap-2" id="template-selector">
-            <!-- Thumbnails generated by JS -->
-          </div>
-        </section>
-
-        <!-- Global Attributes -->
-        <section class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
-          <h2 class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3">Atribut Dokumen</h2>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-[10px] font-semibold text-slate-400 mb-1">Nomor Sertifikat</label>
-              <input type="text" id="b_nomor" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all font-mono" oninput="queueAutoSave()" />
-            </div>
-            <div>
-              <label class="block text-[10px] font-semibold text-slate-400 mb-1">Tanggal Terbit</label>
-              <input type="date" id="b_tanggal" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all text-slate-600" onchange="queueAutoSave()" oninput="queueAutoSave()" />
-            </div>
-            <div>
-              <label class="block text-[10px] font-semibold text-slate-400 mb-1">Lokasi Pembuatan</label>
-              <input type="text" id="b_lokasi" value="Makkah Al-Mukarramah" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" oninput="queueAutoSave()" />
-            </div>
-            <div>
-              <label class="block text-[10px] font-semibold text-slate-400 mb-1">Jenis Badal</label>
-              <select id="b_jenis" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" onchange="queueAutoSave()">
-                <option value="Badal Umroh">Badal Umroh</option>
-                <option value="Badal Haji & Umroh">Badal Haji & Umroh</option>
-                <option value="Badal Haji">Badal Haji</option>
-              </select>
-            </div>
-          </div>
-        </section>
-
-        <!-- Data Peserta & Pelaksana -->
-        <section>
-          <h2 class="text-[11px] font-black text-emerald-700 uppercase tracking-widest mb-4 pb-2 border-b-2 border-emerald-50">Data Pelaksanaan</h2>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-600 mb-1.5">Nama Peserta Badal (Yang Dibadalkan)</label>
-              <input type="text" id="b_peserta" placeholder="Contoh: Alm. H. Ahmad bin Abdullah" class="input-field w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" oninput="queueAutoSave()" />
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-600 mb-1.5">Nama Pelaksana (Mutawwif / Badal)</label>
-              <input type="text" id="b_pelaksana" placeholder="Contoh: Ustadz Fulan Al-Banjary" class="input-field w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" oninput="queueAutoSave()" />
-            </div>
+          <!-- Global Attributes -->
+          <section class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <h2 class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3" data-i18n="secAttr">Atribut Dokumen</h2>
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-[11px] font-semibold text-slate-600 mb-1.5">Miqot</label>
-                <select id="b_miqot" class="input-field w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" onchange="queueAutoSave()">
-                  <option value="Bir Ali (Zulhulaifah)">Bir Ali (Zulhulaifah)</option>
-                  <option value="Qarnul Manazil (As-Sail)">Qarnul Manazil</option>
-                  <option value="Yalamlam">Yalamlam</option>
-                  <option value="Juhfah">Juhfah</option>
-                  <option value="Zatu Irqin">Zatu Irqin</option>
-                  <option value="Tan'im (Masjid Aisyah)">Tan'im (Masjid Aisyah)</option>
-                  <option value="Ji'ranah">Ji'ranah</option>
-                </select>
+                <label class="block text-[10px] font-semibold text-slate-400 mb-1" data-i18n="lblNomor">Nomor Sertifikat</label>
+                <input type="text" id="b_nomor" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all font-mono" oninput="handleInputFilter(this)" />
               </div>
               <div>
-                <label class="block text-[11px] font-semibold text-slate-600 mb-1.5">Waktu Pelaksanaan</label>
-                <input type="text" id="b_waktu" placeholder="Contoh: Ba'da Subuh" class="input-field w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" oninput="queueAutoSave()" />
+                <label class="block text-[10px] font-semibold text-slate-400 mb-1" data-i18n="lblTanggal">Tanggal Terbit</label>
+                <input type="date" id="b_tanggal" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all text-slate-600" onchange="queueAutoSave()" oninput="queueAutoSave()" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-slate-400 mb-1" data-i18n="lblLokasi">Lokasi Pembuatan</label>
+                <input type="text" id="b_lokasi" value="Makkah Al-Mukarramah" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" oninput="handleInputFilter(this)" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-semibold text-slate-400 mb-1" data-i18n="lblJenis">Jenis Badal</label>
+                <select id="b_jenis" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" onchange="queueAutoSave()">
+                  <option value="Badal Umroh" data-i18n="valUmroh">Badal Umroh</option>
+                  <option value="Badal Haji & Umroh" data-i18n="valHajiUmroh">Badal Haji & Umroh</option>
+                  <option value="Badal Haji" data-i18n="valHaji">Badal Haji</option>
+                </select>
+              </div>
+              <div class="col-span-2">
+                <label class="block text-[10px] font-semibold text-slate-400 mb-1" data-i18n="lblFont">Kombinasi Font</label>
+                <select id="b_font" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" onchange="changeFontCombo()">
+                  <option value="0" data-i18n="fontCombo0">Klasik Formal</option>
+                  <option value="1" data-i18n="fontCombo1">Mewah & Elegan</option>
+                  <option value="2" data-i18n="fontCombo2">Tradisional</option>
+                </select>
               </div>
             </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-600 mb-1.5">Link Dokumentasi (Auto Generate QR)</label>
-              <input type="url" id="b_link" placeholder="Contoh: https://youtube.com/..." class="input-field w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" oninput="queueAutoSave()" />
-            </div>
-          </div>
-        </section>
+          </section>
 
-        <!-- Instansi & Tanda Tangan -->
-        <section class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
-          <h2 class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center justify-between">
-            <span>Lembaga / Travel</span>
-            <div class="flex gap-2">
-              <label class="cursor-pointer bg-white border border-slate-200 hover:border-emerald-500 text-slate-500 hover:text-emerald-600 px-2 py-1 rounded text-[9px] flex items-center gap-1 transition-colors">
-                <i data-lucide="image" class="w-3 h-3"></i> Logo
-                <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'logo')">
-              </label>
-              <label class="cursor-pointer bg-white border border-slate-200 hover:border-emerald-500 text-slate-500 hover:text-emerald-600 px-2 py-1 rounded text-[9px] flex items-center gap-1 transition-colors">
-                <i data-lucide="pen-tool" class="w-3 h-3"></i> TTD
-                <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'ttd')">
-              </label>
+          <!-- Data Peserta & Pelaksana -->
+          <section>
+            <h2 class="text-[11px] font-black text-emerald-700 uppercase tracking-widest mb-4 pb-2 border-b-2 border-emerald-50" data-i18n="secPelaksanaan">Data Pelaksanaan</h2>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1.5" data-i18n="lblPeserta">Nama Peserta Badal (Yang Dibadalkan)</label>
+                <input type="text" id="b_peserta" data-i18n-ph="phPeserta" placeholder="Contoh: Alm. H. Ahmad bin Abdullah" class="input-field w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" oninput="handleInputFilter(this)" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1.5" data-i18n="lblPelaksana">Nama Pelaksana (Mutawwif / Badal)</label>
+                <input type="text" id="b_pelaksana" data-i18n-ph="phPelaksana" placeholder="Contoh: Ustadz Fulan Al-Banjary" class="input-field w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" oninput="handleInputFilter(this)" />
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1.5" data-i18n="lblMiqot">Miqot</label>
+                  <select id="b_miqot" class="input-field w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" onchange="queueAutoSave()">
+                    <option value="Bir Ali (Zulhulaifah)">Bir Ali (Zulhulaifah)</option>
+                    <option value="Qarnul Manazil (As-Sail)">Qarnul Manazil (As-Sail)</option>
+                    <option value="Yalamlam">Yalamlam</option>
+                    <option value="Juhfah">Juhfah</option>
+                    <option value="Zatu Irqin">Zatu Irqin</option>
+                    <option value="Tan'im (Masjid Aisyah)">Tan'im (Masjid Aisyah)</option>
+                    <option value="Ji'ranah">Ji'ranah</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-600 mb-1.5" data-i18n="lblWaktu">Waktu Pelaksanaan</label>
+                  <input type="text" id="b_waktu" data-i18n-ph="phWaktu" placeholder="Contoh: Ba'da Subuh" class="input-field w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" oninput="handleInputFilter(this)" />
+                </div>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1.5" data-i18n="lblLink">Link Dokumentasi (Auto Generate QR)</label>
+                <input type="url" id="b_link" data-i18n-ph="phLink" placeholder="Contoh: https://youtube.com/..." class="input-field w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" oninput="handleInputFilter(this)" />
+              </div>
             </div>
-          </h2>
-          <div class="space-y-3">
-            <input type="text" id="b_travel" placeholder="Nama Travel / Lembaga (Contoh: PT. Barokah Tour)" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:border-emerald-500 outline-none shadow-sm font-bold" oninput="queueAutoSave()" />
-            <input type="text" id="b_jabatan" placeholder="Jabatan Penandatangan (Contoh: Direktur Utama)" value="Direktur Utama" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:border-emerald-500 outline-none shadow-sm" oninput="queueAutoSave()" />
-            <input type="text" id="b_penandatangan" placeholder="Nama Penandatangan" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:border-emerald-500 outline-none shadow-sm" oninput="queueAutoSave()" />
-          </div>
-          
-          <!-- Previews for Uploads -->
-          <div class="flex gap-2 mt-3">
-            <div id="prev-logo-container" class="hidden w-12 h-12 bg-white border rounded relative flex items-center justify-center p-1 group">
-              <img id="prev-logo" src="" class="max-w-full max-h-full object-contain" />
-              <button onclick="removeImage('logo')" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 hidden group-hover:block"><i data-lucide="x" class="w-3 h-3"></i></button>
-            </div>
-            <div id="prev-ttd-container" class="hidden w-16 h-12 bg-white border rounded relative flex items-center justify-center p-1 group">
-              <img id="prev-ttd" src="" class="max-w-full max-h-full object-contain" />
-              <button onclick="removeImage('ttd')" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 hidden group-hover:block"><i data-lucide="x" class="w-3 h-3"></i></button>
-            </div>
-          </div>
-        </section>
+          </section>
 
+          <!-- Instansi & Tanda Tangan -->
+          <section class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <h2 class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center justify-between">
+              <span data-i18n="secLembaga">Lembaga / Travel</span>
+              <div class="flex gap-2">
+                <label class="cursor-pointer bg-white border border-slate-200 hover:border-emerald-500 text-slate-500 hover:text-emerald-600 px-2 py-1 rounded text-[9px] flex items-center gap-1 transition-colors">
+                  <i data-lucide="image" class="w-3 h-3"></i> Logo
+                  <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'logo')">
+                </label>
+                <label class="cursor-pointer bg-white border border-slate-200 hover:border-emerald-500 text-slate-500 hover:text-emerald-600 px-2 py-1 rounded text-[9px] flex items-center gap-1 transition-colors">
+                  <i data-lucide="pen-tool" class="w-3 h-3"></i> TTD
+                  <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'ttd')">
+                </label>
+              </div>
+            </h2>
+            <div class="space-y-3">
+              <input type="text" id="b_travel" data-i18n-ph="phTravel" placeholder="Nama Travel / Lembaga (Contoh: PT. Barokah Tour)" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:border-emerald-500 outline-none shadow-sm font-bold" oninput="handleInputFilter(this)" />
+              <input type="text" id="b_jabatan" data-i18n-ph="phJabatan" placeholder="Jabatan Penandatangan (Contoh: Direktur Utama)" value="Direktur Utama" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:border-emerald-500 outline-none shadow-sm" oninput="handleInputFilter(this)" />
+              <input type="text" id="b_penandatangan" data-i18n-ph="phPenandatangan" placeholder="Nama Penandatangan" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:border-emerald-500 outline-none shadow-sm" oninput="handleInputFilter(this)" />
+            </div>
+            
+            <!-- Previews for Uploads -->
+            <div class="flex gap-2 mt-3">
+              <div id="prev-logo-container" class="hidden w-12 h-12 bg-white border rounded relative flex items-center justify-center p-1 group">
+                <img id="prev-logo" src="" class="max-w-full max-h-full object-contain" />
+                <button onclick="removeImage('logo')" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 hidden group-hover:block"><i data-lucide="x" class="w-3 h-3"></i></button>
+              </div>
+              <div id="prev-ttd-container" class="hidden w-16 h-12 bg-white border rounded relative flex items-center justify-center p-1 group">
+                <img id="prev-ttd" src="" class="max-w-full max-h-full object-contain" />
+                <button onclick="removeImage('ttd')" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 hidden group-hover:block"><i data-lucide="x" class="w-3 h-3"></i></button>
+              </div>
+            </div>
+          </section>
+
+        </div>
       </div>
-    </div>
 
-    <!-- RIGHT: PREVIEW PANEL -->
-    <div class="flex-1 bg-slate-800 overflow-y-auto p-4 md:p-10 flex justify-center items-start custom-scrollbar relative" id="preview-section">
-      <!-- Zoom control for preview (hidden in print) -->
-      <div class="absolute top-4 right-6 z-20 flex gap-2 print:hidden bg-slate-900/80 p-2 rounded-xl backdrop-blur-md border border-slate-700">
-        <button onclick="adjustScale(-0.1)" class="text-white hover:text-emerald-400 p-1"><i data-lucide="zoom-out" class="w-5 h-5"></i></button>
-        <button onclick="adjustScale(0.1)" class="text-white hover:text-emerald-400 p-1"><i data-lucide="zoom-in" class="w-5 h-5"></i></button>
-      </div>
-
-      <!-- A4 Paper Container (Landscape) -->
-      <div class="cert-wrapper w-full overflow-x-auto custom-scrollbar flex justify-center pb-20 items-start transform origin-top" id="cert-wrapper">
+      <!-- RIGHT: PREVIEW PANEL -->
+      <div class="w-full h-[45vh] md:h-full md:flex-1 bg-slate-800 relative order-1 md:order-2 border-b md:border-b-0 border-slate-700 flex flex-col transition-all duration-300 ease-in-out" id="preview-section">
         
-        <!-- Certificate DOM -->
-        <div class="certificate-container" id="cert-container">
-          <!-- Content will be injected here by JS -->
+        <!-- Zoom control fixed at bottom center of the preview wrapper -->
+        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2 print:hidden bg-slate-900/90 p-2 rounded-2xl backdrop-blur-md border border-slate-700 shadow-2xl">
+          <button onclick="adjustScale(-0.05)" class="text-white hover:text-emerald-400 p-2" title="Perkecil"><i data-lucide="zoom-out" class="w-5 h-5"></i></button>
+          <button onclick="calculateAutoScale()" class="text-white hover:text-emerald-400 p-2 border-x border-slate-600 px-4 mx-1" title="Fit to Screen"><i data-lucide="maximize" class="w-5 h-5"></i></button>
+          <button onclick="adjustScale(0.05)" class="text-white hover:text-emerald-400 p-2" title="Perbesar"><i data-lucide="zoom-in" class="w-5 h-5"></i></button>
+        </div>
+
+        <!-- Scrollable Viewport -->
+        <div class="flex-1 overflow-auto p-4 md:p-10 flex justify-center items-start custom-scrollbar relative" id="preview-viewport">
+          <!-- Wrapper transisi skala -->
+          <div class="w-full flex justify-center items-start pb-24 transition-all" id="cert-wrapper">
+            <!-- DOM Sertifikat Aktual -->
+            <div class="certificate-container transform transition-transform duration-300" id="cert-container" style="transform-origin: top center;">
+              <!-- Content will be injected here by JS -->
+            </div>
+          </div>
         </div>
 
       </div>
+
     </div>
   </div>
 
@@ -366,23 +398,155 @@
     let currentTemplate = 0;
     let autoSaveTimeout = null;
     let previewScale = 1.0;
+    let isPreviewVisible = true;
+    let currentLanguage = 'id';
     
     // Images Base64
     let imgLogo = null;
     let imgTtd = null;
 
+    // --- Font Combos Definition ---
+    const fontCombos = [
+      {
+        id: 0,
+        title: "'Playfair Display', serif",
+        body: "'Inter', sans-serif",
+        arabic: "'Amiri', serif",
+        script: "'Great Vibes', cursive"
+      },
+      {
+        id: 1,
+        title: "'Cinzel', serif",
+        body: "'Montserrat', sans-serif",
+        arabic: "'Cairo', sans-serif",
+        script: "'Alex Brush', cursive"
+      },
+      {
+        id: 2,
+        title: "'Lora', serif",
+        body: "'Lora', serif",
+        arabic: "'Noto Naskh Arabic', serif",
+        script: "'Dancing Script', cursive"
+      }
+    ];
+
+    // --- Dictionary Translasi ---
+    const translations = {
+      id: {
+        appTitle: "Badal Umroh Gen",
+        btnCetak: "CETAK PDF",
+        secDesign: "Desain Sertifikat (20 Tema)",
+        secAttr: "Atribut Dokumen",
+        lblNomor: "Nomor Sertifikat",
+        lblTanggal: "Tanggal Terbit",
+        lblLokasi: "Lokasi Pembuatan",
+        lblJenis: "Jenis Badal",
+        lblFont: "Kombinasi Font",
+        fontCombo0: "Klasik Formal",
+        fontCombo1: "Mewah & Elegan",
+        fontCombo2: "Tradisional",
+        secPelaksanaan: "Data Pelaksanaan",
+        lblPeserta: "Nama Peserta Badal (Yang Dibadalkan)",
+        phPeserta: "Contoh: Alm. H. Ahmad bin Abdullah",
+        lblPelaksana: "Nama Pelaksana (Mutawwif / Badal)",
+        phPelaksana: "Contoh: Ustadz Fulan Al-Banjary",
+        lblMiqot: "Miqot",
+        lblWaktu: "Waktu Pelaksanaan",
+        phWaktu: "Contoh: Ba'da Subuh",
+        lblLink: "Link Dokumentasi (Auto Generate QR)",
+        phLink: "Contoh: https://youtube.com/...",
+        secLembaga: "Lembaga / Travel",
+        lblTravel: "Nama Travel / Lembaga",
+        phTravel: "Contoh: PT. Barokah Tour",
+        lblJabatan: "Jabatan Penandatangan",
+        phJabatan: "Contoh: Direktur Utama",
+        lblPenandatangan: "Nama Penandatangan",
+        phPenandatangan: "Nama Penandatangan",
+        valUmroh: "Badal Umroh",
+        valHajiUmroh: "Badal Haji & Umroh",
+        valHaji: "Badal Haji",
+        certTitle: "Sertifikat Badal",
+        certGivenTo: "Diberikan kepada dan diniatkan untuk:",
+        certDesc1: "Alhamdulillah, telah dilaksanakan amanah",
+        certDesc2: "dengan mengambil miqot dari",
+        certDesc3: "pada",
+        certDesc4: "dan diselesaikan dengan sempurna sesuai sunnah Rasulullah ﷺ oleh:",
+        qrText: "Scan to Verify",
+        hadithTranslation: "\"Laksanakan haji dan umroh untuk ayahmu!\"<br>(HR. At Tirmidzi, dari Abu Razin Al 'Uqaili yang bertanya tentang ayahnya yang sudah tua renta)"
+      },
+      ar: {
+        appTitle: "مولد شهادة البدل",
+        btnCetak: "طباعة PDF",
+        secDesign: "تصميم الشهادة (20 سمة)",
+        secAttr: "خصائص الوثيقة",
+        lblNomor: "رقم الشهادة",
+        lblTanggal: "تاريخ الإصدار",
+        lblLokasi: "مكان الإصدار",
+        lblJenis: "نوع البدل",
+        lblFont: "مجموعة الخطوط",
+        fontCombo0: "كلاسيكي رسمي",
+        fontCombo1: "فاخر وأنيق",
+        fontCombo2: "تقليدي",
+        secPelaksanaan: "بيانات التنفيذ",
+        lblPeserta: "اسم المعتمر عنه (المتوفى/المريض)",
+        phPeserta: "مثال: المرحوم أحمد بن عبد الله",
+        lblPelaksana: "اسم المنفذ (المطوف / البدل)",
+        phPelaksana: "مثال: الأستاذ فلان البنجري",
+        lblMiqot: "الميقات",
+        lblWaktu: "وقت التنفيذ",
+        phWaktu: "مثال: بعد الفجر",
+        lblLink: "رابط التوثيق (إنشاء QR)",
+        phLink: "مثال: https://youtube.com/...",
+        secLembaga: "الوكالة / الشركة",
+        lblTravel: "اسم الشركة / الوكالة",
+        phTravel: "مثال: شركة البركة للسياحة",
+        lblJabatan: "المنصب",
+        phJabatan: "مثال: المدير العام",
+        lblPenandatangan: "اسم الموقع",
+        phPenandatangan: "اسم الموقع",
+        valUmroh: "عمرة البدل",
+        valHajiUmroh: "حج وعمرة البدل",
+        valHaji: "حج البدل",
+        certTitle: "شهادة بدل",
+        certGivenTo: "أُديت هذه النسك بالنيابة عن:",
+        certDesc1: "الحمد لله، تم أداء أمانة",
+        certDesc2: "بالإحرام من ميقات",
+        certDesc3: "في وقت",
+        certDesc4: "وأُتمت على أكمل وجه وفق سنة رسول الله ﷺ بواسطة:",
+        qrText: "امسح للتحقق",
+        hadithTranslation: "(رواه الترمذي، عن أبي رزين العقيلي)"
+      }
+    };
+
+    // Mapping Values Khusus Arab
+    const miqotMapAr = {
+        "Bir Ali (Zulhulaifah)": "ذي الحليفة (أبيار علي)",
+        "Qarnul Manazil (As-Sail)": "قرن المنازل (السيل الكبير)",
+        "Yalamlam": "يلملم",
+        "Juhfah": "الجحفة",
+        "Zatu Irqin": "ذات عرق",
+        "Tan'im (Masjid Aisyah)": "التنعيم (مسجد عائشة)",
+        "Ji'ranah": "الجعرانة"
+    };
+
+    const jenisMapAr = {
+        "Badal Umroh": "عمرة البدل",
+        "Badal Haji & Umroh": "حج وعمرة البدل",
+        "Badal Haji": "حج البدل"
+    };
+
     // --- Konfigurasi Keamanan Login ---
     const API_ENCODED = 'aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J3MXJHbm5rcWtnZmFmODRlX1dmZ0hETmFIdVE3WUFXay1sa1h2Qjd0N0QxU0k5M2w0X3NzYlJlVno1RjdLenBrT18vZXhlYw'; 
     
-    // --- Template Definitions (12 Premium Themes) ---
+    // --- Template Definitions (20 Premium Themes) ---
     const templates = [
       { 
         id: 0, name: 'Classic Gold', 
         thumb: 'linear-gradient(135deg, #fefce8, #fef08a)',
         bgOut: 'bg-yellow-50',
         bgInner: 'bg-white border-4 border-double border-yellow-600',
-        title: 'text-yellow-700 font-serif font-black',
-        textMain: 'text-slate-800 font-serif',
+        title: 'text-yellow-700 font-black',
+        textMain: 'text-slate-800',
         accent: 'text-yellow-600',
         pattern: true
       },
@@ -391,8 +555,8 @@
         thumb: 'linear-gradient(135deg, #064e3b, #047857)',
         bgOut: 'bg-emerald-900',
         bgInner: 'bg-emerald-800 border-2 border-emerald-400 ring-4 ring-emerald-900 ring-offset-2 ring-offset-emerald-500',
-        title: 'text-yellow-400 font-serif font-black',
-        textMain: 'text-emerald-50 font-serif',
+        title: 'text-yellow-400 font-black',
+        textMain: 'text-emerald-50',
         accent: 'text-yellow-300',
         pattern: true
       },
@@ -401,8 +565,8 @@
         thumb: 'linear-gradient(135deg, #1e293b, #0f172a)',
         bgOut: 'bg-slate-900',
         bgInner: 'bg-slate-800 border-[6px] border-amber-500',
-        title: 'text-amber-500 font-serif font-black',
-        textMain: 'text-slate-100 font-serif',
+        title: 'text-amber-500 font-black',
+        textMain: 'text-slate-100',
         accent: 'text-amber-400',
         pattern: true
       },
@@ -411,8 +575,8 @@
         thumb: 'linear-gradient(135deg, #ffffff, #f1f5f9)',
         bgOut: 'bg-white',
         bgInner: 'bg-white border border-slate-300 shadow-inner',
-        title: 'text-slate-800 font-sans font-black tracking-widest',
-        textMain: 'text-slate-600 font-sans',
+        title: 'text-slate-800 font-black tracking-widest',
+        textMain: 'text-slate-600',
         accent: 'text-slate-900',
         pattern: false
       },
@@ -423,8 +587,8 @@
         bgInner: 'bg-[#111] border-4 border-yellow-600',
         bgImage: 'https://images.unsplash.com/photo-1565552643952-2508eb605b07?q=80&w=1000&auto=format&fit=crop',
         imageOpacity: 'opacity-25',
-        title: 'text-yellow-500 font-serif font-black',
-        textMain: 'text-gray-200 font-serif',
+        title: 'text-yellow-500 font-black',
+        textMain: 'text-gray-200',
         accent: 'text-yellow-600',
         pattern: false
       },
@@ -433,8 +597,8 @@
         thumb: 'linear-gradient(135deg, #faf5ff, #f3e8ff)',
         bgOut: 'bg-purple-50',
         bgInner: 'bg-white border-2 border-purple-200 rounded-3xl',
-        title: 'text-purple-800 font-serif font-bold',
-        textMain: 'text-slate-700 font-serif',
+        title: 'text-purple-800 font-bold',
+        textMain: 'text-slate-700',
         accent: 'text-purple-600',
         pattern: false
       },
@@ -445,8 +609,8 @@
         bgInner: 'bg-white border-[8px] border-double border-slate-800',
         bgImage: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?q=80&w=1000&auto=format&fit=crop',
         imageOpacity: 'opacity-15',
-        title: 'text-slate-900 font-serif font-black',
-        textMain: 'text-slate-800 font-serif',
+        title: 'text-slate-900 font-black',
+        textMain: 'text-slate-800',
         accent: 'text-slate-700',
         pattern: false
       },
@@ -455,8 +619,8 @@
         thumb: 'linear-gradient(135deg, #dcfce7, #86efac)',
         bgOut: 'bg-green-100',
         bgInner: 'bg-white border border-green-500',
-        title: 'text-green-800 font-serif font-bold',
-        textMain: 'text-slate-700 font-serif',
+        title: 'text-green-800 font-bold',
+        textMain: 'text-slate-700',
         accent: 'text-green-600',
         pattern: true
       },
@@ -465,8 +629,8 @@
         thumb: 'linear-gradient(135deg, #1e3a8a, #1d4ed8)',
         bgOut: 'bg-blue-900',
         bgInner: 'bg-blue-50 border-[4px] border-blue-900',
-        title: 'text-blue-900 font-serif font-black',
-        textMain: 'text-blue-950 font-serif',
+        title: 'text-blue-900 font-black',
+        textMain: 'text-blue-950',
         accent: 'text-blue-700',
         pattern: true
       },
@@ -475,8 +639,8 @@
         thumb: 'linear-gradient(135deg, #ffedd5, #fdba74)',
         bgOut: 'bg-orange-100',
         bgInner: 'bg-orange-50 border-2 border-orange-800',
-        title: 'text-orange-900 font-serif font-black',
-        textMain: 'text-orange-950 font-serif',
+        title: 'text-orange-900 font-black',
+        textMain: 'text-orange-950',
         accent: 'text-orange-700',
         pattern: true
       },
@@ -487,8 +651,8 @@
         bgInner: 'bg-[#0f172a] border-4 border-amber-600',
         bgImage: 'https://lh3.googleusercontent.com/d/17UkFIKceKQjubOt5aK5864b9Mv1PmBMg',
         imageOpacity: 'opacity-40',
-        title: 'text-amber-500 font-serif font-black',
-        textMain: 'text-gray-100 font-serif',
+        title: 'text-amber-500 font-black',
+        textMain: 'text-gray-100',
         accent: 'text-amber-400',
         pattern: false
       },
@@ -499,9 +663,105 @@
         bgInner: 'bg-emerald-950 border-4 border-emerald-400',
         bgImage: 'https://lh3.googleusercontent.com/d/1s4DYIJuN3qOkxO0RqFyT5tK9dDvgLm2Y',
         imageOpacity: 'opacity-40',
-        title: 'text-emerald-300 font-serif font-black',
-        textMain: 'text-emerald-50 font-serif',
+        title: 'text-emerald-300 font-black',
+        textMain: 'text-emerald-50',
         accent: 'text-emerald-400',
+        pattern: false
+      },
+      { 
+        id: 12, name: 'Ruby Ka\'bah', 
+        thumb: 'linear-gradient(135deg, #4c0519, #881337)',
+        bgOut: 'bg-rose-950',
+        bgInner: 'bg-rose-900 border-4 border-rose-300 ring-2 ring-rose-900 ring-offset-2 ring-offset-rose-800',
+        bgImage: 'https://lh3.googleusercontent.com/d/17UkFIKceKQjubOt5aK5864b9Mv1PmBMg',
+        imageOpacity: 'opacity-30',
+        title: 'text-rose-200 font-black',
+        textMain: 'text-rose-50',
+        accent: 'text-rose-300',
+        pattern: false
+      },
+      { 
+        id: 13, name: 'Silver Nabawi', 
+        thumb: 'linear-gradient(135deg, #e2e8f0, #94a3b8)',
+        bgOut: 'bg-slate-200',
+        bgInner: 'bg-white border-[6px] border-double border-slate-400',
+        bgImage: 'https://lh3.googleusercontent.com/d/1s4DYIJuN3qOkxO0RqFyT5tK9dDvgLm2Y',
+        imageOpacity: 'opacity-20',
+        title: 'text-slate-800 font-black',
+        textMain: 'text-slate-800',
+        accent: 'text-slate-600',
+        pattern: false
+      },
+      { 
+        id: 14, name: 'Navy Ka\'bah', 
+        thumb: 'linear-gradient(135deg, #0f172a, #1e3a8a)',
+        bgOut: 'bg-blue-950',
+        bgInner: 'bg-slate-900 border border-amber-400 ring-4 ring-slate-900 ring-offset-4 ring-offset-amber-500',
+        bgImage: 'https://lh3.googleusercontent.com/d/17UkFIKceKQjubOt5aK5864b9Mv1PmBMg',
+        imageOpacity: 'opacity-25',
+        title: 'text-amber-500 font-black',
+        textMain: 'text-slate-200',
+        accent: 'text-amber-400',
+        pattern: false
+      },
+      { 
+        id: 15, name: 'Rose Gold Nabawi', 
+        thumb: 'linear-gradient(135deg, #fff1f2, #fecdd3)',
+        bgOut: 'bg-stone-100',
+        bgInner: 'bg-[#fff5f5] border-[3px] border-[#d4af37]',
+        bgImage: 'https://lh3.googleusercontent.com/d/1s4DYIJuN3qOkxO0RqFyT5tK9dDvgLm2Y',
+        imageOpacity: 'opacity-15',
+        title: 'text-[#9d6b53] font-black',
+        textMain: 'text-stone-800',
+        accent: 'text-[#b76e79]',
+        pattern: false
+      },
+      { 
+        id: 16, name: 'Teal Ka\'bah', 
+        thumb: 'linear-gradient(135deg, #134e4a, #042f2e)',
+        bgOut: 'bg-teal-900',
+        bgInner: 'bg-teal-950 border-2 border-orange-300 border-dashed',
+        bgImage: 'https://lh3.googleusercontent.com/d/17UkFIKceKQjubOt5aK5864b9Mv1PmBMg',
+        imageOpacity: 'opacity-30',
+        title: 'text-orange-300 font-black',
+        textMain: 'text-teal-50',
+        accent: 'text-orange-400',
+        pattern: false
+      },
+      { 
+        id: 17, name: 'Ivory Nabawi', 
+        thumb: 'linear-gradient(135deg, #fefce8, #e7e5e4)',
+        bgOut: 'bg-[#fdfbf7]',
+        bgInner: 'bg-[#f8f5eb] border border-[#8b7355] shadow-inner',
+        bgImage: 'https://lh3.googleusercontent.com/d/1s4DYIJuN3qOkxO0RqFyT5tK9dDvgLm2Y',
+        imageOpacity: 'opacity-15',
+        title: 'text-[#5c4d3c] font-black',
+        textMain: 'text-[#4a3f35]',
+        accent: 'text-[#8b7355]',
+        pattern: false
+      },
+      { 
+        id: 18, name: 'Indigo Ka\'bah', 
+        thumb: 'linear-gradient(135deg, #312e81, #1e1b4b)',
+        bgOut: 'bg-indigo-950',
+        bgInner: 'bg-indigo-950 border-4 border-indigo-300',
+        bgImage: 'https://lh3.googleusercontent.com/d/17UkFIKceKQjubOt5aK5864b9Mv1PmBMg',
+        imageOpacity: 'opacity-25',
+        title: 'text-indigo-200 font-black',
+        textMain: 'text-indigo-50',
+        accent: 'text-indigo-300',
+        pattern: false
+      },
+      { 
+        id: 19, name: 'Golden Nabawi', 
+        thumb: 'linear-gradient(135deg, #78350f, #451a03)',
+        bgOut: 'bg-amber-950',
+        bgInner: 'bg-amber-950 border-[6px] border-double border-amber-500',
+        bgImage: 'https://lh3.googleusercontent.com/d/1s4DYIJuN3qOkxO0RqFyT5tK9dDvgLm2Y',
+        imageOpacity: 'opacity-30',
+        title: 'text-amber-400 font-black',
+        textMain: 'text-amber-50',
+        accent: 'text-amber-300',
         pattern: false
       }
     ];
@@ -517,11 +777,13 @@
           setTimeout(() => {
             splash.classList.add('hidden');
             mainApp.classList.add('loaded'); // Fade in the main app
+            calculateAutoScale(); // Ensure right scale after load
           }, 700);
         }
       }, 1800);
 
       renderThemeSelector();
+      changeFontCombo(); // Memastikan inisialisasi font default
       
       const dateInput = document.getElementById('b_tanggal');
       const numInput = document.getElementById('b_nomor');
@@ -541,21 +803,96 @@
         numInput.value = `BU-${yyyymmdd}-${rnd}`;
       }
 
+      applyTranslations(); // Set UI language
       loadSavedData();
-      adjustScale(0); 
+      calculateAutoScale(); 
       renderPreview();
     }
 
+    // --- Logic Mengubah Font Combo ---
+    function changeFontCombo() {
+      const idx = document.getElementById('b_font').value || 0;
+      const combo = fontCombos[idx];
+      document.documentElement.style.setProperty('--font-title', combo.title);
+      document.documentElement.style.setProperty('--font-body', combo.body);
+      document.documentElement.style.setProperty('--font-arabic', combo.arabic);
+      document.documentElement.style.setProperty('--font-script', combo.script);
+      queueAutoSave();
+    }
+
+    // --- Logic Ganti Bahasa & Filter Input ---
+    function toggleLanguage() {
+      currentLanguage = currentLanguage === 'id' ? 'ar' : 'id';
+      document.getElementById('lang-text').innerText = currentLanguage.toUpperCase();
+      applyTranslations();
+      queueAutoSave();
+    }
+
+    function applyTranslations() {
+      const t = translations[currentLanguage];
+      
+      // Update semua text element
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+          const key = el.getAttribute('data-i18n');
+          if (t[key]) {
+            if (el.tagName === 'OPTION') {
+              el.text = t[key];
+            } else {
+              el.innerHTML = t[key];
+            }
+          }
+      });
+      
+      // Update semua placeholder
+      document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+          const key = el.getAttribute('data-i18n-ph');
+          if (t[key]) el.placeholder = t[key];
+      });
+
+      // Update options dropdown miqot
+      const miqotSelect = document.getElementById('b_miqot');
+      if(currentLanguage === 'ar') {
+          miqotSelect.options[0].text = "ذي الحليفة (أبيار علي)";
+          miqotSelect.options[1].text = "قرن المنازل (السيل الكبير)";
+          miqotSelect.options[2].text = "يلملم";
+          miqotSelect.options[3].text = "الجحفة";
+          miqotSelect.options[4].text = "ذات عرق";
+          miqotSelect.options[5].text = "التنعيم (مسجد عائشة)";
+          miqotSelect.options[6].text = "الجعرانة";
+      } else {
+          miqotSelect.options[0].text = "Bir Ali (Zulhulaifah)";
+          miqotSelect.options[1].text = "Qarnul Manazil (As-Sail)";
+          miqotSelect.options[2].text = "Yalamlam";
+          miqotSelect.options[3].text = "Juhfah";
+          miqotSelect.options[4].text = "Zatu Irqin";
+          miqotSelect.options[5].text = "Tan'im (Masjid Aisyah)";
+          miqotSelect.options[6].text = "Ji'ranah";
+      }
+    }
+
+    // Memblokir input Latin saat mode Arab aktif
+    function handleInputFilter(el) {
+        if (currentLanguage === 'ar') {
+            // Abaikan input tipe link, nomor sertifikat, dan tanggal
+            if (el.id !== 'b_link' && el.id !== 'b_nomor' && el.id !== 'b_tanggal' && el.id !== 'b_font') {
+                const cursorPos = el.selectionStart;
+                // Menghapus semua karakter huruf latin (A-Z, a-z)
+                el.value = el.value.replace(/[a-zA-Z]/g, '');
+                el.setSelectionRange(cursorPos, cursorPos);
+            }
+        }
+        queueAutoSave();
+    }
+
+
     // --- Logic Login & Intercept Print ---
-    // 1. Intercept Ctrl+P
     document.addEventListener('keydown', function(event) {
         if ((event.ctrlKey || event.metaKey) && event.key === 'p') {
-            event.preventDefault(); // cegah print default
-            attemptPrint(); // jalankan fungsi kita
+            event.preventDefault(); 
+            attemptPrint(); 
         }
     });
 
-    // 2. Hash Password di Client (SHA-256)
     async function hashPassword(message) {
         const msgBuffer = new TextEncoder().encode(message);                    
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -564,7 +901,6 @@
         return hashHex;
     }
 
-    // 3. Logic Show/Hide Modal
     function showLoginModal() {
         const modal = document.getElementById('loginModal');
         const view = document.getElementById('loginView');
@@ -579,33 +915,23 @@
         setTimeout(() => { modal.classList.add('hidden'); }, 300);
     }
 
-    // Fungsi khusus untuk mengatur nama file PDF saat dicetak
     function executePrint() {
         const originalTitle = document.title;
         const pesertaName = document.getElementById('b_peserta').value.trim() || 'Peserta';
-        
-        // Ubah title document sesaat sebelum print (ini akan jadi nama default file PDF)
         document.title = `Badal Umroh - ${pesertaName}`;
-        
         window.print();
-        
-        // Kembalikan title asli setelah dialog print terbuka
-        setTimeout(() => {
-            document.title = originalTitle;
-        }, 1000);
+        setTimeout(() => { document.title = originalTitle; }, 1000);
     }
 
-    // 4. Periksa apakah boleh print
     function attemptPrint() {
         const isAuth = sessionStorage.getItem('is_auth_print') === 'true';
         if (isAuth) {
-            executePrint(); // Jika sudah login di sesi ini, langsung panggil executePrint
+            executePrint();
         } else {
-            showLoginModal(); // Jika belum, tampilkan modal login
+            showLoginModal();
         }
     }
 
-    // 5. Handle Proses Login (Hit ke Google Apps Script API)
     async function handleLogin() {
         const pwdInput = document.getElementById('password').value;
         if (!pwdInput) return alert("Silakan masukkan sandi akses!");
@@ -618,7 +944,6 @@
         try {
             const hashedPwd = await hashPassword(pwdInput);
             
-            // Decode API URL yang disembunyikan
             let apiUrl = null;
             if (API_ENCODED !== 'YOUR_BASE64_ENCODED_API_URL_HERE') {
                 if (API_ENCODED.startsWith('http')) {
@@ -626,10 +951,7 @@
                 } else {
                     try {
                         let base64Str = API_ENCODED;
-                        // Tambahkan padding '=' untuk menghindari InvalidCharacterError pada atob
-                        while (base64Str.length % 4 !== 0) {
-                            base64Str += '=';
-                        }
+                        while (base64Str.length % 4 !== 0) { base64Str += '='; }
                         apiUrl = atob(base64Str);
                     } catch (e) {
                         console.warn("Peringatan: URL API gagal di-decode, menggunakan URL secara langsung.");
@@ -645,7 +967,6 @@
 
             const response = await fetch(apiUrl, {
                 method: 'POST',
-                // PENTING: Gunakan text/plain untuk menghindari error preflight CORS di Google Script
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify({ hash: hashedPwd })
             });
@@ -655,12 +976,7 @@
             if (result.status === 'success') {
                 sessionStorage.setItem('is_auth_print', 'true');
                 closeLoginModal();
-                
-                // Delay sejenak biar animasi modal tertutup rapi sebelum kotak dialog print muncul
-                setTimeout(() => {
-                    executePrint();
-                }, 400);
-
+                setTimeout(() => { executePrint(); }, 400);
             } else {
                 alert("Sandi akses yang Anda masukkan SALAH!");
                 document.getElementById('password').value = '';
@@ -676,34 +992,40 @@
         }
     }
 
-    // Enter key pada field password untuk submit
     document.getElementById('password').addEventListener('keypress', function (e) {
         if (e.key === 'Enter') handleLogin();
     });
 
-
     // --- Helper Format Date (Masehi & Hijriah) ---
-    function formatHijriMasehi(dateStr, location) {
+    function formatHijriMasehi(dateStr, location, isAr) {
       if(!dateStr) return '';
       try {
         const d = new Date(dateStr);
-        if (isNaN(d)) return `${location}, ${dateStr}`;
+        if (isNaN(d)) return `${location}${isAr ? '، ' : ', '}${dateStr}`;
 
+        const localeM = isAr ? 'ar-SA-u-nu-arab' : 'id-ID';
         const optionsM = { day: 'numeric', month: 'long', year: 'numeric' };
-        const masehi = d.toLocaleDateString('id-ID', optionsM) + ' M';
+        let masehi = d.toLocaleDateString(localeM, optionsM);
+        masehi += isAr ? ' م' : ' M';
         
         let hijriah = '';
         try {
+          const localeH = isAr ? 'ar-SA-u-ca-islamic-umalqura-nu-arab' : 'id-ID-u-ca-islamic-umalqura';
           const optionsH = { day: 'numeric', month: 'long', year: 'numeric', calendar: 'islamic-umalqura' };
-          let hStr = new Intl.DateTimeFormat('id-ID-u-ca-islamic-umalqura', optionsH).format(d);
-          hijriah = hStr.replace(/ M| H| AH/gi, '').trim() + ' H';
+          let hStr = new Intl.DateTimeFormat(localeH, optionsH).format(d);
+          
+          // Memotong marker penanggalan yang salah (seperti M, H, AH, SM, EH) di bagian akhir
+          let cleanHStr = hStr.replace(/\s*(هـ|م|AH|SM|EH|H|M|CE|BCE)\s*$/i, '');
+          hijriah = cleanHStr.trim() + (isAr ? ' هـ' : ' H');
         } catch(e) {
           hijriah = '';
         }
 
-        return hijriah ? `${location}, ${masehi}, bertepatan dengan ${hijriah}` : `${location}, ${masehi}`;
+        const separator = isAr ? '، الموافق ' : ', bertepatan dengan ';
+        const comma = isAr ? '، ' : ', ';
+        return hijriah ? `${location}${comma}${masehi}${separator}${hijriah}` : `${location}${comma}${masehi}`;
       } catch(e) {
-        return `${location}, ${dateStr}`;
+        return `${location}${isAr ? '، ' : ', '}${dateStr}`;
       }
     }
 
@@ -792,7 +1114,10 @@
           if (data.fields) {
             Object.keys(data.fields).forEach(id => {
               const el = document.getElementById(id);
-              if (el) el.value = data.fields[id];
+              if (el) {
+                el.value = data.fields[id];
+                if (id === 'b_font') changeFontCombo(); // Set font jika ada tersimpan
+              }
             });
           }
         } catch(e) { console.error("Error loading data", e); }
@@ -811,31 +1136,68 @@
       }
     }
 
-    // --- View Controls ---
+    // --- View Controls (Auto Scale to Fit Screen) ---
     function adjustScale(change) {
       previewScale += change;
-      if (previewScale < 0.3) previewScale = 0.3;
-      if (previewScale > 1.5) previewScale = 1.5;
+      if (previewScale < 0.15) previewScale = 0.15;
+      if (previewScale > 2.0) previewScale = 2.0;
       
+      const container = document.getElementById('cert-container');
       const wrapper = document.getElementById('cert-wrapper');
       
       if (window.matchMedia('print').matches) {
-        wrapper.style.transform = `scale(1)`;
+        container.style.transform = `none`;
+        wrapper.style.height = 'auto';
       } else {
-        wrapper.style.transform = `scale(${previewScale})`;
+        container.style.transform = `scale(${previewScale})`;
+        wrapper.style.height = `${794 * previewScale}px`; 
       }
     }
 
-    window.addEventListener('resize', () => {
-      if (window.innerWidth < 768) { previewScale = 0.4; } 
-      else if (window.innerWidth < 1024) { previewScale = 0.6; }
-      else { previewScale = 0.8; }
+    function calculateAutoScale() {
+      const viewport = document.getElementById('preview-viewport');
+      if (!viewport || !isPreviewVisible) return;
+      
+      const certBaseWidth = 1123; // Estimasi lebar 297mm dalam pixels
+      const paddingX = window.innerWidth < 768 ? 32 : 80; 
+      
+      let autoScale = (viewport.clientWidth - paddingX) / certBaseWidth;
+      
+      if (autoScale > 1.5) autoScale = 1.5;
+      if (autoScale < 0.15) autoScale = 0.15;
+      
+      previewScale = autoScale;
       adjustScale(0);
-    });
+    }
 
-    if (window.innerWidth < 768) { previewScale = 0.4; } 
-    else if (window.innerWidth < 1024) { previewScale = 0.6; }
-    else { previewScale = 0.8; }
+    window.addEventListener('resize', calculateAutoScale);
+
+    // --- Fitur Ciutkan / Tampilkan Pratinjau ---
+    function togglePreview() {
+      const previewSection = document.getElementById('preview-section');
+      const icon = document.getElementById('toggle-preview-icon');
+      
+      isPreviewVisible = !isPreviewVisible;
+      
+      if (isPreviewVisible) {
+          // Tampilkan: hilangkan hidden, kembalikan class flex-1 dan tinggi asal
+          previewSection.classList.remove('hidden');
+          setTimeout(() => {
+            previewSection.classList.replace('opacity-0', 'opacity-100');
+            icon.setAttribute('data-lucide', 'eye-off');
+            lucide.createIcons();
+            calculateAutoScale(); // Recalculate zoom
+          }, 10);
+      } else {
+          // Ciutkan: jadikan hidden
+          previewSection.classList.replace('opacity-100', 'opacity-0');
+          setTimeout(() => {
+            previewSection.classList.add('hidden');
+            icon.setAttribute('data-lucide', 'eye');
+            lucide.createIcons();
+          }, 300);
+      }
+    }
 
     // --- Helper ---
     function val(id, fallback = '.........................') {
@@ -847,36 +1209,38 @@
     function renderPreview() {
       const container = document.getElementById('cert-container');
       const theme = templates[currentTemplate];
+      const isAr = currentLanguage === 'ar';
+      const t = translations[currentLanguage];
       
       container.classList.remove('fade-enter-active');
       container.classList.add('fade-enter');
       
       setTimeout(() => {
-        // SVG Flags - Exact 3x2 cm size with Google Drive images
+        // SVG Flags
         const flagID = `<div class="shadow-sm border border-black/20 overflow-hidden" style="width: 30mm; height: 20mm;"><img src="https://lh3.googleusercontent.com/d/1B474IkUFpGbX_lLD924dl-tmEGw1dgt8" class="w-full h-full object-cover" crossorigin="anonymous" /></div>`;
         const flagSA = `<div class="shadow-sm border border-black/20 overflow-hidden" style="width: 30mm; height: 20mm;"><img src="https://lh3.googleusercontent.com/d/1X8HwnPQvRuFuFM1c2tNuTd6Q7OEkRfdl" class="w-full h-full object-cover" crossorigin="anonymous" /></div>`;
 
         // Logo
         const logoHtml = imgLogo ? `<img src="${imgLogo}" class="h-16 w-16 object-contain" />` : `<div class="w-16 h-16 border-2 border-dashed border-current opacity-30 flex items-center justify-center text-[8px]">LOGO</div>`;
         
-        // TTD - Diperbesar (h-32 w-56) dan diposisikan lebih ke bawah (-bottom-4) dengan z-index tinggi (z-30) agar menimpa teks nama
+        // TTD
         const ttdHtml = imgTtd ? `<img src="${imgTtd}" class="absolute -bottom-4 left-1/2 -translate-x-1/2 h-32 w-56 object-contain mix-blend-multiply pointer-events-none z-30" />` : '';
 
         // Patterns and Image Overlays
         const patternHtml = theme.pattern ? `<div class="pattern-overlay"></div>` : '';
         const bgImageHtml = theme.bgImage ? `<div class="absolute inset-0 z-0 ${theme.imageOpacity} pointer-events-none" style="background-image: url('${theme.bgImage}'); background-size: cover; background-position: center;"></div>` : '';
 
-        // Tanggal Format Lengkap (Masehi + Hijriah)
+        // Tanggal Format
         const dateInputVal = document.getElementById('b_tanggal').value;
-        const locVal = val('b_lokasi', 'Makkah');
-        const formattedDateFull = formatHijriMasehi(dateInputVal, locVal);
+        const locVal = val('b_lokasi', isAr ? 'مكة المكرمة' : 'Makkah');
+        const formattedDateFull = formatHijriMasehi(dateInputVal, locVal, isAr);
 
-        // Link Dokumentasi (QR Code)
+        // QR Code
         const linkDokumentasi = document.getElementById('b_link').value.trim();
         let qrDisplayHtml = `
           <div class="w-20 h-20 border-2 border-current p-1 opacity-50 flex items-center justify-center flex-col rounded">
             <i data-lucide="qr-code" class="w-10 h-10"></i>
-            <span class="text-[6px] mt-1 font-sans uppercase font-bold text-center">Scan to Verify</span>
+            <span class="text-[6px] mt-1 font-sans uppercase font-bold text-center">${t.qrText}</span>
           </div>`;
           
         if (linkDokumentasi && linkDokumentasi.startsWith('http')) {
@@ -885,11 +1249,18 @@
             <div class="w-20 h-20 bg-white border border-slate-300 p-1 flex items-center justify-center flex-col rounded shadow-sm">
               <img src="${qrUrl}" alt="QR Dokumentasi" class="w-full h-full object-contain" crossorigin="anonymous" />
             </div>
-            <span class="text-[8px] mt-1 font-sans uppercase font-bold tracking-wider">Dokumentasi</span>`;
+            <span class="text-[8px] mt-1 font-sans uppercase font-bold tracking-wider">${isAr ? 'توثيق' : 'Dokumentasi'}</span>`;
         }
 
+        // Mapping Data Khusus Arab
+        const valJenis = val('b_jenis', 'Badal Umroh');
+        const displayJenis = isAr ? (jenisMapAr[valJenis] || valJenis) : valJenis;
+        
+        const valMiqot = val('b_miqot', 'Bir Ali (Zulhulaifah)');
+        const displayMiqot = isAr ? (miqotMapAr[valMiqot] || valMiqot) : valMiqot;
+
         const html = `
-          <div class="cert-inner ${theme.bgOut}">
+          <div class="cert-inner ${theme.bgOut}" ${isAr ? 'dir="rtl"' : ''}>
             <div class="w-full h-full ${theme.bgInner} relative flex flex-col items-center justify-between p-4 md:p-5">
               
               ${patternHtml}
@@ -898,8 +1269,8 @@
               <!-- Header Row -->
               <div class="w-full flex justify-between items-start relative z-20">
                 <div class="w-16 h-16"></div> <!-- Spacer for balance -->
-                <div class="${theme.textMain} opacity-80 text-xs font-bold uppercase tracking-widest text-center mt-2">
-                  ${val('b_travel', 'NAMA TRAVEL / LEMBAGA')}
+                <div class="${theme.textMain} cert-body-text opacity-80 text-xs font-bold uppercase tracking-widest text-center mt-2">
+                  ${val('b_travel', t.lblTravel)}
                 </div>
                 <div class="w-16 h-16 flex justify-end">
                   ${logoHtml}
@@ -907,18 +1278,18 @@
               </div>
 
               <!-- Title Section with Flags -->
-              <div class="flex justify-center items-center gap-6 md:gap-8 relative z-20 -mt-4 md:-mt-6 w-full">
+              <div class="flex justify-center items-center gap-6 md:gap-8 relative z-20 -mt-4 md:-mt-6 w-full" ${isAr ? 'dir="ltr"' : ''}>
                 <div class="flex-shrink-0 pb-4">${flagID}</div>
                 
                 <div class="text-center flex-1 max-w-[500px]">
-                  <h1 class="text-4xl md:text-5xl uppercase tracking-widest ${theme.title}">
-                    Sertifikat Badal
+                  <h1 class="text-4xl md:text-5xl uppercase tracking-widest cert-title-text ${theme.title}">
+                    ${t.certTitle}
                   </h1>
-                  <h2 class="text-xl md:text-2xl mt-1 tracking-widest uppercase font-semibold ${theme.accent}">
-                    ${val('b_jenis', 'Badal Umroh')}
+                  <h2 class="text-xl md:text-2xl mt-1 tracking-widest uppercase font-semibold cert-title-text ${theme.accent}">
+                    ${displayJenis}
                   </h2>
                   <div class="w-48 h-1 ${theme.bgInner} mx-auto mt-2 rounded-full opacity-50 border-t border-current"></div>
-                  <p class="mt-1 text-sm ${theme.textMain} opacity-80">Nomor: ${val('b_nomor', 'BU-20260417-001')}</p>
+                  <p class="mt-1 text-sm ${theme.textMain} cert-body-text opacity-80">${t.lblNomor}: ${val('b_nomor', 'BU-20260417-001')}</p>
                 </div>
                 
                 <div class="flex-shrink-0 pb-4">${flagSA}</div>
@@ -926,27 +1297,27 @@
 
               <!-- Body Section -->
               <div class="text-center relative z-20 flex-1 flex flex-col justify-center w-full my-1">
-                <p class="text-sm md:text-base ${theme.textMain} mb-1 italic">Diberikan kepada dan diniatkan untuk:</p>
-                <h3 class="text-5xl md:text-7xl font-script ${theme.accent} my-1 leading-tight w-full px-2">
-                  ${val('b_peserta', 'Nama Peserta Badal')}
+                <p class="text-sm md:text-base ${theme.textMain} cert-body-text mb-1 italic">${t.certGivenTo}</p>
+                <h3 class="text-5xl md:text-7xl cert-script-text ${theme.accent} my-1 leading-tight w-full px-2">
+                  ${val('b_peserta', t.lblPeserta)}
                 </h3>
                 
-                <p class="text-sm md:text-base ${theme.textMain} mt-2 max-w-4xl mx-auto leading-relaxed">
-                  Alhamdulillah, telah dilaksanakan amanah <strong>${val('b_jenis', 'Badal Umroh')}</strong> 
-                  dengan mengambil miqot dari <strong>${val('b_miqot', 'Bir Ali (Zulhulaifah)')}</strong> 
-                  pada <strong>${val('b_waktu', '....................')}</strong>,<br> 
-                  dan diselesaikan dengan sempurna sesuai sunnah Rasulullah ﷺ oleh: <br>
-                  <span class="text-lg font-bold mt-1 inline-block border-b border-current border-dashed pb-1 px-4">${val('b_pelaksana', 'Nama Pelaksana')}</span>
+                <p class="text-sm md:text-base ${theme.textMain} cert-body-text mt-2 max-w-4xl mx-auto leading-relaxed">
+                  ${t.certDesc1} <strong class="cert-title-text">${displayJenis}</strong> 
+                  ${t.certDesc2} <strong class="cert-title-text">${displayMiqot}</strong> 
+                  ${t.certDesc3} <strong class="cert-title-text">${val('b_waktu', '....................')}</strong>${isAr ? '،' : ','}<br> 
+                  ${t.certDesc4} <br>
+                  <span class="text-lg font-bold mt-1 inline-block border-b border-current border-dashed pb-1 px-4 cert-title-text">${val('b_pelaksana', t.lblPelaksana)}</span>
                 </p>
               </div>
 
               <!-- Hadith Section -->
               <div class="w-full max-w-4xl mx-auto relative z-20 border-y border-current py-2 opacity-80 ${theme.textMain}">
-                <p class="font-arabic text-2xl md:text-3xl leading-loose mb-0" dir="rtl">
+                <p class="cert-arabic-text text-2xl md:text-3xl leading-loose mb-0" dir="rtl">
                   حج عن أبيك واعتمر
                 </p>
-                <p class="text-[10px] md:text-xs leading-relaxed px-4">
-                  "Laksanakan haji dan umroh untuk ayahmu!"<br>(HR. At Tirmidzi, dari Abu Razin Al 'Uqaili yang bertanya tentang ayahnya yang sudah tua renta)
+                <p class="text-[10px] md:text-xs leading-relaxed px-4 cert-body-text" ${isAr ? 'dir="rtl"' : 'dir="ltr"'}>
+                  ${t.hadithTranslation}
                 </p>
               </div>
 
@@ -954,20 +1325,20 @@
               <div class="w-full flex justify-between items-end relative z-20 mt-2">
                 
                 <!-- QR Dokumentasi -->
-                <div class="flex flex-col items-center justify-end pb-1 ${theme.textMain}">
+                <div class="flex flex-col items-center justify-end pb-1 ${theme.textMain} cert-body-text">
                   ${qrDisplayHtml}
                 </div>
 
                 <!-- Signature -->
-                <div class="text-center w-[300px] ${theme.textMain}">
-                  <p class="text-[10px] md:text-xs mb-1 leading-relaxed px-2">${formattedDateFull}</p>
-                  <p class="text-xs font-bold uppercase mb-12">${val('b_travel', 'Nama Lembaga')}</p>
+                <div class="text-center w-[300px] ${theme.textMain} cert-body-text">
+                  <p class="text-[10px] md:text-xs mb-1 leading-relaxed px-2" ${isAr ? 'dir="rtl"' : 'dir="ltr"'}>${formattedDateFull}</p>
+                  <p class="text-xs font-bold uppercase mb-12">${val('b_travel', t.lblTravel)}</p>
                   
                   <div class="relative w-full flex flex-col items-center">
                     ${ttdHtml}
-                    <p class="font-bold border-b border-current inline-block pb-0.5 px-4 relative z-20">${val('b_penandatangan', 'Nama Penandatangan')}</p>
+                    <p class="font-bold border-b border-current inline-block pb-0.5 px-4 relative z-20 cert-title-text">${val('b_penandatangan', t.lblPenandatangan)}</p>
                   </div>
-                  <p class="text-[10px] mt-1 uppercase tracking-wider">${val('b_jabatan', 'Direktur Utama')}</p>
+                  <p class="text-[10px] mt-1 uppercase tracking-wider">${val('b_jabatan', t.lblJabatan)}</p>
                 </div>
 
               </div>
