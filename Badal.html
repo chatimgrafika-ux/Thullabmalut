@@ -48,12 +48,12 @@
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
       position: relative;
       box-sizing: border-box;
-      transition: all 0.4s ease;
+      transition: transform 0.4s ease, background 0.4s ease;
       overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 0; /* Margin kertas putih dihilangkan agar Full A4 */
+      padding: 0; /* Full edge to edge */
     }
 
     .cert-inner {
@@ -61,7 +61,7 @@
       height: 100%;
       position: relative;
       z-index: 10;
-      padding: 6mm; /* Jarak antara tepian kertas full dan bingkai dalam */
+      padding: 4mm; /* Jarak bingkai luar (bgOut) ke garis bingkai dalam (bgInner) */
       display: flex;
       flex-direction: column;
       text-align: center;
@@ -69,16 +69,40 @@
       background-position: center;
     }
 
-    /* Print Configuration */
+    /* Print Configuration - FIXED FULL A4 */
     @media print {
-      @page { size: A4 landscape; margin: 0; }
-      body { background: white; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-      body * { visibility: hidden; }
-      #preview-section, #preview-section * { visibility: visible; }
-      #preview-section { position: absolute; left: 0; top: 0; width: 100%; height: 100%; margin: 0; padding: 0; background: white; overflow: hidden; display: block; }
-      .certificate-container { box-shadow: none !important; width: 297mm; height: 210mm; margin: 0; transform: scale(1) !important; page-break-after: avoid; }
-      .cert-wrapper { display: block; overflow: visible; padding: 0; }
-      ::-webkit-scrollbar { display: none; }
+      @page { 
+        size: A4 landscape; 
+        margin: 0 !important; /* Menghilangkan margin browser */
+      }
+      html, body { 
+        width: 297mm !important; 
+        height: 210mm !important; 
+        margin: 0 !important; 
+        padding: 0 !important; 
+        background: white; 
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important; 
+      }
+      body * { 
+        visibility: hidden; 
+      }
+      #cert-container, #cert-container * { 
+        visibility: visible; 
+      }
+      #cert-container { 
+        position: fixed !important; 
+        left: 0 !important; 
+        top: 0 !important; 
+        width: 297mm !important; 
+        height: 210mm !important; 
+        margin: 0 !important; 
+        padding: 0 !important; 
+        box-shadow: none !important; 
+        transform: scale(1) !important; 
+        page-break-after: avoid;
+      }
+      ::-webkit-scrollbar { display: none !important; }
     }
 
     /* Islamic Pattern Backgrounds */
