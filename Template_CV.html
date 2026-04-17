@@ -541,7 +541,7 @@
       });
     };
 
-    // Mengaplikasikan tema ke CSS Variables
+    // Mengaplikasikan tema ke CSS Variables dan Simpan ke Local Storage
     const applyTheme = (idx) => {
       const theme = themes[idx];
       const root = document.documentElement;
@@ -549,6 +549,66 @@
       root.style.setProperty('--primary-dark', theme.dark);
       root.style.setProperty('--primary-bg', theme.bg);
       root.style.setProperty('--accent', theme.accent);
+      
+      // Simpan index tema ke local storage
+      localStorage.setItem('cv_builder_theme', idx);
+    };
+
+    // ==========================================
+    // LOGIKA PENYIMPANAN LOKAL (AUTO-SAVE)
+    // ==========================================
+    const saveInputsData = () => {
+      const inputs = document.querySelectorAll('#main-app input[type="text"], #main-app input[type="email"], #main-app textarea');
+      const data = {};
+      inputs.forEach(input => {
+        if (input.id) data[input.id] = input.value;
+      });
+      localStorage.setItem('cv_builder_data', JSON.stringify(data));
+    };
+
+    const setupAutoSave = () => {
+      const inputs = document.querySelectorAll('#main-app input[type="text"], #main-app input[type="email"], #main-app textarea');
+      inputs.forEach(input => {
+        input.addEventListener('input', saveInputsData);
+        input.addEventListener('change', saveInputsData);
+      });
+    };
+
+    const loadDataFromLocal = () => {
+      // Load inputs text
+      const savedData = localStorage.getItem('cv_builder_data');
+      if (savedData) {
+        try {
+          const data = JSON.parse(savedData);
+          Object.keys(data).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = data[id];
+          });
+        } catch (e) {
+          console.error("Gagal memuat data", e);
+        }
+      }
+
+      // Load Theme
+      const savedTheme = localStorage.getItem('cv_builder_theme');
+      if (savedTheme !== null && themes[savedTheme]) {
+        applyTheme(parseInt(savedTheme));
+      } else {
+        applyTheme(0); // Default
+      }
+
+      // Load Photo
+      const savedPhoto = localStorage.getItem('cv_builder_photo');
+      if (savedPhoto) {
+        photoDataUrl = savedPhoto;
+        const preview = document.getElementById('photo-preview-container');
+        preview.innerHTML = `<img src="${photoDataUrl}" alt="Preview" class="w-full h-full object-cover" />`;
+        
+        const outImg = document.getElementById('out-photo');
+        outImg.src = photoDataUrl;
+        outImg.classList.remove('hidden');
+        document.getElementById('out-photo-placeholder').classList.add('hidden');
+      }
     };
 
     // Splash Screen Logic
@@ -560,7 +620,12 @@
         document.getElementById('main-app').classList.add('flex');
         
         renderThemes();
-        syncCV(); // Sinkronisasi awal data
+        
+        // Memuat semua data dari Local Storage dan mengaktifkan Auto-save
+        loadDataFromLocal();
+        setupAutoSave();
+        
+        syncCV(); // Sinkronisasi awal data agar CV terupdate dengan data yang diload
       }, 500);
     }, 1500);
 
@@ -608,6 +673,13 @@
           outImg.src = photoDataUrl;
           outImg.classList.remove('hidden');
           document.getElementById('out-photo-placeholder').classList.add('hidden');
+          
+          // Simpan foto ke local storage (dengan batasan jika ukuran terlalu besar)
+          try {
+            localStorage.setItem('cv_builder_photo', photoDataUrl);
+          } catch (err) {
+            console.warn("Ukuran foto terlalu besar untuk disimpan di Local Storage.");
+          }
         };
         reader.readAsDataURL(file);
       }
