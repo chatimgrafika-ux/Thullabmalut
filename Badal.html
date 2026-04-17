@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Badal Umroh Certificate Generator</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400&family=Great+Vibes&display=swap');
+    
+    :root {
+      --primary: #047857; /* Emerald 600 */
+      --primary-dark: #064e3b; /* Emerald 900 */
+      --primary-bg: #ecfdf5; /* Emerald 50 */
+      --accent: #d97706; /* Amber 600 */
+    }
+
+    body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+    
+    /* Document Fonts */
+    .font-serif { font-family: 'Playfair Display', serif; }
+    .font-arabic { font-family: 'Amiri', serif; }
+    .font-script { font-family: 'Great Vibes', cursive; }
+
+    /* Custom Scrollbars */
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+    /* Certificate Layout (A4 Landscape) */
+    .cert-wrapper { perspective: 1000px; }
+    
+    .certificate-container {
+      width: 297mm;
+      height: 210mm;
+      min-width: 297mm;
+      min-height: 210mm;
+      margin: 0 auto;
+      background: white;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      position: relative;
+      box-sizing: border-box;
+      transition: all 0.4s ease;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 4mm;
+    }
+
+    .cert-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      z-index: 10;
+      padding: 4mm;
+      display: flex;
+      flex-col;
+      text-align: center;
+      background-size: cover;
+      background-position: center;
+    }
+
+    /* Print Configuration */
+    @media print {
+      @page { size: A4 landscape; margin: 0; }
+      body { background: white; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      body * { visibility: hidden; }
+      #preview-section, #preview-section * { visibility: visible; }
+      #preview-section { position: absolute; left: 0; top: 0; width: 100%; height: 100%; margin: 0; padding: 0; background: white; overflow: hidden; display: block; }
+      .certificate-container { box-shadow: none !important; width: 297mm; height: 210mm; margin: 0; transform: scale(1) !important; page-break-after: avoid; }
+      .cert-wrapper { display: block; overflow: visible; padding: 0; }
+      ::-webkit-scrollbar { display: none; }
+    }
+
+    /* Islamic Pattern Backgrounds */
+    .pattern-overlay {
+      position: absolute;
+      inset: 0;
+      opacity: 0.05;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    /* Fade Transition */
+    .fade-enter { opacity: 0; transform: scale(0.98); }
+    .fade-enter-active { opacity: 1; transform: scale(1); transition: opacity 400ms, transform 400ms; }
+    
+    .thumb-active { border-color: var(--primary) !important; ring: 2px; ring-color: var(--primary); transform: scale(1.05); }
+
+    /* Main app fade in */
+    #main-app { opacity: 0; transition: opacity 0.8s ease-in-out; }
+    #main-app.loaded { opacity: 1; }
+  </style>
+</head>
+<body class="overflow-hidden h-screen bg-[#0f172a]">
+
+  <!-- ================= SPLASH SCREEN ================= -->
+  <div id="splash-screen" class="fixed inset-0 z-[100] bg-[#0f172a] flex flex-col items-center justify-center p-6 text-center transition-all duration-700">
+    <div class="w-32 mb-8 relative">
+      <!-- Glow Effect -->
+      <div class="absolute inset-0 bg-amber-500 blur-2xl opacity-20 rounded-full animate-pulse"></div>
+      <img src="https://lh3.googleusercontent.com/d/1LFYbCI1A83jrD4OA9NyuANANMmyZeePL" alt="Logo Chatimgrafika" class="relative z-10 w-full h-full object-contain drop-shadow-[0_0_15px_rgba(217,119,6,0.6)] animate-bounce" style="animation-duration: 2s;" />
+    </div>
+    <h3 class="text-center flex flex-col items-center">
+      <span class="block text-3xl mb-3 font-serif tracking-[0.2em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-500 to-amber-200">Chatimgrafika</span>
+      <span class="text-[10px] font-medium text-amber-200/60 uppercase tracking-[0.4em] flex items-center gap-2 bg-amber-900/30 px-4 py-1.5 rounded-full border border-amber-500/20">
+        <i data-lucide="loader-2" class="w-3 h-3 animate-spin text-amber-400"></i> Memuat Workspace...
+      </span>
+    </h3>
+  </div>
+
+  <!-- ================= MAIN APP ================= -->
+  <div id="main-app" class="h-full w-full flex flex-col md:flex-row">
+    
+    <!-- LEFT: CONTROL PANEL (FORM) -->
+    <div class="w-full md:w-[450px] lg:w-[500px] h-full flex flex-col bg-white border-r border-slate-200 shadow-2xl z-20 flex-shrink-0">
+      
+      <!-- HEADER -->
+      <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm p-5 border-b border-slate-100 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 flex items-center justify-center">
+            <img src="https://lh3.googleusercontent.com/d/1LFYbCI1A83jrD4OA9NyuANANMmyZeePL" alt="Chatimgrafika" class="w-full h-full object-contain" />
+          </div>
+          <div>
+            <h1 class="text-sm font-black text-slate-800 tracking-tight uppercase">Chatimgrafika</h1>
+            <p class="text-[10px] text-emerald-600 font-bold uppercase tracking-widest">Badal Umroh Gen</p>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="resetData()" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Reset Form">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          </button>
+          <button onclick="window.print()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-xs font-bold transition-colors shadow-md">
+            <i data-lucide="printer" class="w-4 h-4"></i> CETAK PDF
+          </button>
+        </div>
+      </header>
+
+      <!-- FORM AREA -->
+      <div class="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar pb-24" id="form-container">
+        
+        <!-- Template Selector -->
+        <section>
+          <h2 class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <i data-lucide="layout" class="w-3 h-3 text-emerald-600"></i> Desain Sertifikat (12 Tema)
+          </h2>
+          <div class="grid grid-cols-4 md:grid-cols-6 gap-2" id="template-selector">
+            <!-- Thumbnails generated by JS -->
+          </div>
+        </section>
+
+        <!-- Global Attributes -->
+        <section class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <h2 class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3">Atribut Dokumen</h2>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-400 mb-1">Nomor Sertifikat</label>
+              <input type="text" id="b_nomor" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all font-mono" oninput="queueAutoSave()" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-400 mb-1">Tanggal Terbit</label>
+              <input type="date" id="b_tanggal" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all text-slate-600" onchange="queueAutoSave()" oninput="queueAutoSave()" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-400 mb-1">Lokasi Pembuatan</label>
+              <input type="text" id="b_lokasi" value="Makkah Al-Mukarramah" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" oninput="queueAutoSave()" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-400 mb-1">Jenis Badal</label>
+              <select id="b_jenis" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" onchange="queueAutoSave()">
+                <option value="Badal Umroh">Badal Umroh</option>
+                <option value="Badal Haji & Umroh">Badal Haji & Umroh</option>
+                <option value="Badal Haji">Badal Haji</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- Data Peserta & Pelaksana -->
+        <section>
+          <h2 class="text-[11px] font-black text-emerald-700 uppercase tracking-widest mb-4 pb-2 border-b-2 border-emerald-50">Data Pelaksanaan</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1.5">Nama Peserta Badal (Yang Dibadalkan)</label>
+              <input type="text" id="b_peserta" placeholder="Contoh: Alm. H. Ahmad bin Abdullah" class="input-field w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" oninput="queueAutoSave()" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1.5">Nama Pelaksana (Mutawwif / Badal)</label>
+              <input type="text" id="b_pelaksana" placeholder="Contoh: Ustadz Fulan Al-Banjary" class="input-field w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" oninput="queueAutoSave()" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1.5">Miqot</label>
+                <select id="b_miqot" class="input-field w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" onchange="queueAutoSave()">
+                  <option value="Bir Ali (Zulhulaifah)">Bir Ali (Zulhulaifah)</option>
+                  <option value="Qarnul Manazil (As-Sail)">Qarnul Manazil</option>
+                  <option value="Yalamlam">Yalamlam</option>
+                  <option value="Juhfah">Juhfah</option>
+                  <option value="Zatu Irqin">Zatu Irqin</option>
+                  <option value="Tan'im (Masjid Aisyah)">Tan'im (Masjid Aisyah)</option>
+                  <option value="Ji'ranah">Ji'ranah</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-1.5">Waktu Pelaksanaan</label>
+                <input type="text" id="b_waktu" placeholder="Contoh: Ba'da Subuh" class="input-field w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" oninput="queueAutoSave()" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1.5">Link Dokumentasi (Auto Generate QR)</label>
+              <input type="url" id="b_link" placeholder="Contoh: https://youtube.com/..." class="input-field w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 outline-none shadow-sm transition-all" oninput="queueAutoSave()" />
+            </div>
+          </div>
+        </section>
+
+        <!-- Instansi & Tanda Tangan -->
+        <section class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <h2 class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center justify-between">
+            <span>Lembaga / Travel</span>
+            <div class="flex gap-2">
+              <label class="cursor-pointer bg-white border border-slate-200 hover:border-emerald-500 text-slate-500 hover:text-emerald-600 px-2 py-1 rounded text-[9px] flex items-center gap-1 transition-colors">
+                <i data-lucide="image" class="w-3 h-3"></i> Logo
+                <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'logo')">
+              </label>
+              <label class="cursor-pointer bg-white border border-slate-200 hover:border-emerald-500 text-slate-500 hover:text-emerald-600 px-2 py-1 rounded text-[9px] flex items-center gap-1 transition-colors">
+                <i data-lucide="pen-tool" class="w-3 h-3"></i> TTD
+                <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'ttd')">
+              </label>
+            </div>
+          </h2>
+          <div class="space-y-3">
+            <input type="text" id="b_travel" placeholder="Nama Travel / Lembaga (Contoh: PT. Barokah Tour)" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:border-emerald-500 outline-none shadow-sm font-bold" oninput="queueAutoSave()" />
+            <input type="text" id="b_jabatan" placeholder="Jabatan Penandatangan (Contoh: Direktur Utama)" value="Direktur Utama" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:border-emerald-500 outline-none shadow-sm" oninput="queueAutoSave()" />
+            <input type="text" id="b_penandatangan" placeholder="Nama Penandatangan" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs focus:border-emerald-500 outline-none shadow-sm" oninput="queueAutoSave()" />
+          </div>
+          
+          <!-- Previews for Uploads -->
+          <div class="flex gap-2 mt-3">
+            <div id="prev-logo-container" class="hidden w-12 h-12 bg-white border rounded relative flex items-center justify-center p-1 group">
+              <img id="prev-logo" src="" class="max-w-full max-h-full object-contain" />
+              <button onclick="removeImage('logo')" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 hidden group-hover:block"><i data-lucide="x" class="w-3 h-3"></i></button>
+            </div>
+            <div id="prev-ttd-container" class="hidden w-16 h-12 bg-white border rounded relative flex items-center justify-center p-1 group">
+              <img id="prev-ttd" src="" class="max-w-full max-h-full object-contain" />
+              <button onclick="removeImage('ttd')" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 hidden group-hover:block"><i data-lucide="x" class="w-3 h-3"></i></button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- RIGHT: PREVIEW PANEL -->
+    <div class="flex-1 bg-slate-800 overflow-y-auto p-4 md:p-10 flex justify-center items-start custom-scrollbar relative" id="preview-section">
+      <!-- Zoom control for preview (hidden in print) -->
+      <div class="absolute top-4 right-6 z-20 flex gap-2 print:hidden bg-slate-900/80 p-2 rounded-xl backdrop-blur-md border border-slate-700">
+        <button onclick="adjustScale(-0.1)" class="text-white hover:text-emerald-400 p-1"><i data-lucide="zoom-out" class="w-5 h-5"></i></button>
+        <button onclick="adjustScale(0.1)" class="text-white hover:text-emerald-400 p-1"><i data-lucide="zoom-in" class="w-5 h-5"></i></button>
+      </div>
+
+      <!-- A4 Paper Container (Landscape) -->
+      <div class="cert-wrapper w-full overflow-x-auto custom-scrollbar flex justify-center pb-20 items-start transform origin-top" id="cert-wrapper">
+        
+        <!-- Certificate DOM -->
+        <div class="certificate-container" id="cert-container">
+          <!-- Content will be injected here by JS -->
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SCRIPTS ================= -->
+  <script>
+    // --- Initialize Icons ---
+    lucide.createIcons();
+
+    // --- State Management ---
+    let currentTemplate = 0;
+    let autoSaveTimeout = null;
+    let previewScale = 1.0;
+    
+    // Images Base64
+    let imgLogo = null;
+    let imgTtd = null;
+
+    // --- Template Definitions (12 Premium Themes) ---
+    const templates = [
+      { 
+        id: 0, name: 'Classic Gold', 
+        thumb: 'linear-gradient(135deg, #fefce8, #fef08a)',
+        bgOut: 'bg-yellow-50',
+        bgInner: 'bg-white border-4 border-double border-yellow-600',
+        title: 'text-yellow-700 font-serif font-black',
+        textMain: 'text-slate-800 font-serif',
+        accent: 'text-yellow-600',
+        pattern: true
+      },
+      { 
+        id: 1, name: 'Emerald Islamic', 
+        thumb: 'linear-gradient(135deg, #064e3b, #047857)',
+        bgOut: 'bg-emerald-900',
+        bgInner: 'bg-emerald-800 border-2 border-emerald-400 ring-4 ring-emerald-900 ring-offset-2 ring-offset-emerald-500',
+        title: 'text-yellow-400 font-serif font-black',
+        textMain: 'text-emerald-50 font-serif',
+        accent: 'text-yellow-300',
+        pattern: true
+      },
+      { 
+        id: 2, name: 'Royal Black', 
+        thumb: 'linear-gradient(135deg, #1e293b, #0f172a)',
+        bgOut: 'bg-slate-900',
+        bgInner: 'bg-slate-800 border-[6px] border-amber-500',
+        title: 'text-amber-500 font-serif font-black',
+        textMain: 'text-slate-100 font-serif',
+        accent: 'text-amber-400',
+        pattern: true
+      },
+      { 
+        id: 3, name: 'Minimalist Clean', 
+        thumb: 'linear-gradient(135deg, #ffffff, #f1f5f9)',
+        bgOut: 'bg-white',
+        bgInner: 'bg-white border border-slate-300 shadow-inner',
+        title: 'text-slate-800 font-sans font-black tracking-widest',
+        textMain: 'text-slate-600 font-sans',
+        accent: 'text-slate-900',
+        pattern: false
+      },
+      { 
+        id: 4, name: 'Ka\'bah Theme', 
+        thumb: 'linear-gradient(135deg, #000000, #475569)',
+        bgOut: 'bg-slate-900',
+        bgInner: 'bg-[#111] border-4 border-yellow-600',
+        bgImage: 'https://images.unsplash.com/photo-1565552643952-2508eb605b07?q=80&w=1000&auto=format&fit=crop',
+        imageOpacity: 'opacity-25',
+        title: 'text-yellow-500 font-serif font-black',
+        textMain: 'text-gray-200 font-serif',
+        accent: 'text-yellow-600',
+        pattern: false
+      },
+      { 
+        id: 5, name: 'Soft Pastel', 
+        thumb: 'linear-gradient(135deg, #faf5ff, #f3e8ff)',
+        bgOut: 'bg-purple-50',
+        bgInner: 'bg-white border-2 border-purple-200 rounded-3xl',
+        title: 'text-purple-800 font-serif font-bold',
+        textMain: 'text-slate-700 font-serif',
+        accent: 'text-purple-600',
+        pattern: false
+      },
+      { 
+        id: 6, name: 'Official Formal', 
+        thumb: 'linear-gradient(135deg, #eff6ff, #bfdbfe)',
+        bgOut: 'bg-slate-100',
+        bgInner: 'bg-white border-[8px] border-double border-slate-800',
+        bgImage: 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?q=80&w=1000&auto=format&fit=crop',
+        imageOpacity: 'opacity-15',
+        title: 'text-slate-900 font-serif font-black',
+        textMain: 'text-slate-800 font-serif',
+        accent: 'text-slate-700',
+        pattern: false
+      },
+      { 
+        id: 7, name: 'Green Geometry', 
+        thumb: 'linear-gradient(135deg, #dcfce7, #86efac)',
+        bgOut: 'bg-green-100',
+        bgInner: 'bg-white border border-green-500',
+        title: 'text-green-800 font-serif font-bold',
+        textMain: 'text-slate-700 font-serif',
+        accent: 'text-green-600',
+        pattern: true
+      },
+      { 
+        id: 8, name: 'Royal Blue', 
+        thumb: 'linear-gradient(135deg, #1e3a8a, #1d4ed8)',
+        bgOut: 'bg-blue-900',
+        bgInner: 'bg-blue-50 border-[4px] border-blue-900',
+        title: 'text-blue-900 font-serif font-black',
+        textMain: 'text-blue-950 font-serif',
+        accent: 'text-blue-700',
+        pattern: true
+      },
+      { 
+        id: 9, name: 'Desert Sand', 
+        thumb: 'linear-gradient(135deg, #ffedd5, #fdba74)',
+        bgOut: 'bg-orange-100',
+        bgInner: 'bg-orange-50 border-2 border-orange-800',
+        title: 'text-orange-900 font-serif font-black',
+        textMain: 'text-orange-950 font-serif',
+        accent: 'text-orange-700',
+        pattern: true
+      },
+      { 
+        id: 10, name: 'Ka\'bah Exclusive', 
+        thumb: 'linear-gradient(135deg, #1f2937, #000000)',
+        bgOut: 'bg-slate-900',
+        bgInner: 'bg-[#0f172a] border-4 border-amber-600',
+        bgImage: 'https://lh3.googleusercontent.com/d/17UkFIKceKQjubOt5aK5864b9Mv1PmBMg',
+        imageOpacity: 'opacity-40',
+        title: 'text-amber-500 font-serif font-black',
+        textMain: 'text-gray-100 font-serif',
+        accent: 'text-amber-400',
+        pattern: false
+      },
+      { 
+        id: 11, name: 'Nabawi Exclusive', 
+        thumb: 'linear-gradient(135deg, #064e3b, #10b981)',
+        bgOut: 'bg-emerald-900',
+        bgInner: 'bg-emerald-950 border-4 border-emerald-400',
+        bgImage: 'https://lh3.googleusercontent.com/d/1s4DYIJuN3qOkxO0RqFyT5tK9dDvgLm2Y',
+        imageOpacity: 'opacity-40',
+        title: 'text-emerald-300 font-serif font-black',
+        textMain: 'text-emerald-50 font-serif',
+        accent: 'text-emerald-400',
+        pattern: false
+      }
+    ];
+
+    // --- Core Initialization ---
+    function init() {
+      // Splash screen & Main App logic
+      setTimeout(() => {
+        const splash = document.getElementById('splash-screen');
+        const mainApp = document.getElementById('main-app');
+        if(splash) {
+          splash.style.opacity = '0';
+          setTimeout(() => {
+            splash.classList.add('hidden');
+            mainApp.classList.add('loaded'); // Fade in the main app
+          }, 700);
+        }
+      }, 1800);
+
+      renderThemeSelector();
+      
+      const dateInput = document.getElementById('b_tanggal');
+      const numInput = document.getElementById('b_nomor');
+      const today = new Date();
+      
+      if (!dateInput.value) {
+        // Set to YYYY-MM-DD for date input
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        dateInput.value = `${yyyy}-${mm}-${dd}`;
+      }
+      
+      if (!numInput.value) {
+        const yyyymmdd = today.toISOString().slice(0,10).replace(/-/g, "");
+        const rnd = Math.floor(Math.random() * 900) + 100;
+        numInput.value = `BU-${yyyymmdd}-${rnd}`;
+      }
+
+      loadSavedData();
+      adjustScale(0); 
+      renderPreview();
+    }
+
+    // --- Helper Format Date (Masehi & Hijriah) ---
+    function formatHijriMasehi(dateStr, location) {
+      if(!dateStr) return '';
+      try {
+        const d = new Date(dateStr);
+        if (isNaN(d)) return `${location}, ${dateStr}`;
+
+        const optionsM = { day: 'numeric', month: 'long', year: 'numeric' };
+        const masehi = d.toLocaleDateString('id-ID', optionsM) + ' M';
+        
+        let hijriah = '';
+        try {
+          const optionsH = { day: 'numeric', month: 'long', year: 'numeric', calendar: 'islamic-umalqura' };
+          let hStr = new Intl.DateTimeFormat('id-ID-u-ca-islamic-umalqura', optionsH).format(d);
+          hijriah = hStr.replace(/ M| H| AH/gi, '').trim() + ' H';
+        } catch(e) {
+          hijriah = '';
+        }
+
+        return hijriah ? `${location}, ${masehi}, bertepatan dengan ${hijriah}` : `${location}, ${masehi}`;
+      } catch(e) {
+        return `${location}, ${dateStr}`;
+      }
+    }
+
+    // --- Theme Selector Rendering ---
+    function renderThemeSelector() {
+      const container = document.getElementById('template-selector');
+      container.innerHTML = '';
+      templates.forEach((theme, idx) => {
+        const btn = document.createElement('button');
+        btn.className = `w-full aspect-video rounded-md border-2 border-transparent hover:scale-105 transition-transform shadow-sm overflow-hidden ${idx === currentTemplate ? 'thumb-active' : ''}`;
+        btn.style.background = theme.thumb;
+        btn.title = theme.name;
+        btn.onclick = () => {
+          currentTemplate = idx;
+          renderThemeSelector(); 
+          queueAutoSave();
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    // --- Image Handlers ---
+    function handleImageUpload(e, type) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const base64 = event.target.result;
+          if (type === 'logo') { imgLogo = base64; }
+          if (type === 'ttd') { imgTtd = base64; }
+          
+          try {
+            localStorage.setItem(`bu_${type}`, base64);
+          } catch(err) { console.warn("Image too large for local storage"); }
+          
+          updateImageUI();
+          queueAutoSave();
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function removeImage(type) {
+      if (type === 'logo') { imgLogo = null; localStorage.removeItem('bu_logo'); }
+      if (type === 'ttd') { imgTtd = null; localStorage.removeItem('bu_ttd'); }
+      updateImageUI();
+      queueAutoSave();
+    }
+
+    function updateImageUI() {
+      const logoCont = document.getElementById('prev-logo-container');
+      const logoImg = document.getElementById('prev-logo');
+      if (imgLogo) { logoImg.src = imgLogo; logoCont.classList.remove('hidden'); } 
+      else { logoCont.classList.add('hidden'); }
+
+      const ttdCont = document.getElementById('prev-ttd-container');
+      const ttdImg = document.getElementById('prev-ttd');
+      if (imgTtd) { ttdImg.src = imgTtd; ttdCont.classList.remove('hidden'); } 
+      else { ttdCont.classList.add('hidden'); }
+    }
+
+    // --- Auto Save & Load ---
+    function queueAutoSave() {
+      clearTimeout(autoSaveTimeout);
+      renderPreview();
+      autoSaveTimeout = setTimeout(saveData, 500);
+    }
+
+    function saveData() {
+      const inputs = document.querySelectorAll('.input-field');
+      const data = { template: currentTemplate, fields: {} };
+      inputs.forEach(input => { data.fields[input.id] = input.value; });
+      localStorage.setItem('bu_data', JSON.stringify(data));
+    }
+
+    function loadSavedData() {
+      imgLogo = localStorage.getItem('bu_logo');
+      imgTtd = localStorage.getItem('bu_ttd');
+      updateImageUI();
+
+      const savedData = localStorage.getItem('bu_data');
+      if (savedData) {
+        try {
+          const data = JSON.parse(savedData);
+          if (data.template !== undefined) { currentTemplate = data.template; renderThemeSelector(); }
+          if (data.fields) {
+            Object.keys(data.fields).forEach(id => {
+              const el = document.getElementById(id);
+              if (el) el.value = data.fields[id];
+            });
+          }
+        } catch(e) { console.error("Error loading data", e); }
+      }
+    }
+
+    function resetData() {
+      if(confirm("Hapus semua data form?")) {
+        localStorage.removeItem('bu_data');
+        localStorage.removeItem('bu_logo');
+        localStorage.removeItem('bu_ttd');
+        imgLogo = null; imgTtd = null;
+        document.querySelectorAll('.input-field').forEach(el => el.value = '');
+        updateImageUI();
+        init();
+      }
+    }
+
+    // --- View Controls ---
+    function adjustScale(change) {
+      previewScale += change;
+      if (previewScale < 0.3) previewScale = 0.3;
+      if (previewScale > 1.5) previewScale = 1.5;
+      
+      const wrapper = document.getElementById('cert-wrapper');
+      
+      if (window.matchMedia('print').matches) {
+        wrapper.style.transform = `scale(1)`;
+      } else {
+        wrapper.style.transform = `scale(${previewScale})`;
+      }
+    }
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth < 768) { previewScale = 0.4; } 
+      else if (window.innerWidth < 1024) { previewScale = 0.6; }
+      else { previewScale = 0.8; }
+      adjustScale(0);
+    });
+
+    if (window.innerWidth < 768) { previewScale = 0.4; } 
+    else if (window.innerWidth < 1024) { previewScale = 0.6; }
+    else { previewScale = 0.8; }
+
+    // --- Helper ---
+    function val(id, fallback = '.........................') {
+      const el = document.getElementById(id);
+      return el && el.value.trim() !== '' ? el.value : fallback;
+    }
+
+    // --- Render Certificate ---
+    function renderPreview() {
+      const container = document.getElementById('cert-container');
+      const theme = templates[currentTemplate];
+      
+      container.classList.remove('fade-enter-active');
+      container.classList.add('fade-enter');
+      
+      setTimeout(() => {
+        // SVG Flags - Exact 3x2 cm size with Google Drive images
+        const flagID = `<div class="shadow-sm border border-black/20 overflow-hidden" style="width: 30mm; height: 20mm;"><img src="https://lh3.googleusercontent.com/d/1B474IkUFpGbX_lLD924dl-tmEGw1dgt8" class="w-full h-full object-cover" crossorigin="anonymous" /></div>`;
+        const flagSA = `<div class="shadow-sm border border-black/20 overflow-hidden" style="width: 30mm; height: 20mm;"><img src="https://lh3.googleusercontent.com/d/1X8HwnPQvRuFuFM1c2tNuTd6Q7OEkRfdl" class="w-full h-full object-cover" crossorigin="anonymous" /></div>`;
+
+        // Logo
+        const logoHtml = imgLogo ? `<img src="${imgLogo}" class="h-16 w-16 object-contain" />` : `<div class="w-16 h-16 border-2 border-dashed border-current opacity-30 flex items-center justify-center text-[8px]">LOGO</div>`;
+        
+        // TTD
+        const ttdHtml = imgTtd ? `<img src="${imgTtd}" class="absolute bottom-6 left-1/2 -translate-x-1/2 h-16 w-32 object-contain mix-blend-multiply pointer-events-none z-10" />` : '';
+
+        // Patterns and Image Overlays
+        const patternHtml = theme.pattern ? `<div class="pattern-overlay"></div>` : '';
+        const bgImageHtml = theme.bgImage ? `<div class="absolute inset-0 z-0 ${theme.imageOpacity} pointer-events-none" style="background-image: url('${theme.bgImage}'); background-size: cover; background-position: center;"></div>` : '';
+
+        // Tanggal Format Lengkap (Masehi + Hijriah)
+        const dateInputVal = document.getElementById('b_tanggal').value;
+        const locVal = val('b_lokasi', 'Makkah');
+        const formattedDateFull = formatHijriMasehi(dateInputVal, locVal);
+
+        // Link Dokumentasi (QR Code)
+        const linkDokumentasi = document.getElementById('b_link').value.trim();
+        let qrDisplayHtml = `
+          <div class="w-20 h-20 border-2 border-current p-1 opacity-50 flex items-center justify-center flex-col rounded">
+            <i data-lucide="qr-code" class="w-10 h-10"></i>
+            <span class="text-[6px] mt-1 font-sans uppercase font-bold text-center">Scan to Verify</span>
+          </div>`;
+          
+        if (linkDokumentasi && linkDokumentasi.startsWith('http')) {
+          const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(linkDokumentasi)}`;
+          qrDisplayHtml = `
+            <div class="w-20 h-20 bg-white border border-slate-300 p-1 flex items-center justify-center flex-col rounded shadow-sm">
+              <img src="${qrUrl}" alt="QR Dokumentasi" class="w-full h-full object-contain" crossorigin="anonymous" />
+            </div>
+            <span class="text-[8px] mt-1 font-sans uppercase font-bold tracking-wider">Dokumentasi</span>`;
+        }
+
+        const html = `
+          <div class="cert-inner ${theme.bgOut}">
+            <div class="w-full h-full ${theme.bgInner} relative flex flex-col items-center justify-between p-4 md:p-5">
+              
+              ${patternHtml}
+              ${bgImageHtml}
+              
+              <!-- Header Row -->
+              <div class="w-full flex justify-between items-start relative z-20">
+                <div class="w-16 h-16"></div> <!-- Spacer for balance -->
+                <div class="${theme.textMain} opacity-80 text-xs font-bold uppercase tracking-widest text-center mt-2">
+                  ${val('b_travel', 'NAMA TRAVEL / LEMBAGA')}
+                </div>
+                <div class="w-16 h-16 flex justify-end">
+                  ${logoHtml}
+                </div>
+              </div>
+
+              <!-- Title Section with Flags -->
+              <div class="flex justify-center items-center gap-6 md:gap-8 relative z-20 -mt-4 md:-mt-6 w-full">
+                <div class="flex-shrink-0 pb-4">${flagID}</div>
+                
+                <div class="text-center flex-1 max-w-[500px]">
+                  <h1 class="text-4xl md:text-5xl uppercase tracking-widest ${theme.title}">
+                    Sertifikat Badal
+                  </h1>
+                  <h2 class="text-xl md:text-2xl mt-1 tracking-widest uppercase font-semibold ${theme.accent}">
+                    ${val('b_jenis', 'Badal Umroh')}
+                  </h2>
+                  <div class="w-48 h-1 ${theme.bgInner} mx-auto mt-2 rounded-full opacity-50 border-t border-current"></div>
+                  <p class="mt-1 text-sm ${theme.textMain} opacity-80">Nomor: ${val('b_nomor', 'BU-20260417-001')}</p>
+                </div>
+                
+                <div class="flex-shrink-0 pb-4">${flagSA}</div>
+              </div>
+
+              <!-- Body Section -->
+              <div class="text-center relative z-20 flex-1 flex flex-col justify-center w-full my-1">
+                <p class="text-sm md:text-base ${theme.textMain} mb-1 italic">Diberikan kepada dan diniatkan untuk:</p>
+                <h3 class="text-5xl md:text-7xl font-script ${theme.accent} my-1 leading-tight w-full px-2">
+                  ${val('b_peserta', 'Nama Peserta Badal')}
+                </h3>
+                
+                <p class="text-sm md:text-base ${theme.textMain} mt-2 max-w-4xl mx-auto leading-relaxed">
+                  Alhamdulillah, telah dilaksanakan amanah <strong>${val('b_jenis', 'Badal Umroh')}</strong> 
+                  dengan mengambil miqot dari <strong>${val('b_miqot', 'Bir Ali (Zulhulaifah)')}</strong> 
+                  pada <strong>${val('b_waktu', '....................')}</strong>,<br> 
+                  dan diselesaikan dengan sempurna sesuai sunnah Rasulullah ﷺ oleh: <br>
+                  <span class="text-lg font-bold mt-1 inline-block border-b border-current border-dashed pb-1 px-4">${val('b_pelaksana', 'Nama Pelaksana')}</span>
+                </p>
+              </div>
+
+              <!-- Hadith Section -->
+              <div class="w-full max-w-4xl mx-auto relative z-20 border-y border-current py-2 opacity-80 ${theme.textMain}">
+                <p class="font-arabic text-2xl md:text-3xl leading-loose mb-0" dir="rtl">
+                  حج عن أبيك واعتمر
+                </p>
+                <p class="text-[10px] md:text-xs leading-relaxed px-4">
+                  "Laksanakan haji dan umroh untuk ayahmu!"<br>(HR. At Tirmidzi, dari Abu Razin Al 'Uqaili yang bertanya tentang ayahnya yang sudah tua renta)
+                </p>
+              </div>
+
+              <!-- Footer Section -->
+              <div class="w-full flex justify-between items-end relative z-20 mt-2">
+                
+                <!-- QR Dokumentasi -->
+                <div class="flex flex-col items-center justify-end pb-1 ${theme.textMain}">
+                  ${qrDisplayHtml}
+                </div>
+
+                <!-- Signature -->
+                <div class="text-center w-[300px] ${theme.textMain}">
+                  <p class="text-[10px] md:text-xs mb-1 leading-relaxed px-2">${formattedDateFull}</p>
+                  <p class="text-xs font-bold uppercase mb-12">${val('b_travel', 'Nama Lembaga')}</p>
+                  
+                  <div class="relative w-full flex flex-col items-center">
+                    ${ttdHtml}
+                    <p class="font-bold border-b border-current inline-block pb-0.5 px-4 relative z-20">${val('b_penandatangan', 'Nama Penandatangan')}</p>
+                  </div>
+                  <p class="text-[10px] mt-1 uppercase tracking-wider">${val('b_jabatan', 'Direktur Utama')}</p>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        `;
+
+        container.innerHTML = html;
+        container.className = `certificate-container ${theme.bgOut}`;
+        lucide.createIcons();
+        
+        requestAnimationFrame(() => {
+          container.classList.add('fade-enter-active');
+        });
+
+      }, 50);
+    }
+
+    // Run
+    window.onload = init;
+
+  </script>
+</body>
+</html>
