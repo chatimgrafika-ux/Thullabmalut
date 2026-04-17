@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Pelajar - CV Builder Premium A4</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;700;900&display=swap');
+    
+    :root {
+      /* Tema Default (Teal) */
+      --primary: #1db1a2;
+      --primary-dark: #168e82;
+      --primary-bg: #f0fbf9;
+      --accent: #eab308;
+    }
+
+    body { font-family: 'Inter', sans-serif; }
+    .font-serif { font-family: 'Amiri', serif; line-height: 1.6; }
+    
+    /* Custom Scrollbars */
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+    /* A4 PDF Container Strict (210mm x 297mm) */
+    .pdf-container {
+      width: 210mm;
+      height: 297mm;
+      overflow: hidden; 
+      box-sizing: border-box;
+      position: relative;
+      background: white;
+      margin: 0 auto;
+    }
+
+    /* Print Configuration - A4 Strict 100% Fit */
+    @media print {
+      @page { size: A4 portrait; margin: 0; }
+      html, body {
+        width: 210mm !important;
+        height: 297mm !important;
+        min-width: 210mm !important;
+        min-height: 297mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        overflow: hidden !important;
+        background-color: white !important;
+      }
+      /* Sembunyikan UI saat print */
+      header, #form-section, #splash-screen, #premium-modal, .md\:hidden {
+        display: none !important;
+      }
+      /* Reset container pembungkus agar posisinya di kiri atas mutlak */
+      #main-app, #preview-wrapper {
+        display: block !important; position: static !important; margin: 0 !important;
+        padding: 0 !important; width: 100% !important; height: auto !important;
+        border: none !important; transform: none !important; text-align: left !important;
+        overflow: visible !important;
+      }
+      body * { visibility: hidden; }
+      #cv-preview, #cv-preview * { visibility: visible; }
+      #cv-preview {
+        position: fixed !important; left: 0 !important; top: 0 !important;
+        width: 210mm !important; height: 297mm !important;
+        margin: 0 !important; padding: 0 !important;
+        box-shadow: none !important; border: none !important;
+        transform: none !important; transform-origin: 0 0 !important;
+      }
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    }
+
+    /* Efek transisi global */
+    * { transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
+
+    /* Premium Overlay Styles */
+    .locked-overlay {
+      position: absolute; inset: 0; background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(1px); display: flex; align-items: center; justify-content: center;
+      z-index: 10; cursor: pointer; transition: background 0.3s ease;
+    }
+    .locked-overlay:hover { background: rgba(255, 255, 255, 0.4); }
+
+    /* ========================================================
+       SISTEM GRID CV (20 STRUKTUR LAYOUT)
+       ======================================================== */
+    #cv-grid { display: grid; width: 100%; height: 100%; box-sizing: border-box; position: relative; z-index: 20; }
+    .grid-item { box-sizing: border-box; position: relative; z-index: 2; }
+    
+    #grid-title { grid-area: title; } #grid-photo { grid-area: photo; } #grid-contact { grid-area: contact; }
+    #grid-summary { grid-area: summary; } #grid-edu { grid-area: edu; } #grid-exp { grid-area: exp; }
+    #grid-rel { grid-area: rel; } #grid-awd { grid-area: awd; } #grid-skills { grid-area: skills; }
+
+    .cv-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5mm; font-size: 11px; text-transform: uppercase; font-weight: 900; color: var(--primary-dark); }
+    .cv-heading .ar { font-family: 'Amiri', serif; font-size: 14px; text-transform: none; font-weight: 700; }
+    .contact-line { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05); padding: 1mm 0; }
+    .contact-line:last-child { border-bottom: none; }
+    #grid-photo .border-2 { border-radius: 4px; border: 2px solid var(--primary); transition: all 0.3s ease; width: 35mm; height: 50mm; }
+
+    /* LAYOUT 0: KLASIK MINIMALIS */
+    .layout-0 { padding: 8mm 12mm; gap: 3mm 6mm; grid-template-columns: 35mm 1fr; grid-template-rows: auto auto auto auto auto auto auto; grid-template-areas: "title title" "photo contact" "summary summary" "edu edu" "exp exp" "rel awd" "skills skills"; align-content: start; }
+    .layout-0 .cv-heading { background: var(--primary-bg); border-left: 4px solid var(--primary); padding: 1mm 4mm; border-radius: 2px;}
+    .layout-0 #grid-title { border-bottom: 3px solid var(--primary-bg); margin-bottom: 2mm; padding-bottom: 2mm; text-align: center; }
+    .layout-0 #grid-contact { align-self: center; border-left: 2px solid var(--primary-bg); padding-left: 6mm; }
+    .layout-0 .contact-line { border-bottom: 1px dashed rgba(0,0,0,0.1); padding: 1mm 0;}
+    .layout-0 #grid-photo .border-2 { width: 35mm; height: 50mm; }
+
+    /* LAYOUT 1: SIDEBAR KIRI */
+    .layout-1 { grid-template-columns: 70mm 1fr; grid-template-rows: auto auto auto auto auto 1fr; grid-template-areas: "photo title" "contact summary" "skills edu" "skills exp" "skills rel" "skills awd"; gap: 0; padding: 0; }
+    .layout-1 #grid-photo, .layout-1 #grid-contact, .layout-1 #grid-skills { background: var(--primary-bg); padding: 0 6mm; }
+    .layout-1 #grid-photo { padding-top: 12mm; display: flex; justify-content: center; } .layout-1 #grid-contact { padding-bottom: 2mm; } .layout-1 #grid-skills { padding-bottom: 12mm; }
+    .layout-1 #grid-title { padding: 12mm 10mm 2mm 6mm; text-align: left; } .layout-1 #grid-title h1 { text-align: left; } .layout-1 #grid-title h2 { text-align: right; }
+    .layout-1 #grid-summary, .layout-1 #grid-edu, .layout-1 #grid-exp, .layout-1 #grid-rel, .layout-1 #grid-awd { padding: 0 10mm 3mm 6mm; }
+    .layout-1 .cv-heading { border-bottom: 1.5px solid var(--primary); padding-bottom: 1mm; } .layout-1 #grid-skills .cv-heading { border-bottom: 1.5px solid rgba(0,0,0,0.1); }
+    .layout-1 .contact-line { flex-direction: column; text-align: center; gap: 0.5mm; padding: 1.5mm 0;}
+
+    /* LAYOUT 2: SIDEBAR KANAN */
+    .layout-2 { grid-template-columns: 1fr 70mm; grid-template-rows: auto auto auto auto auto 1fr; grid-template-areas: "title photo" "summary contact" "edu skills" "exp skills" "rel skills" "awd skills"; gap: 0; padding: 0; }
+    .layout-2 #grid-photo, .layout-2 #grid-contact, .layout-2 #grid-skills { background: var(--primary-bg); padding: 0 6mm; }
+    .layout-2 #grid-photo { padding-top: 12mm; display: flex; justify-content: center; } .layout-2 #grid-contact { padding-bottom: 2mm; } .layout-2 #grid-skills { padding-bottom: 12mm; }
+    .layout-2 #grid-title { padding: 12mm 6mm 2mm 10mm; text-align: right; } .layout-2 #grid-title h1 { text-align: left; } .layout-2 #grid-title h2 { text-align: right; }
+    .layout-2 #grid-summary, .layout-2 #grid-edu, .layout-2 #grid-exp, .layout-2 #grid-rel, .layout-2 #grid-awd { padding: 0 6mm 3mm 10mm; }
+    .layout-2 .cv-heading { border-bottom: 1.5px solid var(--primary); padding-bottom: 1mm; } .layout-2 #grid-skills .cv-heading { border-bottom: 1.5px solid rgba(0,0,0,0.1); }
+    .layout-2 .contact-line { flex-direction: column; text-align: center; gap: 0.5mm; padding: 1.5mm 0;}
+
+    /* LAYOUT 3: FOKUS SENTRAL */
+    .layout-3 { padding: 8mm 12mm; gap: 3mm 6mm; grid-template-columns: 1fr; grid-template-areas: "photo" "title" "contact" "summary" "edu" "exp" "rel" "awd" "skills"; align-content: start; text-align: center; }
+    .layout-3 .cv-heading { justify-content: center; gap: 4mm; background: var(--primary-bg); border-radius: 4px; padding: 1.5mm 0; margin-bottom: 1.5mm;}
+    .layout-3 #grid-photo { display: flex; justify-content: center; margin-bottom: 2mm; } .layout-3 #grid-title { margin-bottom: 0; }
+    .layout-3 #grid-contact { display: grid; grid-template-columns: 1fr 1fr; gap: 1mm 6mm; border-top: 1px solid var(--primary-bg); border-bottom: 1px solid var(--primary-bg); padding: 2mm 0; margin-bottom: 2mm; text-align: left; }
+    .layout-3 .contact-line { border: none; padding: 1mm 0; width: 100%; border-bottom: 1px dashed rgba(0,0,0,0.05); } .layout-3 .contact-line:last-child { grid-column: 1 / -1; border-bottom: none; }
+
+    /* LAYOUT 4: GRID 2 KOLOM */
+    .layout-4 { padding: 8mm 12mm; gap: 4mm 6mm; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto auto auto auto 1fr; grid-template-areas: "title title" "photo contact" "summary summary" "edu exp" "rel awd" "skills skills"; align-content: start; }
+    .layout-4 .cv-heading { border-bottom: 2px solid var(--primary-bg); padding-bottom: 1mm; margin-bottom: 2mm;} .layout-4 #grid-title { border-bottom: 3px solid var(--primary); text-align: center; padding-bottom: 2mm; margin-bottom: 2mm;}
+    .layout-4 #grid-contact { align-self: center; padding-left: 2mm; } .layout-4 #grid-photo { justify-self: end; padding-right: 6mm; border-right: 2px solid var(--primary-bg);}
+
+    /* LAYOUT 5: HEADER LENGKUNG */
+    .layout-5 { padding: 0; gap: 4mm 6mm; grid-template-columns: 45mm 1fr; grid-template-rows: auto auto auto auto auto 1fr; grid-template-areas: "photo title" "photo contact" "summary summary" "edu exp" "rel awd" "skills skills"; }
+    .layout-5::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 70mm; background: var(--primary-bg); border-bottom-left-radius: 60px; border-bottom-right-radius: 60px; z-index: 1; }
+    .layout-5 #grid-photo { padding: 10mm 0 0 12mm; } .layout-5 #grid-photo .border-2 { width: 40mm; height: 55mm; border-radius: 16px; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+    .layout-5 #grid-title { padding: 10mm 12mm 0 0; text-align: right; } .layout-5 #grid-contact { padding: 0 12mm 0 0; }
+    .layout-5 #grid-summary { padding: 3mm 12mm 0 12mm; grid-column: 1 / -1; } .layout-5 #grid-edu, .layout-5 #grid-exp, .layout-5 #grid-rel, .layout-5 #grid-awd, .layout-5 #grid-skills { padding: 0 12mm; }
+    .layout-5 .cv-heading { border-bottom: 2px dashed var(--primary); padding-bottom: 1mm; }
+
+    /* LAYOUT 6: SIDEBAR LEMBUT */
+    .layout-6 { padding: 0; gap: 0; grid-template-columns: 75mm 1fr; grid-template-rows: auto auto auto auto auto 1fr; grid-template-areas: "photo title" "contact summary" "skills edu" "skills exp" "skills rel" "skills awd"; }
+    .layout-6 #grid-photo, .layout-6 #grid-contact, .layout-6 #grid-skills { background: var(--primary-bg); padding: 0 8mm; }
+    .layout-6 #grid-photo { padding-top: 15mm; display: flex; justify-content: center; border-bottom-right-radius: 50px; } .layout-6 #grid-contact { padding-top: 5mm; padding-bottom: 5mm; } .layout-6 #grid-skills { border-top-right-radius: 50px; padding-top: 5mm; padding-bottom: 15mm; }
+    .layout-6 #grid-photo .border-2 { border-radius: 50%; width: 45mm; height: 45mm; border-width: 3px; object-fit: cover;} .layout-6 #grid-title { padding: 15mm 12mm 5mm 12mm; }
+    .layout-6 .cv-heading { background: linear-gradient(to right, var(--primary-bg), transparent); padding: 2mm 4mm; border-radius: 20px 0 0 20px; }
+    .layout-6 .grid-item:not(#grid-photo):not(#grid-contact):not(#grid-skills) { padding: 0 12mm 5mm 12mm; }
+
+    /* LAYOUT 7: ELEGAN BULAT */
+    .layout-7 { padding: 10mm; gap: 4mm 6mm; grid-template-columns: 1fr 1fr; grid-template-areas: "photo title" "contact contact" "summary summary" "edu exp" "rel awd" "skills skills"; background-color: #f8fafc; }
+    .layout-7::after { content: ''; position: absolute; inset: 5mm; border: 1px solid var(--primary); border-radius: 30px; z-index: 1; pointer-events: none; opacity: 0.2; }
+    .layout-7 .grid-item { background: white; padding: 6mm; border-radius: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+    .layout-7 #grid-photo { display: flex; justify-content: center; align-items: center; background: transparent; box-shadow: none; } .layout-7 #grid-photo .border-2 { border-radius: 16px; border-width: 3px;}
+    .layout-7 #grid-title { display: flex; flex-direction: column; justify-content: center; background: transparent; box-shadow: none; padding-left: 0;}
+    .layout-7 #grid-contact { display: flex; flex-wrap: wrap; justify-content: space-around; gap: 2mm; align-items: center;}
+    .layout-7 .contact-line { border: none; padding: 0; flex-direction: column; align-items: center; text-align: center; background: var(--primary-bg); padding: 2.5mm 5mm; border-radius: 16px;}
+    .layout-7 .cv-heading { justify-content: center; margin-bottom: 3mm; border: none; } .layout-7 .cv-heading .en, .layout-7 .cv-heading .ar { background: var(--primary); color: white; padding: 1.5mm 6mm; border-radius: 20px; }
+
+    /* LAYOUT 8: SPLIT DINAMIS */
+    .layout-8 { padding: 8mm 12mm; gap: 4mm 6mm; grid-template-columns: 45mm 1fr; grid-template-areas: "photo title" "contact contact" "summary summary" "edu exp" "rel awd" "skills skills"; }
+    .layout-8::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 90mm; background: var(--primary); clip-path: ellipse(150% 100% at 50% 0%); z-index: 1; }
+    .layout-8 #grid-title h1, .layout-8 #grid-title h2 { color: white !important; }
+    .layout-8 #grid-photo .border-2 { border-radius: 50%; width: 40mm; height: 40mm; border: 4px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.2);}
+    .layout-8 #grid-contact { background: white; padding: 4mm 6mm; border-radius: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); margin-top: -3mm; border: 1px solid var(--primary-bg);}
+    .layout-8 .cv-heading { position: relative; border-bottom: 2px solid var(--primary-bg); padding-bottom: 1mm; margin-bottom: 2mm;} .layout-8 .cv-heading::after { content: ''; display: block; width: 40mm; height: 2px; background: var(--primary); position: absolute; bottom: -2px; left: 0;}
+    .layout-8 #grid-summary .cv-heading { border-bottom-color: rgba(255,255,255,0.3); } .layout-8 #grid-summary .cv-heading .en, .layout-8 #grid-summary .cv-heading .ar, .layout-8 #grid-summary p { color: white !important; } .layout-8 #grid-summary .cv-heading::after { background: white; }
+
+    /* LAYOUT 9: ORGANIK FLUID */
+    .layout-9 { padding: 8mm 12mm; gap: 4mm 6mm; grid-template-columns: 1fr 1fr; grid-template-areas: "title photo" "summary summary" "contact skills" "edu exp" "rel awd"; overflow: hidden; }
+    .layout-9::before { content: ''; position: absolute; top: -30mm; right: -20mm; width: 140mm; height: 140mm; background: var(--primary-bg); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; z-index: 1; opacity: 0.8; }
+    .layout-9 #grid-photo { justify-self: end; } .layout-9 #grid-photo .border-2 { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; border: none; box-shadow: 6px 6px 0px var(--primary); width: 40mm; height: 45mm;}
+    .layout-9 #grid-title { align-self: center; } .layout-9 #grid-contact { background: var(--primary); padding: 5mm; border-radius: 20px; } .layout-9 #grid-contact * { color: white !important; border-color: rgba(255,255,255,0.2) !important; }
+    .layout-9 .cv-heading { font-style: italic; font-weight: 900; color: var(--primary); border-bottom: 1.5px solid var(--primary); padding-bottom: 1mm;}
+
+    /* LAYOUT 10: GEOMETRIS */
+    .layout-10 { padding: 10mm 12mm; gap: 4mm 6mm; grid-template-columns: 45mm 1fr; grid-template-areas: "photo title" "contact contact" "summary summary" "edu exp" "rel awd" "skills skills"; }
+    .layout-10::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 70mm; background: var(--primary); clip-path: polygon(0 0, 100% 0, 100% 100%, 0 60%); z-index: 1; }
+    .layout-10 #grid-title h1, .layout-10 #grid-title h2 { color: white !important; text-align: right; }
+    .layout-10 #grid-photo .border-2 { border-radius: 0 20px 0 20px; width: 45mm; height: 50mm; border: 3px solid white; box-shadow: -5px 5px 0px var(--primary-dark);}
+    .layout-10 #grid-contact { display: grid; grid-template-columns: 1fr 1fr; gap: 2mm 6mm; margin-top: 2mm; border-bottom: 2px solid var(--primary-bg); padding-bottom: 2mm; } .layout-10 .contact-line { border: none; padding: 0.5mm 0; }
+    .layout-10 .cv-heading { background: var(--primary-bg); padding: 1.5mm 3mm; clip-path: polygon(0 0, 95% 0, 100% 100%, 0% 100%); margin-bottom: 2mm;}
+
+    /* LAYOUT 11: GARIS WAKTU (Timeline) */
+    .layout-11 { padding: 8mm 12mm; gap: 4mm 6mm; grid-template-columns: 40mm 1fr; grid-template-areas: "photo title" "photo contact" "summary summary" "edu exp" "rel awd" "skills skills"; }
+    .layout-11 #grid-photo { padding-top: 4mm; } .layout-11 #grid-title { border-bottom: 1px solid var(--primary-bg); padding-bottom: 2mm; margin-bottom: 2mm;}
+    .layout-11 #grid-edu, .layout-11 #grid-exp, .layout-11 #grid-rel, .layout-11 #grid-awd { border-left: 2px solid var(--primary-bg); padding-left: 4mm; position: relative; margin-left: 2mm; }
+    .layout-11 #grid-edu::before, .layout-11 #grid-exp::before, .layout-11 #grid-rel::before, .layout-11 #grid-awd::before { content: ''; position: absolute; left: -4px; top: 2mm; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); }
+    .layout-11 .cv-heading { border: none; margin-bottom: 1mm;} .layout-11 .cv-heading .en, .layout-11 .cv-heading .ar { color: var(--primary); }
+
+    /* LAYOUT 12: SOLID BLOK */
+    .layout-12 { grid-template-columns: 75mm 1fr; grid-template-rows: auto auto auto auto auto 1fr; grid-template-areas: "photo title" "contact summary" "skills edu" "skills exp" "skills rel" "skills awd"; gap: 0; padding: 0; }
+    .layout-12 #grid-photo, .layout-12 #grid-contact, .layout-12 #grid-skills { background: var(--primary); color: white; padding: 0 8mm; }
+    .layout-12 #grid-photo { padding-top: 15mm; display: flex; justify-content: center; } .layout-12 #grid-photo .border-2 { border-color: white; width: 45mm; height: 50mm;}
+    .layout-12 #grid-contact { padding-bottom: 4mm; padding-top: 4mm; } .layout-12 #grid-skills { padding-bottom: 15mm; }
+    .layout-12 #grid-contact *, .layout-12 #grid-skills * { color: white !important; border-color: rgba(255,255,255,0.2) !important; }
+    .layout-12 #grid-title { padding: 15mm 12mm 2mm 8mm; text-align: left; } .layout-12 #grid-summary, .layout-12 #grid-edu, .layout-12 #grid-exp, .layout-12 #grid-rel, .layout-12 #grid-awd { padding: 0 12mm 4mm 8mm; }
+    .layout-12 .cv-heading { border-bottom: 2px solid var(--primary-bg); padding-bottom: 1mm; margin-bottom: 2mm;} .layout-12 #grid-skills .cv-heading { border-bottom-color: rgba(255,255,255,0.3); } .layout-12 .contact-line { flex-direction: column; text-align: center; gap: 0.5mm; padding: 1.5mm 0;}
+
+    /* LAYOUT 13: GARIS PEMISAH */
+    .layout-13 { padding: 10mm 15mm; gap: 4mm 8mm; grid-template-columns: 50mm 1fr; grid-template-areas: "photo title" "contact summary" "skills edu" "skills exp" ". rel" ". awd"; }
+    .layout-13 #grid-photo, .layout-13 #grid-contact, .layout-13 #grid-skills { border-right: 2px solid var(--primary); padding-right: 6mm; }
+    .layout-13 #grid-title, .layout-13 #grid-summary, .layout-13 #grid-edu, .layout-13 #grid-exp, .layout-13 #grid-rel, .layout-13 #grid-awd { padding-left: 2mm; }
+    .layout-13 .cv-heading { border-bottom: 2px solid var(--primary-bg); padding-bottom: 1mm; margin-bottom: 2mm;}
+
+    /* LAYOUT 14: KARTU MENGAMBANG */
+    .layout-14 { padding: 8mm; gap: 4mm; background-color: var(--primary-bg); grid-template-columns: 1fr 1fr; grid-template-areas: "photo title" "contact summary" "edu exp" "rel awd" "skills skills"; }
+    .layout-14 .grid-item { background: white; border-radius: 12px; padding: 6mm; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+    .layout-14 #grid-photo { background: transparent; box-shadow: none; display: flex; justify-content: center; padding: 0;} .layout-14 #grid-photo .border-2 { border-radius: 12px; }
+    .layout-14 #grid-title { background: transparent; box-shadow: none; display: flex; flex-direction: column; justify-content: center; padding: 0 0 0 4mm;}
+    .layout-14 .cv-heading { border-bottom: 1.5px solid var(--primary); padding-bottom: 1mm; }
+
+    /* LAYOUT 15: PITA ELEGAN */
+    .layout-15 { padding: 0; grid-template-columns: 1fr 1fr; grid-template-areas: "title title" "photo contact" "summary summary" "edu exp" "rel awd" "skills skills"; }
+    .layout-15 #grid-title { background: var(--primary-bg); padding: 10mm 15mm 5mm 15mm; text-align: center; } .layout-15 .grid-item:not(#grid-title) { padding: 2mm 15mm 4mm 15mm; }
+    .layout-15 #grid-photo { display: flex; justify-content: center; } .layout-15 .cv-heading { background: var(--primary); padding: 1.5mm 15mm; margin: 0 -15mm 3mm -15mm; } .layout-15 .cv-heading .en, .layout-15 .cv-heading .ar { color: white; }
+
+    /* LAYOUT 16: HEADER GELAP */
+    .layout-16 { padding: 0; gap: 4mm 8mm; grid-template-columns: 50mm 1fr; grid-template-areas: "photo title" "contact summary" "skills edu" "skills exp" "skills rel" "skills awd"; }
+    .layout-16::before { content:''; position:absolute; top:0; left:0; width:100%; height: 50mm; background: var(--primary-dark); z-index: 1;}
+    .layout-16 #grid-title h1, .layout-16 #grid-title h2 { color: white !important; } .layout-16 #grid-photo { padding: 10mm 0 0 12mm; } .layout-16 #grid-photo .border-2 { border-color: white; border-radius: 8px;}
+    .layout-16 #grid-title { padding: 12mm 12mm 0 0; text-align: right; } .layout-16 #grid-contact, .layout-16 #grid-skills { padding: 0 0 0 12mm; }
+    .layout-16 .grid-item:not(#grid-title):not(#grid-photo) { margin-top: 4mm; padding-right: 12mm;} .layout-16 .cv-heading { border-bottom: 2px solid var(--primary-dark); }
+
+    /* LAYOUT 17: AKADEMIK FORMAL */
+    .layout-17 { padding: 12mm 15mm; gap: 3mm 8mm; grid-template-columns: 1fr; grid-template-areas: "title" "contact" "photo" "summary" "edu" "exp" "rel" "awd" "skills"; text-align: center; }
+    .layout-17 #grid-title h1, .layout-17 #grid-title h2 { color: #1e293b !important; } .layout-17 #grid-photo { display: flex; justify-content: center; margin-bottom: 2mm;}
+    .layout-17 #grid-contact { display: flex; flex-wrap: wrap; justify-content: center; gap: 4mm; border-top: 1.5px solid #1e293b; border-bottom: 1.5px solid #1e293b; padding: 2mm 0; margin-bottom: 2mm;} .layout-17 .contact-line { border: none; padding: 0;}
+    .layout-17 .cv-heading { justify-content: center; border-bottom: 1.5px solid #1e293b; color: #1e293b; padding-bottom: 1mm;} .layout-17 .text-left, .layout-17 .text-right { text-align: center; }
+
+    /* LAYOUT 18: GRID KOTAK */
+    .layout-18 { padding: 10mm 12mm; gap: 4mm; grid-template-columns: 1fr 1fr; grid-template-areas: "photo title" "contact summary" "edu exp" "rel awd" "skills skills"; }
+    .layout-18 .grid-item { border: 1px solid var(--primary); padding: 4mm; border-radius: 6px;} .layout-18 #grid-photo, .layout-18 #grid-title { border: none; padding: 2mm;}
+    .layout-18 #grid-title { display: flex; flex-direction: column; justify-content: center; text-align: right;} .layout-18 .cv-heading { border-bottom: 2px solid var(--primary-bg); margin-bottom: 2mm; padding-bottom: 1mm;}
+
+    /* LAYOUT 19: ASIMETRIS KANAN */
+    .layout-19 { padding: 12mm 15mm; gap: 5mm 8mm; grid-template-columns: 1fr 45mm; grid-template-areas: "title photo" "summary contact" "edu skills" "exp skills" "rel skills" "awd skills"; }
+    .layout-19 #grid-photo { display: flex; justify-content: flex-end;} .layout-19 #grid-title { align-self: center; border-left: 6px solid var(--accent); padding-left: 4mm;}
+    .layout-19 .cv-heading { color: var(--accent); border-bottom: 1.5px solid var(--accent); padding-bottom: 1mm;} .layout-19 #grid-contact, .layout-19 #grid-skills { background: var(--primary-bg); padding: 4mm; border-radius: 12px; border-right: 4px solid var(--primary);}
+
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 overflow-hidden">
+
+  <!-- ================= SPLASH SCREEN ================= -->
+  <div id="splash-screen" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center p-6 text-center transition-opacity duration-500">
+    <div class="w-28 mb-6 animate-bounce">
+      <img src="https://lh3.googleusercontent.com/d/1T_gjbh4D8xTkoE3zVF0WoQl5xdhb3nCJ" alt="Logo" class="w-full h-full object-contain" />
+    </div>
+    <h3 class="text-center text-slate-700 font-bold">
+      <span class="block text-xl mb-1 font-black" dir="rtl">نظام الدخول الموحد</span>
+      <span class="block text-sm font-normal text-slate-500 uppercase tracking-widest">Memuat Workspace...</span>
+    </h3>
+  </div>
+
+  <!-- ================= MODAL PREMIUM / LOGIN ================= -->
+  <div id="premium-modal" class="fixed inset-0 z-[150] bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="premium-modal-card">
+      
+      <!-- Header Modal -->
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white text-center relative">
+        <button onclick="closePremiumModal()" class="absolute top-4 right-4 bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+        <i data-lucide="crown" class="w-10 h-10 mx-auto mb-2 text-yellow-300"></i>
+        <h2 class="text-xl font-black uppercase tracking-wider">Akses Premium</h2>
+        <p class="text-xs text-blue-100 mt-1 font-medium">Buka 20 Struktur & Tema CV Eksklusif</p>
+      </div>
+
+      <!-- Konten Modal -->
+      <div class="p-6 space-y-5 text-center">
+        <div>
+          <p class="text-sm text-slate-600 font-medium mb-3">Scan QR Code di bawah untuk membeli Token Akses Premium. Harga hanya <span class="font-bold text-slate-800">Rp 15.000</span>.</p>
+          
+          <!-- Box QRIS (Bisa diklik untuk unduh) -->
+          <div onclick="downloadQRIS()" class="bg-slate-50 border border-slate-200 p-3 rounded-2xl inline-block shadow-sm cursor-pointer hover:shadow-md hover:border-indigo-300 transition-all group relative" title="Klik untuk mengunduh gambar QRIS">
+            <img src="https://lh3.googleusercontent.com/d/1O7yUWj8e0b7xl6nKXtrnQYAl1deHe2uN" alt="QRIS Payment" class="w-32 h-32 object-contain rounded-lg group-hover:opacity-40 transition-opacity" />
+            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <div class="bg-slate-900/80 text-white p-2.5 rounded-full backdrop-blur-sm">
+                <i data-lucide="download" class="w-5 h-5"></i>
+              </div>
+            </div>
+          </div>
+          <p class="text-[10px] text-slate-500 mt-2 font-medium">Klik gambar QR untuk mengunduh ke galeri.</p>
+
+          <!-- Tombol Konfirmasi WA -->
+          <a href="https://wa.me/6281234567890?text=Assalamu%20a%27alaikum%20kak%2C%0A%0ASaya%20sudah%20melakukan%20pembayaran%20sejumlah%20*Rp.%2015.000*.%0A%0ABerikut%20saya%20lampirkan%20bukti%20pembayarannya%20untuk%20mendapatkan%20Token%20Akses%20Premium.%0A%0ATerima%20kasih." target="_blank" class="mt-3 inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white py-2.5 px-5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-colors shadow-md w-full sm:w-auto">
+            <i data-lucide="message-circle" class="w-4 h-4"></i> Konfirmasi via WhatsApp
+          </a>
+        </div>
+
+        <div class="border-t border-slate-100 pt-5">
+          <label class="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-widest">Masukkan Token Anda</label>
+          <div class="relative">
+            <i data-lucide="key" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4"></i>
+            <input type="text" id="premium-token" placeholder="Contoh: TOKEN-XYZ123" class="w-full pl-9 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold text-center tracking-widest uppercase focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all placeholder:font-normal placeholder:normal-case placeholder:tracking-normal" />
+          </div>
+        </div>
+
+        <button id="btn-verify-token" onclick="verifyToken()" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-3 rounded-xl font-bold uppercase tracking-widest text-sm shadow-md transition-colors flex items-center justify-center gap-2">
+          <i data-lucide="unlock" class="w-4 h-4"></i> Verifikasi & Buka Akses
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MAIN APP (CV BUILDER) ================= -->
+  <div id="main-app" class="hidden h-screen w-full bg-slate-100 flex-col font-sans text-slate-800 overflow-hidden">
+    
+    <!-- GLOBAL HEADER -->
+    <header class="flex-none z-20 bg-white/95 backdrop-blur-md p-4 md:px-6 md:py-4 flex items-center justify-between border-b border-slate-200 shadow-sm">
+      <div class="flex items-center gap-3">
+        <img src="https://lh3.googleusercontent.com/d/1T_gjbh4D8xTkoE3zVF0WoQl5xdhb3nCJ" class="w-10 h-10 object-contain" alt="Logo" />
+        <div>
+          <h1 class="text-[13px] md:text-[14px] font-black text-slate-800 tracking-tighter uppercase">Portal Pelajar</h1>
+          <p class="text-[9px] text-[var(--primary)] uppercase font-black tracking-widest">CV Builder Premium (A4)</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="exportPDF()" class="flex items-center gap-1.5 md:gap-2 bg-slate-800 hover:bg-slate-900 text-white px-4 md:px-5 py-2 md:py-2.5 rounded-xl font-bold transition-colors shadow-md text-[10px] md:text-xs tracking-widest uppercase">
+          <i data-lucide="printer" class="w-4 h-4"></i> <span class="hidden md:inline">Cetak PDF</span><span class="md:hidden">Cetak</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- MOBILE PREVIEW CONTROLS -->
+    <div class="md:hidden bg-slate-900 text-slate-200 px-4 py-2 flex items-center justify-between shrink-0 shadow-md z-30 border-b border-slate-800">
+      <button onclick="togglePreviewState('collapse')" class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[var(--primary)] hover:text-white transition-colors">
+        <i data-lucide="eye" id="icon-eye" class="w-4 h-4"></i>
+        <i data-lucide="eye-off" id="icon-eye-off" class="w-4 h-4 hidden"></i>
+        <span id="preview-text-status">Preview (Sebagian)</span>
+      </button>
+      <div class="flex items-center gap-1">
+        <button onclick="togglePreviewState('minimized')" class="p-1.5 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition-colors" title="Minimize">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+        </button>
+        <button onclick="togglePreviewState('maximized')" class="p-1.5 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition-colors" title="Maximize">
+          <i data-lucide="maximize" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- CONTENT FLEX CONTAINER -->
+    <div class="flex flex-col md:flex-row flex-1 overflow-hidden relative">
+      
+      <!-- ================= PREVIEW SECTION ================= -->
+      <div id="preview-wrapper" class="order-1 md:order-2 w-full md:w-1/2 lg:w-3/5 bg-slate-200 overflow-auto text-center custom-scrollbar transition-all duration-300 ease-in-out shrink-0 border-b md:border-b-0 md:border-l border-slate-300 h-[35vh] md:h-auto md:flex-1 p-4 md:p-8">
+        
+        <!-- A4 Container -->
+        <div id="cv-preview" class="inline-block text-left shadow-2xl relative pdf-container bg-white shrink-0 mx-auto align-top">
+          <!-- Decorative Accents -->
+          <div class="h-4 bg-[var(--primary)] w-full absolute top-0 left-0 right-0 z-30 print-accent"></div>
+          <div class="h-1 bg-[var(--accent)] w-full absolute top-4 left-0 right-0 z-30 print-accent"></div>
+          <div class="h-3 bg-[var(--primary)] w-full absolute bottom-0 left-0 right-0 z-30 print-accent"></div>
+
+          <!-- GRID SYSTEM INNER -->
+          <div id="cv-grid" class="layout-0">
+            <!-- TITLE -->
+            <div id="grid-title" class="grid-item">
+              <h1 class="text-[22px] font-black uppercase tracking-[0.2em] text-[var(--primary-dark)] leading-none">Curriculum Vitae</h1>
+              <h2 class="text-[24px] font-serif font-bold text-[var(--primary-dark)] mt-1 leading-none" dir="rtl">السيرة الذاتية</h2>
+            </div>
+            <!-- PHOTO -->
+            <div id="grid-photo" class="grid-item">
+              <div class="border-2 overflow-hidden shadow-md bg-slate-50 flex items-center justify-center relative">
+                <img id="out-photo" src="" alt="" class="w-full h-full object-cover hidden absolute inset-0 z-10" />
+                <span id="out-photo-placeholder" class="text-slate-300 text-[10px] text-center p-2 font-medium z-0">Foto<br/>4x6</span>
+              </div>
+            </div>
+            <!-- CONTACT -->
+            <div id="grid-contact" class="grid-item">
+              <div class="text-center w-full mb-2">
+                 <h1 id="out-name-en" class="text-[16px] font-black text-slate-800 tracking-wide uppercase break-words whitespace-pre-wrap leading-tight">Nama Lengkap</h1>
+                 <p id="out-name-ar" class="text-[18px] text-slate-800 font-serif font-bold mt-1 break-words whitespace-pre-wrap leading-tight" dir="rtl">الاسم الكامل</p>
+              </div>
+              <div class="flex flex-col text-[10px] text-slate-600">
+                <div class="contact-line">
+                  <span class="font-semibold en text-left">DOB: <span id="out-dob-en" class="font-normal">-</span></span>
+                  <span dir="rtl" class="font-serif text-[12px] font-bold ar text-right">تاريخ الميلاد: <span id="out-dob-ar" class="font-normal">-</span></span>
+                </div>
+                <div class="contact-line">
+                  <span class="font-semibold en text-left">Nat: <span id="out-nat-en" class="font-normal">Indonesia</span></span>
+                  <span dir="rtl" class="font-serif text-[12px] font-bold ar text-right">الجنسية: <span id="out-nat-ar" class="font-normal">إندونيسيا</span></span>
+                </div>
+                <div class="contact-line">
+                  <span class="font-semibold en text-left">Ph: <span id="out-phone-en" class="font-normal">-</span></span>
+                  <span dir="rtl" class="font-serif text-[12px] font-bold ar text-right">الهاتف: <span id="out-phone-ar" class="font-normal">-</span></span>
+                </div>
+                <div class="contact-line">
+                  <span class="font-semibold en text-left">Mail: <span id="out-email-en" class="font-normal break-all">-</span></span>
+                  <span dir="rtl" class="font-serif text-[12px] font-bold ar text-right">البريد: <span id="out-email-ar" class="font-normal text-[9px] break-all">-</span></span>
+                </div>
+                <div class="contact-line">
+                  <span class="font-semibold en text-left">Add: <span id="out-address-en" class="font-normal">-</span></span>
+                  <span dir="rtl" class="font-serif text-[12px] font-bold ar text-right">العنوان: <span id="out-address-ar" class="font-normal">-</span></span>
+                </div>
+              </div>
+            </div>
+            <!-- SUMMARY -->
+            <div id="grid-summary" class="grid-item">
+              <div class="cv-heading">
+                <span class="en">Professional Summary</span>
+                <span class="ar" dir="rtl">ملخص احترافي</span>
+              </div>
+              <div class="text-slate-700 font-medium text-[11px] leading-relaxed break-words whitespace-pre-wrap">
+                <p id="out-summary-ar" class="font-serif text-[13px] text-right w-full mb-1" dir="rtl"></p>
+                <p id="out-summary-en" class="w-full text-justify"></p>
+              </div>
+            </div>
+            <!-- EDUCATION -->
+            <div id="grid-edu" class="grid-item">
+              <div class="cv-heading"><span class="en">Education</span><span class="ar" dir="rtl">المؤهلات التعليمية</span></div>
+              <div class="grid grid-cols-2 gap-2 text-[11px] font-black text-slate-800"><span id="out-edu-inst-en" class="text-left break-words"></span><span id="out-edu-inst-ar" class="text-right font-serif text-[13px] break-words" dir="rtl"></span></div>
+              <div class="grid grid-cols-2 gap-2 text-[var(--primary)] font-bold text-[11px] mt-0.5"><span id="out-edu-deg-en" class="text-left break-words"></span><span id="out-edu-deg-ar" class="text-right font-serif text-[12px] break-words" dir="rtl"></span></div>
+              <div class="grid grid-cols-2 gap-2 text-slate-500 font-medium text-[10px] mt-0.5"><span class="text-left"><span id="out-edu-year-en"></span> | GPA: <span id="out-edu-gpa-en"></span></span><span class="text-right font-serif text-[11px]" dir="rtl"><span id="out-edu-year-ar"></span> | التقدير: <span id="out-edu-gpa-ar"></span></span></div>
+            </div>
+            <!-- EXPERIENCE -->
+            <div id="grid-exp" class="grid-item">
+              <div class="cv-heading"><span class="en">Experience</span><span class="ar" dir="rtl">الخبرات العملية</span></div>
+              <div class="grid grid-cols-2 gap-2 text-[11px] font-black text-slate-800"><span id="out-exp-role-en" class="text-left break-words"></span><span id="out-exp-role-ar" class="text-right font-serif text-[13px] break-words" dir="rtl"></span></div>
+              <div class="grid grid-cols-2 gap-2 text-[var(--primary)] font-bold text-[10px] mt-0.5"><span class="text-left break-words"><span id="out-exp-org-en"></span> | <span id="out-exp-year-en"></span></span><span class="text-right font-serif text-[12px] break-words" dir="rtl"><span id="out-exp-org-ar"></span> | <span id="out-exp-year-ar"></span></span></div>
+              <div class="grid grid-cols-2 gap-2 text-slate-600 font-medium text-[10px] mt-1"><span id="out-exp-desc-en" class="text-left break-words pr-1"></span><span id="out-exp-desc-ar" class="text-right font-serif text-[12px] break-words pl-1" dir="rtl"></span></div>
+            </div>
+            <!-- RELIGIOUS AWARDS -->
+            <div id="grid-rel" class="grid-item">
+              <div class="cv-heading"><span class="en">Religious Skills</span><span class="ar" dir="rtl">الخبرات الدينية</span></div>
+              <div class="grid grid-cols-2 gap-2 text-[11px] font-black text-slate-800"><span class="text-left break-words">• <span id="out-rel-title-en"></span></span><span class="text-right font-serif text-[13px] break-words" dir="rtl"><span id="out-rel-title-ar"></span> •</span></div>
+              <div class="grid grid-cols-2 gap-2 text-slate-600 font-medium text-[10px] mt-1 leading-tight"><span id="out-rel-desc-en" class="text-left break-words pr-1"></span><span id="out-rel-desc-ar" class="text-right font-serif text-[12px] break-words pl-1" dir="rtl"></span></div>
+            </div>
+            <!-- AWARDS -->
+            <div id="grid-awd" class="grid-item">
+              <div class="cv-heading"><span class="en">Awards & Honors</span><span class="ar" dir="rtl">الجوائز والشهادات</span></div>
+              <div class="grid grid-cols-2 gap-2 text-[11px] font-black text-slate-800"><span class="text-left break-words"><span id="out-awd-title-en"></span> (<span id="out-awd-year-en"></span>)</span><span class="text-right font-serif text-[13px] break-words" dir="rtl"><span id="out-awd-title-ar"></span> (<span id="out-awd-year-ar"></span>)</span></div>
+              <div class="grid grid-cols-2 gap-2 text-slate-600 font-medium text-[10px] mt-1"><span id="out-awd-desc-en" class="text-left break-words pr-1"></span><span id="out-awd-desc-ar" class="text-right font-serif text-[12px] break-words pl-1" dir="rtl"></span></div>
+            </div>
+            <!-- SKILLS -->
+            <div id="grid-skills" class="grid-item">
+              <div class="cv-heading"><span class="en">Skills Profile</span><span class="ar" dir="rtl">المهارات</span></div>
+              <div class="grid grid-cols-2 gap-x-6 gap-y-1.5 text-[10px] text-slate-700">
+                <div class="flex justify-between items-start border-b border-slate-100 pb-0.5"><span class="font-bold w-1/3">Arabic:</span><span id="out-skill-ar" class="font-medium w-2/3 text-right break-words"></span></div>
+                <div class="flex justify-between items-start border-b border-slate-100 pb-0.5"><span class="font-bold w-1/3">English:</span><span id="out-skill-en" class="font-medium w-2/3 text-right break-words"></span></div>
+                <div class="flex justify-between items-start border-b border-slate-100 pb-0.5"><span class="font-bold w-1/3">Technical:</span><span id="out-skill-tech" class="font-medium w-2/3 text-right break-words"></span></div>
+                <div class="flex justify-between items-start border-b border-slate-100 pb-0.5"><span class="font-bold w-1/3">Soft Skills:</span><span id="out-skill-soft" class="font-medium w-2/3 text-right break-words"></span></div>
+              </div>
+            </div>
+          </div> <!-- END GRID SYSTEM -->
+        </div>
+      </div>
+
+      <!-- ================= FORM SECTION ================= -->
+      <div id="form-section" class="order-2 md:order-1 w-full md:w-1/2 lg:w-2/5 p-0 bg-white z-10 flex flex-col flex-1 overflow-y-auto custom-scrollbar relative">
+        <div class="p-6 space-y-8 pb-20">
+          
+          <!-- LAYOUT STRUCTURE -->
+          <section class="bg-indigo-50 p-5 rounded-[1.5rem] border border-indigo-100 relative">
+            <h2 class="text-sm font-black flex items-center gap-2 text-indigo-900 mb-4 uppercase tracking-wider">
+              <i data-lucide="layout-template" class="text-indigo-600 w-4 h-4"></i> Struktur CV Eksklusif
+            </h2>
+            <div id="layout-container" class="grid grid-cols-4 sm:grid-cols-5 gap-2">
+              <!-- Tombol Layout via JS -->
+            </div>
+          </section>
+
+          <!-- TEMA WARNA -->
+          <section class="bg-slate-50 p-5 rounded-[1.5rem] border border-slate-200 relative">
+            <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 mb-4 uppercase tracking-wider">
+              <i data-lucide="palette" class="text-[var(--primary)] w-4 h-4"></i> Tema Warna Premium
+            </h2>
+            <div id="theme-container" class="grid grid-cols-5 sm:grid-cols-10 gap-3">
+              <!-- Tombol tema via JS -->
+            </div>
+          </section>
+
+          <!-- FOTO UPLOAD -->
+          <section class="bg-slate-50 p-5 rounded-[1.5rem] border border-slate-200">
+            <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 mb-4 uppercase tracking-wider">
+              <i data-lucide="image" class="text-slate-400 w-4 h-4"></i> Pas Foto (4x6)
+            </h2>
+            <div class="flex items-center gap-4">
+              <div id="photo-preview-container" class="w-20 h-30 bg-white border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center overflow-hidden shadow-sm" style="aspect-ratio: 2/3;">
+                <i data-lucide="user" class="text-slate-300 w-8 h-8 opacity-50"></i>
+              </div>
+              <div>
+                <label class="cursor-pointer bg-white border border-slate-200 hover:border-indigo-500 hover:text-indigo-600 text-slate-600 py-2 px-4 rounded-xl shadow-sm inline-flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-wider">
+                  <i data-lucide="upload" class="w-4 h-4"></i> Unggah Foto
+                  <input type="file" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)" />
+                </label>
+                <p class="text-[10px] text-slate-400 mt-2 font-medium">Latar formal dianjurkan.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- DATA PRIBADI -->
+          <section>
+            <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 mb-4 pb-2 border-b border-slate-100 uppercase tracking-wider">
+              <i data-lucide="user" class="text-slate-400 w-4 h-4"></i> Data Pribadi
+            </h2>
+            <div class="grid grid-cols-1 gap-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Nama Lengkap</label>
+                  <input type="text" id="in-name" maxlength="40" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Nama Arab</label>
+                  <input type="text" id="in-name-ar" maxlength="40" oninput="forceArabic(this)" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm text-right font-serif focus:border-indigo-500 outline-none shadow-sm font-medium" dir="rtl" />
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Tanggal Lahir</label>
+                  <input type="text" id="in-dob" maxlength="30" oninput="syncCV()" placeholder="ex: 15 Jan 2000" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" />
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Warga Negara</label>
+                    <input type="text" id="in-nationality" maxlength="30" value="Indonesia" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">الجنسية</label>
+                    <input type="text" id="in-nationality-ar" maxlength="30" value="إندونيسيا" oninput="forceArabic(this)" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm text-right font-serif focus:border-indigo-500 outline-none shadow-sm font-medium" dir="rtl" />
+                  </div>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Nomor WA/HP</label>
+                  <input type="text" id="in-phone" maxlength="20" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Email Akun</label>
+                  <input type="email" id="in-email" maxlength="40" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" />
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Alamat (Latin)</label>
+                  <input type="text" id="in-address" maxlength="60" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Alamat (Arab)</label>
+                  <input type="text" id="in-address-ar" maxlength="60" oninput="forceArabic(this)" dir="rtl" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-serif text-right focus:border-indigo-500 outline-none shadow-sm font-medium" />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- SUMMARY -->
+          <section>
+            <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 mb-4 pb-2 border-b border-slate-100 uppercase tracking-wider">
+              <i data-lucide="star" class="text-slate-400 w-4 h-4"></i> Ringkasan Profesional
+            </h2>
+            <textarea id="in-summary-ar" maxlength="200" oninput="forceArabic(this)" class="w-full p-3 bg-white border border-slate-200 rounded-xl h-24 text-sm focus:border-indigo-500 outline-none shadow-sm font-medium mb-3 font-serif text-right" dir="rtl" placeholder="الملخص المهني (Arab) - Max 200 char"></textarea>
+            <textarea id="in-summary-en" maxlength="200" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl h-24 text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" placeholder="Professional Summary (English) - Max 200 char"></textarea>
+          </section>
+
+          <!-- PENDIDIKAN -->
+          <section>
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+              <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 uppercase tracking-wider"><i data-lucide="book-open" class="text-slate-400 w-4 h-4"></i> Pendidikan Terakhir</h2>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-200 shadow-sm space-y-3 mt-1">
+              <input type="text" id="in-edu-year" maxlength="20" oninput="syncCV()" placeholder="Tahun (ex: 2019 - 2022)" value="2019 - 2022" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="in-edu-inst-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Institusi (Arab)" value="مدرسة لقمان الحكيم" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-indigo-500" dir="rtl" />
+                <input type="text" id="in-edu-inst-en" maxlength="60" oninput="syncCV()" placeholder="Institution (English)" value="SMA Lukmanul Hakim" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="in-edu-deg-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Jurusan (Arab)" value="العلوم الطبيعية" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-indigo-500" dir="rtl" />
+                <input type="text" id="in-edu-deg-en" maxlength="60" oninput="syncCV()" placeholder="Major (English)" value="Ilmu Pengetahuan Alam" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
+              </div>
+              <input type="text" id="in-edu-gpa" maxlength="20" oninput="syncCV()" placeholder="Nilai / GPA" value="90/100" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
+            </div>
+          </section>
+
+          <!-- PENGALAMAN AGAMA -->
+          <section>
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+              <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 uppercase tracking-wider"><i data-lucide="award" class="text-slate-400 w-4 h-4"></i> Keahlian Keagamaan</h2>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-200 shadow-sm space-y-3 mt-1">
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="in-rel-title-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Judul (Arab)" value="حفظ القرآن ٣٠ جزءًا" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-indigo-500" dir="rtl" />
+                <input type="text" id="in-rel-title-en" maxlength="60" oninput="syncCV()" placeholder="Title (English)" value="30 Juz Quran" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
+              </div>
+              <textarea id="in-rel-desc-ar" maxlength="150" oninput="forceArabic(this)" placeholder="Deskripsi (Arab)" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-indigo-500" dir="rtl" rows="2">حفظ القرآن كاملاً، والأجرومية، وتحفة الأطفال</textarea>
+              <textarea id="in-rel-desc-en" maxlength="150" oninput="syncCV()" placeholder="Description (English)" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" rows="2">Memorized 30 Juz, Al-Jurumiyah, and Tuhfatul Athfal</textarea>
+            </div>
+          </section>
+
+          <!-- PENGHARGAAN -->
+          <section>
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+              <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 uppercase tracking-wider"><i data-lucide="medal" class="text-slate-400 w-4 h-4"></i> Penghargaan</h2>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-200 shadow-sm space-y-3 mt-1">
+              <input type="text" id="in-awd-year" maxlength="20" oninput="syncCV()" placeholder="Tahun" value="2023" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="in-awd-title-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Penghargaan (Arab)" value="بطل مسابقة تلاوة القرآن" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-indigo-500" dir="rtl" />
+                <input type="text" id="in-awd-title-en" maxlength="60" oninput="syncCV()" placeholder="Award (English)" value="1st Place MTQ" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="in-awd-desc-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Penyelenggara (Arab)" value="على مستوى المحافظة" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-indigo-500" dir="rtl" />
+                <input type="text" id="in-awd-desc-en" maxlength="60" oninput="syncCV()" placeholder="Issuer (English)" value="Provincial Level" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
+              </div>
+            </div>
+          </section>
+
+          <!-- PENGALAMAN KERJA -->
+          <section>
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+              <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 uppercase tracking-wider"><i data-lucide="briefcase" class="text-slate-400 w-4 h-4"></i> Pengalaman</h2>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-200 shadow-sm space-y-3 mt-1">
+              <input type="text" id="in-exp-year" maxlength="20" oninput="syncCV()" placeholder="Tahun (ex: 2020 - 2022)" value="2022 - 2026" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="in-exp-role-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Posisi (Arab)" value="مدرس وإمام" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-indigo-500" dir="rtl" />
+                <input type="text" id="in-exp-role-en" maxlength="60" oninput="syncCV()" placeholder="Role (English)" value="Pengajar & Imam" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="in-exp-org-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Organisasi (Arab)" value="مؤسسة هداية الله" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-indigo-500" dir="rtl" />
+                <input type="text" id="in-exp-org-en" maxlength="60" oninput="syncCV()" placeholder="Organization (English)" value="Yayasan Hidayatullah" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
+              </div>
+              <textarea id="in-exp-desc-ar" maxlength="150" oninput="forceArabic(this)" placeholder="Deskripsi (Arab)" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-indigo-500" dir="rtl" rows="2">تدريس العلوم الإسلامية وإمامة الصلوات.</textarea>
+              <textarea id="in-exp-desc-en" maxlength="150" oninput="syncCV()" placeholder="Description (English)" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" rows="2">Teaching Islamic sciences and leading prayers.</textarea>
+            </div>
+          </section>
+
+          <!-- SKILLS -->
+          <section>
+            <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 mb-4 pb-2 border-b border-slate-100 uppercase tracking-wider"><i data-lucide="settings" class="text-slate-400 w-4 h-4"></i> Keahlian Tambahan</h2>
+            <div class="grid grid-cols-1 gap-4">
+              <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Bahasa Arab</label>
+                <input type="text" id="in-skill-ar" list="lang-levels" maxlength="40" oninput="syncCV()" placeholder="Pilih..." value="ممتاز / Fluent" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" autocomplete="off" />
+                <datalist id="lang-levels">
+                  <option value="مبتدئ / Beginner"></option><option value="متوسط / Intermediate"></option>
+                  <option value="جيد / Good"></option><option value="جيد جداً / Very Good"></option><option value="ممتاز / Fluent"></option>
+                </datalist>
+              </div>
+              <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Bahasa Inggris</label>
+                <input type="text" id="in-skill-en" list="lang-levels" maxlength="40" oninput="syncCV()" placeholder="Pilih..." value="جيد جداً / Very Good" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" autocomplete="off" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Teknis</label>
+                <input type="text" id="in-skill-tech" list="tech-list" maxlength="60" oninput="syncCV()" placeholder="Ketik..." value="MS Office, Research" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" autocomplete="off" />
+                <datalist id="tech-list"><option value="MS Office"></option><option value="Graphic Design"></option></datalist>
+              </div>
+              <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Soft Skills</label>
+                <input type="text" id="in-skill-soft" list="soft-list" maxlength="60" oninput="syncCV()" placeholder="Ketik..." value="Leadership, Speaking" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" autocomplete="off" />
+                <datalist id="soft-list"><option value="Leadership & Teamwork"></option><option value="Public Speaking"></option></datalist>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= SCRIPTS ================= -->
+  <script>
+    /*
+      Setelah di Deploy sebagai Web App, masukkan URL-nya ke variabel di bawah:
+    */
+    const APPS_SCRIPT_API_URL = "https://script.google.com/macros/s/AKfycbxmkeUODS6t4flti3b_NLE2NY-tUMIYEcIJOUIbjNJPFlb5B8DY83xBO8g7zMqMN1oE/exec"; // GANTI DENGAN URL WEB APP ANDA
+
+    lucide.createIcons();
+    let photoDataUrl = null;
+    let isPremium = localStorage.getItem('cv_is_premium') === 'true';
+
+    // Pastikan saat dicetak (print), skala di-reset ke normal agar tidak terpotong atau mengecil
+    window.addEventListener('beforeprint', () => {
+      const preview = document.getElementById('cv-preview');
+      if(preview) {
+        preview.style.transform = 'none';
+        preview.style.marginBottom = '0';
+      }
+    });
+
+    window.addEventListener('afterprint', () => {
+      adjustPreviewScale();
+    });
+
+    // --- LOGIKA PENYESUAIAN SKALA PREVIEW (MOBILE RESPONSIVE) ---
+    const adjustPreviewScale = () => {
+      const wrapper = document.getElementById('preview-wrapper');
+      const preview = document.getElementById('cv-preview');
+      if (!wrapper || !preview) return;
+      if (window.matchMedia && window.matchMedia('print').matches) return;
+
+      preview.style.transform = 'none';
+      preview.style.marginBottom = '0';
+
+      const wrapperWidth = wrapper.clientWidth;
+      const padding = window.innerWidth < 768 ? 32 : 64; 
+      const availableWidth = wrapperWidth - padding;
+      const originalWidth = 793.7; 
+      const originalHeight = 1122.5;
+
+      if (availableWidth < originalWidth) {
+        const scale = availableWidth / originalWidth;
+        preview.style.transform = `scale(${scale})`;
+        preview.style.transformOrigin = 'top center';
+        const heightDiff = originalHeight - (originalHeight * scale);
+        preview.style.marginBottom = `-${heightDiff}px`;
+      }
+    };
+    window.addEventListener('resize', adjustPreviewScale);
+
+    // --- LOGIKA MOBILE PREVIEW ---
+    let currentPreviewState = 'minimized'; 
+    function togglePreviewState(targetState) {
+      const wrapper = document.getElementById('preview-wrapper');
+      const iconEye = document.getElementById('icon-eye');
+      const iconEyeOff = document.getElementById('icon-eye-off');
+      const textStatus = document.getElementById('preview-text-status');
+
+      if (targetState === 'collapse') targetState = currentPreviewState === 'collapsed' ? 'minimized' : 'collapsed';
+      currentPreviewState = targetState;
+
+      wrapper.classList.remove('h-0', 'h-[35vh]', 'h-[75vh]', 'p-0', 'p-4', 'md:p-8');
+      wrapper.classList.add('md:p-8');
+
+      if (targetState === 'collapsed') {
+        wrapper.classList.add('h-0', 'p-0', 'md:h-auto', 'md:flex-1');
+        iconEye.classList.add('hidden'); iconEyeOff.classList.remove('hidden'); textStatus.innerText = 'Preview (Disembunyikan)';
+      } else if (targetState === 'minimized') {
+        wrapper.classList.add('h-[35vh]', 'p-4', 'md:h-auto', 'md:flex-1');
+        iconEye.classList.remove('hidden'); iconEyeOff.classList.add('hidden'); textStatus.innerText = 'Preview (Sebagian)';
+      } else if (targetState === 'maximized') {
+        wrapper.classList.add('h-[75vh]', 'p-4', 'md:h-auto', 'md:flex-1');
+        iconEye.classList.remove('hidden'); iconEyeOff.classList.add('hidden'); textStatus.innerText = 'Preview (Penuh)';
+      }
+      setTimeout(adjustPreviewScale, 310);
+    }
+
+    // --- MODAL PREMIUM ---
+    function showPremiumModal() {
+      const modal = document.getElementById('premium-modal');
+      const card = document.getElementById('premium-modal-card');
+      modal.classList.remove('hidden');
+      // Trigger animation
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        card.classList.remove('scale-95');
+      }, 10);
+    }
+
+    function closePremiumModal() {
+      const modal = document.getElementById('premium-modal');
+      const card = document.getElementById('premium-modal-card');
+      modal.classList.add('opacity-0');
+      card.classList.add('scale-95');
+      setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
+    // --- FUNGSI UNDUH QRIS ---
+    async function downloadQRIS() {
+      const imgUrl = 'https://lh3.googleusercontent.com/d/1O7yUWj8e0b7xl6nKXtrnQYAl1deHe2uN';
+      try {
+        const response = await fetch(imgUrl);
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = 'QRIS_Pembayaran_CV.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+      } catch (err) {
+        // Fallback (Buka di tab baru) jika fetch terblokir keamanan browser
+        window.open(imgUrl, '_blank');
+      }
+    }
+
+    async function verifyToken() {
+      const tokenInput = document.getElementById('premium-token').value.trim();
+      if (!tokenInput) return alert('Silakan masukkan token Anda terlebih dahulu.');
+
+      const btn = document.getElementById('btn-verify-token');
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Memverifikasi...`;
+      lucide.createIcons();
+      btn.disabled = true;
+
+      // Fitur Bypass Hardcode untuk uji coba demo (Hapus jika URL API sudah di set)
+      if (tokenInput === 'PREMIUM2026') {
+        setTimeout(() => {
+           unlockPremium();
+           btn.innerHTML = `<i data-lucide="unlock" class="w-4 h-4"></i> Verifikasi & Buka Akses`;
+           lucide.createIcons();
+           btn.disabled = false;
+        }, 1000);
+        return;
+      }
+
+      if (!APPS_SCRIPT_API_URL) {
+         alert('API Apps Script belum dikonfigurasi. Gunakan token "PREMIUM2026" untuk uji coba.');
+         btn.innerHTML = `<i data-lucide="unlock" class="w-4 h-4"></i> Verifikasi & Buka Akses`;
+         lucide.createIcons();
+         btn.disabled = false;
+         return;
+      }
+
+      // API Call sesungguhnya
+      try {
+        const response = await fetch(APPS_SCRIPT_API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'verify', token: tokenInput }),
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' } // text/plain hindari masalah CORS preflight
+        });
+        const data = await response.json();
+
+        if (data.success) {
+           unlockPremium();
+        } else {
+           alert('Token tidak valid atau sudah pernah digunakan.');
+        }
+      } catch (err) {
+        alert('Terjadi kesalahan saat menyambung ke server sistem. Periksa koneksi Anda.');
+      } finally {
+        btn.innerHTML = `<i data-lucide="unlock" class="w-4 h-4"></i> Verifikasi & Buka Akses`;
+        lucide.createIcons();
+        btn.disabled = false;
+      }
+    }
+
+    function unlockPremium() {
+      isPremium = true;
+      localStorage.setItem('cv_is_premium', 'true');
+      renderLayouts();
+      renderThemes();
+      closePremiumModal();
+      alert('Akses Premium Berhasil Dibuka! Anda sekarang dapat menikmati 20 struktur dan 20 tema secara penuh.');
+    }
+
+    // --- 20 STRUKTUR LAYOUT ---
+    const layoutOptions = [
+      { id: 'layout-0', name: 'Klasik Minimalis', icon: 'layout-template' },
+      { id: 'layout-1', name: 'Sidebar Kiri', icon: 'layout-sidebar' },
+      { id: 'layout-2', name: 'Sidebar Kanan', icon: 'layout-sidebar-reverse' },
+      { id: 'layout-3', name: 'Fokus Sentral', icon: 'align-center' },
+      { id: 'layout-4', name: 'Grid 2 Kolom', icon: 'columns' },
+      { id: 'layout-5', name: 'Header Lengkung', icon: 'panel-top' },
+      { id: 'layout-6', name: 'Sidebar Lembut', icon: 'panel-left' },
+      { id: 'layout-7', name: 'Elegan Bulat', icon: 'circle-dashed' },
+      { id: 'layout-8', name: 'Split Dinamis', icon: 'layers' },
+      { id: 'layout-9', name: 'Organik Fluid', icon: 'shapes' },
+      { id: 'layout-10', name: 'Geometris', icon: 'triangle' },
+      { id: 'layout-11', name: 'Garis Waktu', icon: 'git-commit' },
+      { id: 'layout-12', name: 'Solid Blok', icon: 'square' },
+      { id: 'layout-13', name: 'Garis Pemisah', icon: 'separator-vertical' },
+      { id: 'layout-14', name: 'Kartu Elegan', icon: 'gallery-vertical' },
+      { id: 'layout-15', name: 'Pita Header', icon: 'bookmark' },
+      { id: 'layout-16', name: 'Header Gelap', icon: 'monitor-up' },
+      { id: 'layout-17', name: 'Akademik', icon: 'book-open' },
+      { id: 'layout-18', name: 'Grid Kotak', icon: 'grid' },
+      { id: 'layout-19', name: 'Asimetris', icon: 'list-end' }
+    ];
+
+    const renderLayouts = () => {
+      const container = document.getElementById('layout-container');
+      container.innerHTML = ''; // Bersihkan container
+      layoutOptions.forEach((layout, idx) => {
+        const isLocked = idx !== 0 && !isPremium;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = "relative rounded-xl overflow-hidden";
+
+        const btn = document.createElement('button');
+        btn.className = `flex flex-col items-center w-full justify-center p-1.5 border-2 border-transparent bg-white transition-all group h-14 ${isLocked ? 'opacity-50 cursor-not-allowed' : 'hover:border-indigo-300 hover:shadow-md'}`;
+        btn.innerHTML = `
+          <i data-lucide="${layout.icon}" class="w-4 h-4 text-indigo-400 group-hover:text-indigo-600 mb-1 transition-colors"></i>
+          <span class="text-[7.5px] font-bold text-slate-600 group-hover:text-indigo-700 text-center leading-tight px-0.5 break-words w-full">${layout.name}</span>
+        `;
+        
+        if (isLocked) {
+          btn.onclick = () => showPremiumModal();
+          const overlay = document.createElement('div');
+          overlay.className = "locked-overlay";
+          overlay.onclick = () => showPremiumModal();
+          overlay.innerHTML = `<i data-lucide="lock" class="w-4 h-4 text-slate-600"></i>`;
+          wrapper.appendChild(overlay);
+        } else {
+          btn.onclick = () => applyLayout(idx, btn);
+        }
+
+        wrapper.appendChild(btn);
+        container.appendChild(wrapper);
+      });
+      lucide.createIcons();
+
+      // Pilih ulang layout yang tersimpan (atau default 0)
+      const savedLayout = localStorage.getItem('cv_builder_layout');
+      let layoutIdxToApply = (savedLayout !== null && (!isPremium ? parseInt(savedLayout) === 0 : true)) ? parseInt(savedLayout) : 0;
+      setTimeout(() => {
+         const layoutBtns = container.querySelectorAll('button');
+         if(layoutBtns[layoutIdxToApply] && (!isPremium ? layoutIdxToApply === 0 : true)) { 
+           applyLayout(layoutIdxToApply, layoutBtns[layoutIdxToApply]); 
+         }
+      }, 50);
+    };
+
+    const applyLayout = (idx, btnElement = null) => {
+      if (idx !== 0 && !isPremium) return;
+
+      const layoutClass = layoutOptions[idx].id;
+      const grid = document.getElementById('cv-grid');
+      
+      layoutOptions.forEach(opt => grid.classList.remove(opt.id));
+      grid.classList.add(layoutClass);
+
+      if(btnElement) {
+         const allBtns = document.getElementById('layout-container').querySelectorAll('button');
+         allBtns.forEach(b => b.classList.remove('border-indigo-500', 'shadow-md', 'bg-indigo-50'));
+         btnElement.classList.add('border-indigo-500', 'shadow-md', 'bg-indigo-50');
+      }
+
+      localStorage.setItem('cv_builder_layout', idx);
+    };
+
+    // --- 20 KOMBINASI WARNA TEMA ---
+    const themes = [
+      { name: 'Teal & Yellow', primary: '#1db1a2', dark: '#168e82', bg: '#f0fbf9', accent: '#eab308' },
+      { name: 'Navy & Amber', primary: '#1e3a8a', dark: '#1e3a8a', bg: '#eff6ff', accent: '#fbbf24' },
+      { name: 'Burgundy & Rose', primary: '#881337', dark: '#4c0519', bg: '#fff1f2', accent: '#f87171' },
+      { name: 'Emerald & Mint', primary: '#059669', dark: '#047857', bg: '#ecfdf5', accent: '#10b981' },
+      { name: 'Royal & Orange', primary: '#2563eb', dark: '#1d4ed8', bg: '#eff6ff', accent: '#f97316' },
+      { name: 'Purple & Yellow', primary: '#7c3aed', dark: '#5b21b6', bg: '#f5f3ff', accent: '#facc15' },
+      { name: 'Charcoal & Emerald', primary: '#374151', dark: '#1f2937', bg: '#f3f4f6', accent: '#34d399' },
+      { name: 'Crimson & Navy', primary: '#dc2626', dark: '#b91c1c', bg: '#fef2f2', accent: '#1e3a8a' },
+      { name: 'Slate & Coral', primary: '#475569', dark: '#334155', bg: '#f8fafc', accent: '#fb7185' },
+      { name: 'Indigo & Pink', primary: '#4f46e5', dark: '#3730a3', bg: '#eef2ff', accent: '#fb7185' },
+      { name: 'Forest & Mustard', primary: '#14532d', dark: '#064e3b', bg: '#f0fdf4', accent: '#ca8a04' },
+      { name: 'Chocolate & Sky', primary: '#78350f', dark: '#451a03', bg: '#fffbeb', accent: '#38bdf8' },
+      { name: 'Plum & Orange', primary: '#701a75', dark: '#4a044e', bg: '#fdf4ff', accent: '#d97706' },
+      { name: 'Olive & Rust', primary: '#3f6212', dark: '#365314', bg: '#f7fee7', accent: '#ea580c' },
+      { name: 'Ocean & Lime', primary: '#0891b2', dark: '#0e7490', bg: '#ecfeff', accent: '#84cc16' },
+      { name: 'Mocha & Cream', primary: '#713f12', dark: '#422006', bg: '#fefce8', accent: '#d97706' },
+      { name: 'Amethyst & Aqua', primary: '#9333ea', dark: '#7e22ce', bg: '#faf5ff', accent: '#2dd4bf' },
+      { name: 'Midnight & Silver', primary: '#0f172a', dark: '#020617', bg: '#f8fafc', accent: '#94a3b8' },
+      { name: 'Terracotta & Sage', primary: '#b45309', dark: '#92400e', bg: '#fffbeb', accent: '#14b8a6' },
+      { name: 'Fuchsia & Cyan', primary: '#c026d3', dark: '#a21caf', bg: '#fdf4ff', accent: '#22d3ee' }
+    ];
+
+    const renderThemes = () => {
+      const container = document.getElementById('theme-container');
+      container.innerHTML = '';
+      themes.forEach((theme, idx) => {
+        const isLocked = idx !== 0 && !isPremium;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = "relative w-8 h-8 rounded-full overflow-hidden";
+
+        const btn = document.createElement('button');
+        btn.className = `w-full h-full rounded-full border border-slate-300 focus:outline-none transition-transform relative ${isLocked ? 'cursor-not-allowed opacity-50 grayscale' : 'hover:scale-110 focus:ring-2 focus:ring-offset-2 shadow-sm'}`;
+        btn.style.backgroundColor = theme.primary;
+        btn.title = theme.name;
+        btn.innerHTML = `<span class="absolute bottom-0 right-0 w-full h-[40%]" style="background-color: ${theme.accent}"></span>`;
+        
+        if (isLocked) {
+          btn.onclick = () => showPremiumModal();
+          const overlay = document.createElement('div');
+          overlay.className = "locked-overlay rounded-full";
+          overlay.onclick = () => showPremiumModal();
+          overlay.innerHTML = `<i data-lucide="lock" class="w-3 h-3 text-slate-700"></i>`;
+          wrapper.appendChild(overlay);
+        } else {
+          btn.onclick = () => applyTheme(idx);
+        }
+
+        wrapper.appendChild(btn);
+        container.appendChild(wrapper);
+      });
+      lucide.createIcons();
+    };
+
+    const applyTheme = (idx) => {
+      if (idx !== 0 && !isPremium) return;
+
+      const theme = themes[idx];
+      const root = document.documentElement;
+      root.style.setProperty('--primary', theme.primary);
+      root.style.setProperty('--primary-dark', theme.dark);
+      root.style.setProperty('--primary-bg', theme.bg);
+      root.style.setProperty('--accent', theme.accent);
+      localStorage.setItem('cv_builder_theme', idx);
+    };
+
+    // --- LOGIKA DATA & PENYIMPANAN ---
+    const saveInputsData = () => {
+      const inputs = document.querySelectorAll('#main-app input[type="text"], #main-app input[type="email"], #main-app textarea');
+      const data = {};
+      inputs.forEach(input => { if (input.id) data[input.id] = input.value; });
+      localStorage.setItem('cv_builder_data', JSON.stringify(data));
+    };
+
+    const loadDataFromLocal = () => {
+      const savedData = localStorage.getItem('cv_builder_data');
+      if (savedData) {
+        try {
+          const data = JSON.parse(savedData);
+          Object.keys(data).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = data[id];
+          });
+        } catch (e) {}
+      }
+
+      const savedTheme = localStorage.getItem('cv_builder_theme');
+      applyTheme((savedTheme !== null && (!isPremium ? parseInt(savedTheme) === 0 : true)) && themes[savedTheme] ? parseInt(savedTheme) : 0);
+
+      const savedPhoto = localStorage.getItem('cv_builder_photo');
+      if (savedPhoto) {
+        photoDataUrl = savedPhoto;
+        document.getElementById('photo-preview-container').innerHTML = `<img src="${photoDataUrl}" alt="Preview" class="w-full h-full object-cover" />`;
+        const outImg = document.getElementById('out-photo');
+        outImg.src = photoDataUrl; outImg.classList.remove('hidden');
+        document.getElementById('out-photo-placeholder').classList.add('hidden');
+      }
+    };
+
+    // --- INISIALISASI ---
+    setTimeout(() => {
+      document.getElementById('splash-screen').style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('splash-screen').classList.add('hidden');
+        document.getElementById('main-app').classList.remove('hidden');
+        document.getElementById('main-app').classList.add('flex');
+        
+        renderLayouts();
+        renderThemes();
+        loadDataFromLocal();
+        
+        const inputs = document.querySelectorAll('#main-app input[type="text"], #main-app input[type="email"], #main-app textarea');
+        inputs.forEach(input => {
+          input.addEventListener('input', saveInputsData);
+          input.addEventListener('change', saveInputsData);
+        });
+        
+        syncCV(); 
+        adjustPreviewScale();
+      }, 500);
+    }, 1500);
+
+    // --- FUNGSI FORMATTING ---
+    const toArabicNumerals = (str) => {
+      if (!str) return '';
+      return str.toString().replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+    };
+
+    const translateDateToArabic = (dateStr) => {
+      if (!dateStr) return '';
+      const months = {
+        'januari': 'يناير', 'februari': 'فبراير', 'maret': 'مارس', 'april': 'أبريل',
+        'mei': 'مايو', 'juni': 'يونيو', 'juli': 'يوليو', 'agustus': 'أغسطس',
+        'september': 'سبتمبر', 'oktober': 'أكتوبر', 'november': 'نوفمبر', 'desember': 'ديسمبر'
+      };
+      let result = dateStr.toLowerCase();
+      for (const [id, ar] of Object.entries(months)) { result = result.replace(id, ar); }
+      return toArabicNumerals(result);
+    };
+
+    const forceArabic = (elem) => {
+      let val = elem.value.replace(/[a-zA-Z]/g, '').replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+      elem.value = val;
+      syncCV();
+    };
+
+    const handlePhotoUpload = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          photoDataUrl = event.target.result;
+          document.getElementById('photo-preview-container').innerHTML = `<img src="${photoDataUrl}" alt="Preview" class="w-full h-full object-cover" />`;
+          const outImg = document.getElementById('out-photo');
+          outImg.src = photoDataUrl; outImg.classList.remove('hidden');
+          document.getElementById('out-photo-placeholder').classList.add('hidden');
+          try { localStorage.setItem('cv_builder_photo', photoDataUrl); } catch (err) {}
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    const syncSplit = (inputArId, inputEnId, outArId, outEnId) => {
+      if(outEnId && document.getElementById(inputEnId)) document.getElementById(outEnId).innerText = document.getElementById(inputEnId).value || '-';
+      if(outArId && document.getElementById(inputArId)) document.getElementById(outArId).innerText = toArabicNumerals(document.getElementById(inputArId).value || '-');
+    };
+
+    const syncShared = (inputId, outArId, outEnId, isDate = false) => {
+      let val = document.getElementById(inputId)?.value || '-';
+      if(outEnId) document.getElementById(outEnId).innerText = val;
+      if(outArId) document.getElementById(outArId).innerText = isDate ? translateDateToArabic(val) : toArabicNumerals(val);
+    };
+
+    const syncCV = () => {
+      syncSplit('in-name-ar', 'in-name', 'out-name-ar', 'out-name-en');
+      syncSplit('in-nationality-ar', 'in-nationality', 'out-nat-ar', 'out-nat-en');
+      syncSplit('in-address-ar', 'in-address', 'out-address-ar', 'out-address-en');
+      syncShared('in-dob', 'out-dob-ar', 'out-dob-en', true);
+      syncShared('in-phone', 'out-phone-ar', 'out-phone-en');
+      syncShared('in-email', 'out-email-ar', 'out-email-en');
+      syncSplit('in-summary-ar', 'in-summary-en', 'out-summary-ar', 'out-summary-en');
+      syncShared('in-edu-year', 'out-edu-year-ar', 'out-edu-year-en');
+      syncShared('in-edu-gpa', 'out-edu-gpa-ar', 'out-edu-gpa-en');
+      syncSplit('in-edu-inst-ar', 'in-edu-inst-en', 'out-edu-inst-ar', 'out-edu-inst-en');
+      syncSplit('in-edu-deg-ar', 'in-edu-deg-en', 'out-edu-deg-ar', 'out-edu-deg-en');
+      syncSplit('in-rel-title-ar', 'in-rel-title-en', 'out-rel-title-ar', 'out-rel-title-en');
+      syncSplit('in-rel-desc-ar', 'in-rel-desc-en', 'out-rel-desc-ar', 'out-rel-desc-en');
+      syncShared('in-awd-year', 'out-awd-year-ar', 'out-awd-year-en');
+      syncSplit('in-awd-title-ar', 'in-awd-title-en', 'out-awd-title-ar', 'out-awd-title-en');
+      syncSplit('in-awd-desc-ar', 'in-awd-desc-en', 'out-awd-desc-ar', 'out-awd-desc-en');
+      syncShared('in-exp-year', 'out-exp-year-ar', 'out-exp-year-en');
+      syncSplit('in-exp-role-ar', 'in-exp-role-en', 'out-exp-role-ar', 'out-exp-role-en');
+      syncSplit('in-exp-org-ar', 'in-exp-org-en', 'out-exp-org-ar', 'out-exp-org-en');
+      syncSplit('in-exp-desc-ar', 'in-exp-desc-en', 'out-exp-desc-ar', 'out-exp-desc-en');
+      
+      document.getElementById('out-skill-ar').innerText = document.getElementById('in-skill-ar').value || '-';
+      document.getElementById('out-skill-en').innerText = document.getElementById('in-skill-en').value || '-';
+      document.getElementById('out-skill-tech').innerText = document.getElementById('in-skill-tech').value || '-';
+      document.getElementById('out-skill-soft').innerText = document.getElementById('in-skill-soft').value || '-';
+    };
+
+    const exportPDF = () => {
+      const originalTitle = document.title;
+      const userName = document.getElementById('in-name').value.trim() || 'User';
+      document.title = `CV-${userName}`;
+      window.print();
+      setTimeout(() => { document.title = originalTitle; }, 500);
+    };
+
+  </script>
+</body>
+</html>
