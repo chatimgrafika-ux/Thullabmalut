@@ -180,7 +180,7 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-[10px] font-semibold text-slate-400 mb-1">Lokasi Pembuatan</label>
-            <input type="text" id="g-lokasi" value="Jakarta" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-bg)] outline-none shadow-sm transition-all" oninput="queueAutoSave()" />
+            <input type="text" id="g-lokasi" value="Ternate" class="input-field w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-bg)] outline-none shadow-sm transition-all" oninput="queueAutoSave()" />
           </div>
           <div>
             <label class="block text-[10px] font-semibold text-slate-400 mb-1">Tanggal</label>
@@ -264,13 +264,13 @@
     const formDefinitions = {
       'kuasa': [
         { group: 'Pihak Pertama (Pemberi Kuasa)' },
-        { id: 'k_nama1', label: 'Nama Lengkap', type: 'text', placeholder: 'Budi Santoso' },
+        { id: 'k_nama1', label: 'Nama Lengkap', type: 'text', placeholder: 'MFulan' },
         { id: 'k_nik1', label: 'Nomor Induk Kependudukan (NIK)', type: 'text', placeholder: '3171234567890001' },
-        { id: 'k_alamat1', label: 'Alamat Lengkap', type: 'textarea', placeholder: 'Jl. Merdeka No. 1, Jakarta Selatan' },
+        { id: 'k_alamat1', label: 'Alamat Lengkap', type: 'textarea', placeholder: 'Jl. Isnain Ibrahim No. 1, Kel. Gambesi, Kota Ternate 97718' },
         { group: 'Pihak Kedua (Penerima Kuasa)' },
         { id: 'k_nama2', label: 'Nama Lengkap', type: 'text', placeholder: 'Andi Setiawan' },
         { id: 'k_nik2', label: 'Nomor Induk Kependudukan (NIK)', type: 'text', placeholder: '3179876543210002' },
-        { id: 'k_alamat2', label: 'Alamat Lengkap', type: 'textarea', placeholder: 'Jl. Sudirman No. 10, Jakarta Pusat' },
+        { id: 'k_alamat2', label: 'Alamat Lengkap', type: 'textarea', placeholder: 'Jl. Isnain Ibrahim No. 1, Kel. Gambesi, Kota Ternate 97718' },
         { group: 'Detail Kuasa' },
         { id: 'k_keperluan', label: 'Tujuan Pemberian Kuasa', type: 'datalist', options: ['Pengambilan Surat Keterangan Catatan Kepolisian (SKCK)', 'Pengambilan Ijazah / Transkrip Nilai', 'Legalisir Dokumen Pendidikan', 'Pengurusan Administrasi Pendidikan (Daftar Ulang, dll)', 'Pengambilan BPKB / STNK Kendaraan'], placeholder: 'Pilih opsi atau ketik sendiri...' }
       ],
@@ -278,22 +278,22 @@
         { group: 'Instansi Tujuan' },
         { id: 'i_instansi', label: 'Ditujukan Kepada (Instansi)', type: 'text', placeholder: 'Kepala Kantor Imigrasi' },
         { group: 'Data Orang Tua / Wali' },
-        { id: 'i_ortu_nama', label: 'Nama Lengkap', type: 'text', placeholder: 'Ahmad Fauzi' },
-        { id: 'i_ortu_pekerjaan', label: 'Pekerjaan', type: 'text', placeholder: 'Wiraswasta' },
-        { id: 'i_ortu_alamat', label: 'Alamat Lengkap', type: 'textarea', placeholder: 'Jl. Ahmad Yani No. 5, Medan' },
+        { id: 'i_ortu_nama', label: 'Nama Lengkap', type: 'text', placeholder: 'Muhammad Fulan' },
+        { id: 'i_ortu_pekerjaan', label: 'Pekerjaan', type: 'text', placeholder: 'Guru Honorer' },
+        { id: 'i_ortu_alamat', label: 'Alamat Lengkap', type: 'textarea', placeholder: 'Kel. kalumata, Kota Ternate' },
         { group: 'Data Anak' },
-        { id: 'i_anak_nama', label: 'Nama Anak', type: 'text', placeholder: 'Muhammad Fatih' },
+        { id: 'i_anak_nama', label: 'Nama Anak', type: 'text', placeholder: 'Ibnu Fulan' },
         { id: 'i_anak_paspor', label: 'Nomor Paspor / NIK', type: 'text', placeholder: 'C1234567' },
         { group: 'Detail Keperluan Izin' },
         { id: 'i_keperluan', label: 'Keperluan', type: 'text', placeholder: 'Penerbitan Paspor RI' },
-        { id: 'i_tujuan', label: 'Tujuan (Negara/Pendidikan)', type: 'datalist', options: ['Melanjutkan Pendidikan ke Universitas Islam Madinah (UIM)', 'Melanjutkan Pendidikan ke Universitas Umm Al-Qura (UQU)', 'Melanjutkan Pendidikan ke Arab Saudi'], placeholder: 'Pilih kampus/negara atau ketik sendiri...' }
+        { id: 'i_tujuan', label: 'Tujuan (Negara/Pendidikan)', type: 'datalist', options: ['Melanjutkan Pendidikan ke Universitas Islam Madinah (UIM)', 'Melanjutkan Pendidikan ke Universitas Thaibah (TU)', 'Melanjutkan Pendidikan ke Arab Saudi'], placeholder: 'Pilih kampus/negara atau ketik sendiri...' }
       ],
       'skck': [
         { group: 'Data Siswa / Santri' },
-        { id: 's_nama', label: 'Nama Lengkap', type: 'text', placeholder: 'Aisyah Putri' },
+        { id: 's_nama', label: 'Nama Lengkap', type: 'text', placeholder: 'Muhammad Fulan' },
         { id: 's_nis', label: 'NIS / NISN', type: 'text', placeholder: '19283746' },
-        { id: 's_ttl', label: 'Tempat, Tanggal Lahir', type: 'text', placeholder: 'Bandung, 12 Agustus 2005' },
-        { id: 's_alamat', label: 'Alamat Siswa', type: 'textarea', placeholder: 'Jl. Kopo No. 99, Bandung' },
+        { id: 's_ttl', label: 'Tempat, Tanggal Lahir', type: 'text', placeholder: 'Ternate, 17 Agustus 2005' },
+        { id: 's_alamat', label: 'Alamat Siswa', type: 'textarea', placeholder: 'Kel. Kalumata, Kota Ternate' },
         { group: 'Keterangan' },
         { id: 's_kelakuan', label: 'Keterangan Akhlak', type: 'textarea', placeholder: 'Berkelakuan sangat baik, disiplin, dan tidak pernah melanggar tata tertib sekolah.' }
       ]
@@ -511,7 +511,7 @@
       
       setTimeout(() => {
         // Global variables
-        const lokasi = val('g-lokasi', 'Jakarta');
+        const lokasi = val('g-lokasi', 'Ternate');
         const tanggal = val('g-tanggal', '17 April 2026');
         const nomor = document.getElementById('g-nomor').value.trim();
         const kInstansi = document.getElementById('k-instansi').value.trim();
@@ -522,7 +522,7 @@
         if (type === 'skck') {
           // Kop hanya dirender untuk surat kelakuan baik (SKCK)
           let instansiText = kInstansi || 'PEMERINTAH PROVINSI / YAYASAN PENDIDIKAN';
-          let alamatText = kAlamat || 'Jalan Pendidikan No. 1, Telp: (021) 1234567, Email: info@sekolah.sch.id';
+          let alamatText = kAlamat || 'Jalan Ikatan Pelajar Mahasiswa Madinah Indonesia Timur No. 1, Telp: (021) 1234567, Email: info@sekolah.sch.id';
           
           let logoImg = currentLogo ? `<img src="${currentLogo}" class="w-20 h-20 object-contain absolute left-0 top-0">` : '';
           
