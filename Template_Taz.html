@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elegant Tazkiyah Generator</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#064e3b', // Emerald 900
+            secondary: '#d97706', // Amber 600
+            paperbg: '#fdfbf7',
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            amiri: ['Amiri', 'serif'],
+            playfair: ['Playfair Display', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbars */
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #064e3b; }
+
+    /* A4 Paper Configuration */
+    .paper-wrapper { perspective: 1000px; }
+    
+    .paper {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto 20mm auto;
+      background: #fff;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      position: relative;
+      box-sizing: border-box;
+      padding: 20mm;
+      overflow: hidden;
+    }
+
+    .paper-border {
+      position: absolute;
+      top: 15mm; bottom: 15mm; left: 15mm; right: 15mm;
+      border: 3px double #064e3b;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .paper-content {
+      position: relative;
+      z-index: 10;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Watermark Configuration */
+    .watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-45deg);
+      font-size: 6rem;
+      color: rgba(6, 78, 59, 0.05); /* Warna hijau transparan */
+      z-index: 0;
+      pointer-events: none;
+      user-select: none;
+      font-weight: 900;
+      white-space: nowrap;
+      text-transform: uppercase;
+      letter-spacing: 0.5rem;
+    }
+
+    /* Rich Text Formatting Fixes for Tailwind */
+    .rich-text b, .rich-text strong { font-weight: bold; }
+    .rich-text i, .rich-text em { font-style: italic; }
+    .rich-text u { text-decoration: underline; }
+    .rich-text ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+    .rich-text ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
+    .rich-text h1 { font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem; text-align: center; }
+    .rich-text h2 { font-size: 1.25rem; font-weight: bold; margin-bottom: 0.5rem; }
+    .rich-text p { margin-bottom: 0.5rem; }
+    [dir="rtl"].rich-text ul, [dir="rtl"].rich-text ol { padding-left: 0; padding-right: 1.5rem; }
+
+    /* Typography */
+    .doc-ar { font-family: 'Amiri', serif; font-size: 20px; line-height: 2; text-align: justify; direction: rtl; }
+    .doc-en, .doc-id { font-family: 'Playfair Display', serif; font-size: 15px; line-height: 1.6; text-align: justify; }
+
+    /* Print Config */
+    @media print {
+      @page { size: A4; margin: 0; }
+      body { background: white; }
+      body * { visibility: hidden; }
+      #print-area, #print-area * { visibility: visible; }
+      #print-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; background: white; }
+      .paper { box-shadow: none !important; width: 210mm; height: 297mm; margin: 0; page-break-after: always; }
+      .paper:last-child { page-break-after: auto; }
+      ::-webkit-scrollbar { display: none; }
+      .watermark { 
+        color: rgba(6, 78, 59, 0.05) !important; 
+        -webkit-print-color-adjust: exact; 
+        print-color-adjust: exact; 
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 overflow-hidden h-screen flex flex-col md:flex-row font-sans">
+
+  <!-- POPUP PERINGATAN (Selalu muncul saat dimuat) -->
+  <div id="disclaimer-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300">
+    <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md mx-4 text-center transform scale-100 transition-transform duration-300">
+      <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+      </div>
+      <h3 class="text-xl font-bold text-slate-800 mb-2">Pemberitahuan Penting</h3>
+      <p class="text-sm text-slate-600 mb-6 leading-relaxed">
+        <strong>TazkiyahGen</strong> ini hanya bertujuan untuk membantu dan memudahkan dalam memberikan fasilitas template dasar, <span class="text-red-500 font-semibold">bukan sebagai Tazkiyah resmi</span>. Harap gunakan dengan bijak dan sesuaikan dengan ketentuan institusi Anda.
+      </p>
+      <button onclick="closeModal()" class="w-full bg-primary hover:bg-emerald-800 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-emerald-900/20">
+        Saya Mengerti
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= LEFT: CONTROL PANEL ================= -->
+  <div class="w-full md:w-[450px] lg:w-[500px] h-full flex flex-col bg-white border-r border-slate-200 shadow-2xl z-20 flex-shrink-0">
+    
+    <!-- HEADER -->
+    <header class="sticky top-0 z-30 bg-primary p-5 border-b border-primary flex justify-between items-center text-white">
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-white/10 rounded-lg">
+          <i data-lucide="award" class="w-6 h-6 text-secondary"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-wide">Tazkiyah<span class="text-secondary">Gen</span></h1>
+          <p id="conn-status" class="text-[10px] text-emerald-200 font-medium uppercase tracking-widest flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span> Memuat Data...
+          </p>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="window.print()" class="flex items-center gap-2 bg-secondary hover:bg-amber-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-lg">
+          <i data-lucide="printer" class="w-4 h-4"></i> CETAK PDF
+        </button>
+      </div>
+    </header>
+
+    <!-- FORM AREA -->
+    <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar pb-24 bg-slate-50/50" id="form-container">
+      
+      <!-- DATA SISWA & TEMPLATE -->
+      <section class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <h2 class="text-xs font-bold text-primary uppercase tracking-widest mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
+          <i data-lucide="user" class="w-4 h-4"></i> Data Kandidat & Template
+        </h2>
+        
+        <div class="grid grid-cols-3 gap-3">
+          <div class="col-span-2">
+            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Nama (Arab) *</label>
+            <input type="text" id="s-nama-ar" placeholder="محمد فلان" dir="rtl" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:border-primary outline-none font-amiri text-lg" oninput="enforceArabicOnly(this); saveAndRender()" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Jenis Kelamin</label>
+            <select id="s-gender" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:border-primary outline-none" onchange="saveAndRender()">
+              <option value="L">Laki-laki</option>
+              <option value="P">Perempuan</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Nama (Latin)</label>
+            <input type="text" id="s-nama-en" placeholder="Muhammad Fulan" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:border-primary outline-none" oninput="saveAndRender()" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-500 mb-1">No. Paspor / KTP</label>
+            <input type="text" id="s-id" placeholder="C1234567" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:border-primary outline-none" oninput="saveAndRender()" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Tujuan (Arab)</label>
+            <input type="text" id="s-tujuan-ar" placeholder="الجامعة" dir="rtl" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:border-primary outline-none font-amiri" oninput="enforceArabicOnly(this); saveAndRender()" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Tujuan (Inggris)</label>
+            <input type="text" id="s-tujuan-en" placeholder="University" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:border-primary outline-none" oninput="saveAndRender()" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Tujuan (Indo)</label>
+            <input type="text" id="s-tujuan-id" placeholder="Universitas" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:border-primary outline-none" oninput="saveAndRender()" />
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-100">
+          <label class="block text-[10px] font-semibold text-slate-500 mb-2">Pilih Template Dasar</label>
+          <div class="flex gap-2">
+            <select id="t-template" class="flex-1 bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg p-2.5 focus:outline-none focus:border-primary">
+              <option value="">Memuat Template...</option>
+            </select>
+            <button onclick="applyTemplate()" class="bg-primary hover:bg-emerald-800 text-white px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1">
+              <i data-lucide="zap" class="w-3 h-3"></i> Terapkan
+            </button>
+          </div>
+          <p class="text-[9px] text-slate-400 mt-1 italic">* Klik Terapkan untuk memuat template ke Editor di bawah.</p>
+        </div>
+      </section>
+
+      <!-- TEXT EDITOR -->
+      <section class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+        <h2 class="text-xs font-bold text-primary uppercase tracking-widest mb-2 flex items-center gap-2 border-b border-slate-100 pb-2">
+          <i data-lucide="edit-3" class="w-4 h-4"></i> Editor Konten (Visual)
+        </h2>
+        
+        <div class="flex gap-2 border-b border-slate-200 pb-2">
+          <button onclick="switchTab('ar')" id="tab-ar" class="flex-1 py-1.5 text-xs font-bold rounded bg-primary text-white transition-all">Arab</button>
+          <button onclick="switchTab('en')" id="tab-en" class="flex-1 py-1.5 text-xs font-bold rounded bg-slate-100 text-slate-500 hover:bg-slate-200 transition-all">Inggris</button>
+          <button onclick="switchTab('id')" id="tab-id" class="flex-1 py-1.5 text-xs font-bold rounded bg-slate-100 text-slate-500 hover:bg-slate-200 transition-all">Indo</button>
+        </div>
+
+        <!-- Rich Text Toolbar & Editable Area -->
+        <div class="border border-slate-200 rounded-lg overflow-hidden bg-amber-50/30 flex flex-col">
+          <!-- Toolbar -->
+          <div class="bg-slate-100 border-b border-slate-200 p-2 flex gap-1 flex-wrap items-center">
+            <button onclick="formatDoc('bold')" class="p-1.5 hover:bg-slate-300 rounded text-slate-700 transition-colors" title="Tebal (Bold)"><i data-lucide="bold" class="w-4 h-4"></i></button>
+            <button onclick="formatDoc('italic')" class="p-1.5 hover:bg-slate-300 rounded text-slate-700 transition-colors" title="Miring (Italic)"><i data-lucide="italic" class="w-4 h-4"></i></button>
+            <button onclick="formatDoc('underline')" class="p-1.5 hover:bg-slate-300 rounded text-slate-700 transition-colors" title="Garis Bawah (Underline)"><i data-lucide="underline" class="w-4 h-4"></i></button>
+            
+            <div class="w-px h-5 bg-slate-300 mx-1"></div>
+            
+            <button onclick="formatDoc('justifyLeft')" class="p-1.5 hover:bg-slate-300 rounded text-slate-700 transition-colors" title="Rata Kiri"><i data-lucide="align-left" class="w-4 h-4"></i></button>
+            <button onclick="formatDoc('justifyCenter')" class="p-1.5 hover:bg-slate-300 rounded text-slate-700 transition-colors" title="Rata Tengah"><i data-lucide="align-center" class="w-4 h-4"></i></button>
+            <button onclick="formatDoc('justifyRight')" class="p-1.5 hover:bg-slate-300 rounded text-slate-700 transition-colors" title="Rata Kanan"><i data-lucide="align-right" class="w-4 h-4"></i></button>
+            <button onclick="formatDoc('justifyFull')" class="p-1.5 hover:bg-slate-300 rounded text-slate-700 transition-colors" title="Rata Kiri Kanan (Justify)"><i data-lucide="align-justify" class="w-4 h-4"></i></button>
+            
+            <div class="w-px h-5 bg-slate-300 mx-1"></div>
+            
+            <button onclick="formatDoc('insertUnorderedList')" class="p-1.5 hover:bg-slate-300 rounded text-slate-700 transition-colors" title="Daftar Titik (Bullet)"><i data-lucide="list" class="w-4 h-4"></i></button>
+            <button onclick="formatDoc('insertOrderedList')" class="p-1.5 hover:bg-slate-300 rounded text-slate-700 transition-colors" title="Daftar Angka (Number)"><i data-lucide="list-ordered" class="w-4 h-4"></i></button>
+            <button onclick="formatDoc('removeFormat')" class="p-1.5 hover:bg-slate-300 rounded text-red-600 transition-colors ml-auto" title="Hapus Format (Clear)"><i data-lucide="eraser" class="w-4 h-4"></i></button>
+          </div>
+
+          <!-- ContentEditable Divs -->
+          <div id="editor-ar" contenteditable="true" dir="rtl" class="rich-text w-full p-4 min-h-[250px] max-h-[400px] overflow-y-auto focus:outline-none font-amiri text-lg transition-all custom-scrollbar" oninput="saveAndRender()"></div>
+          
+          <div id="editor-en" contenteditable="true" class="rich-text w-full p-4 min-h-[250px] max-h-[400px] overflow-y-auto focus:outline-none font-playfair text-sm transition-all custom-scrollbar hidden" oninput="saveAndRender()"></div>
+          
+          <div id="editor-id" contenteditable="true" class="rich-text w-full p-4 min-h-[250px] max-h-[400px] overflow-y-auto focus:outline-none font-playfair text-sm transition-all custom-scrollbar hidden" oninput="saveAndRender()"></div>
+        </div>
+        
+        <p class="text-[9px] text-slate-400 italic text-center">Data yang diubah di sini otomatis tersimpan di cache lokal browser.</p>
+      </section>
+
+      <!-- DATA PEMBERI REKOMENDASI -->
+      <section class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <h2 class="text-xs font-bold text-primary uppercase tracking-widest mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
+          <i data-lucide="award" class="w-4 h-4"></i> TTD & Instansi
+        </h2>
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div class="col-span-2">
+            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Nama Instansi</label>
+            <input type="text" id="r-lembaga" placeholder="Lembaga Pendidikan Islam" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:border-primary outline-none" oninput="saveAndRender()" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Nama Pemberi</label>
+            <input type="text" id="r-nama" placeholder="Dr. Ahmad Abdullah" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:border-primary outline-none" oninput="saveAndRender()" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Jabatan</label>
+            <input type="text" id="r-jabatan" placeholder="Mudir / Direktur" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:border-primary outline-none" oninput="saveAndRender()" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Tanggal</label>
+            <input type="text" id="g-tanggal" placeholder="18 April 2026" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:border-primary outline-none" oninput="saveAndRender()" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Lokasi</label>
+            <input type="text" id="g-lokasi" placeholder="Jakarta" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:border-primary outline-none" oninput="saveAndRender()" />
+          </div>
+        </div>
+
+        <div class="flex gap-4 pt-2 border-t border-slate-100">
+          <div class="flex-1">
+            <label class="cursor-pointer flex flex-col items-center justify-center p-3 border border-dashed border-slate-300 rounded-xl hover:border-primary hover:bg-slate-50 transition-all">
+              <span class="text-[10px] text-slate-500 font-bold"><i data-lucide="image" class="w-3 h-3 inline"></i> Upload Logo</span>
+              <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'logo')">
+            </label>
+          </div>
+          <div class="flex-1">
+            <label class="cursor-pointer flex flex-col items-center justify-center p-3 border border-dashed border-slate-300 rounded-xl hover:border-primary hover:bg-slate-50 transition-all">
+              <span class="text-[10px] text-slate-500 font-bold"><i data-lucide="pen-tool" class="w-3 h-3 inline"></i> Upload TTD</span>
+              <input type="file" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'sig')">
+            </label>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ================= RIGHT: PREVIEW PANEL ================= -->
+  <div class="flex-1 bg-slate-300/80 overflow-y-auto p-4 md:p-8 flex flex-col items-center custom-scrollbar" id="print-area">
+    
+    <!-- ARABIC PAGE -->
+    <div class="paper-wrapper w-full max-w-[210mm] flex justify-center mb-10">
+      <div class="paper">
+        <div class="watermark">chatimgrafika</div>
+        <div class="paper-border"></div>
+        <div class="paper-content relative">
+          <div class="flex justify-between items-center border-b-2 border-primary pb-4 mb-8">
+            <div class="w-24 h-24 flex items-center justify-center">
+              <img id="kop-logo-ar" src="" class="hidden max-w-full max-h-full object-contain sys-logo" />
+            </div>
+            <div class="text-center flex-1 mx-4 text-primary">
+              <h2 class="text-xl font-bold font-amiri sys-instansi">مؤسسة التعليم الإسلامية</h2>
+              <p class="text-xs font-sans mt-1">Sistem Generator Tazkiyah Resmi</p>
+            </div>
+            <div class="w-24 h-24"></div>
+          </div>
+          
+          <div id="prev-ar" class="doc-ar rich-text flex-1 whitespace-pre-wrap"></div>
+
+          <div class="mt-12 flex justify-end">
+            <div class="text-center w-64 doc-ar">
+              <p class="sys-tgl">التاريخ: ١٨ أبريل ٢٠٢٦</p>
+              <p class="mb-12 font-bold sys-jabatan">المدير</p>
+              <div class="relative h-16 w-full flex justify-center items-end">
+                <img class="sys-sig hidden absolute bottom-0 h-20 w-32 object-contain mix-blend-multiply z-0" src="" />
+                <p class="font-bold relative z-10 w-full text-center border-b border-dashed border-gray-400 sys-nama">د. أحمد عبد الله</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENGLISH PAGE -->
+    <div class="paper-wrapper w-full max-w-[210mm] flex justify-center mb-10">
+      <div class="paper">
+        <div class="watermark">chatimgrafika</div>
+        <div class="paper-border"></div>
+        <div class="paper-content relative">
+          <div class="flex justify-between items-center border-b-2 border-primary pb-4 mb-8">
+            <div class="w-24 h-24 flex items-center justify-center">
+              <img class="hidden max-w-full max-h-full object-contain sys-logo" src="" />
+            </div>
+            <div class="text-center flex-1 mx-4 text-primary">
+              <h2 class="text-xl font-bold font-playfair uppercase sys-instansi">Lembaga Pendidikan Islam</h2>
+            </div>
+            <div class="w-24 h-24"></div>
+          </div>
+          
+          <div id="prev-en" class="doc-en rich-text flex-1 whitespace-pre-wrap"></div>
+
+          <div class="mt-12 flex justify-end">
+            <div class="text-center w-64 doc-en">
+              <p class="sys-tgl">Date: April 18, 2026</p>
+              <p class="mb-12 font-bold sys-jabatan">Director</p>
+              <div class="relative h-16 w-full flex justify-center items-end">
+                <img class="sys-sig hidden absolute bottom-0 h-20 w-32 object-contain mix-blend-multiply z-0" src="" />
+                <p class="font-bold relative z-10 w-full text-center border-b border-dashed border-gray-400 sys-nama">Dr. Ahmad Abdullah</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INDONESIAN PAGE -->
+    <div class="paper-wrapper w-full max-w-[210mm] flex justify-center">
+      <div class="paper">
+        <div class="watermark">chatimgrafika</div>
+        <div class="paper-border"></div>
+        <div class="paper-content relative">
+          <div class="flex justify-between items-center border-b-2 border-primary pb-4 mb-8">
+            <div class="w-24 h-24 flex items-center justify-center">
+              <img class="hidden max-w-full max-h-full object-contain sys-logo" src="" />
+            </div>
+            <div class="text-center flex-1 mx-4 text-primary">
+              <h2 class="text-xl font-bold font-playfair uppercase sys-instansi">Lembaga Pendidikan Islam</h2>
+            </div>
+            <div class="w-24 h-24"></div>
+          </div>
+          
+          <div id="prev-id" class="doc-id rich-text flex-1 whitespace-pre-wrap"></div>
+
+          <div class="mt-12 flex justify-end">
+            <div class="text-center w-64 doc-id">
+              <p class="sys-tgl">Tanggal: 18 April 2026</p>
+              <p class="mb-12 font-bold sys-jabatan">Direktur</p>
+              <div class="relative h-16 w-full flex justify-center items-end">
+                <img class="sys-sig hidden absolute bottom-0 h-20 w-32 object-contain mix-blend-multiply z-0" src="" />
+                <p class="font-bold relative z-10 w-full text-center border-b border-dashed border-gray-400 sys-nama">Dr. Ahmad Abdullah</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ================= SCRIPTS ================= -->
+  <script>
+    lucide.createIcons();
+
+    // --- FUNGSI MODAL ---
+    function closeModal() {
+      const modal = document.getElementById('disclaimer-modal');
+      modal.classList.add('opacity-0');
+      setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
+    // 1. SETTING BACKEND & KUNCI RAHASIA (HARUS SAMA DENGAN APPS SCRIPT)
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxoxFTSL1ORCeoQlB2uMRmPh0IznErs5mDstHCHEcsh_nZU89qWKiaf1l0Ed9HnUwA-oQ/exec';
+    const SECRET_KEY = 'TazkiyahRahasia2026'; 
+
+    let templatesData = [{ id:"T0", title:"Template Default", ar:"Tulis di sini...", en:"Write here...", id_lang:"Tulis di sini..."}];
+
+    // --- FUNGSI DEKRIPSI (XOR + BASE64) ---
+    function decryptData(base64Data, key) {
+      try {
+        const binaryString = atob(base64Data);
+        const bytes = new Uint8Array(binaryString.length);
+        
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        const encoder = new TextEncoder();
+        const keyBytes = encoder.encode(key);
+
+        for (let i = 0; i < bytes.length; i++) {
+            // Membalikkan operasi XOR
+            bytes[i] = bytes[i] ^ keyBytes[i % keyBytes.length];
+        }
+
+        const decoder = new TextDecoder('utf-8');
+        return JSON.parse(decoder.decode(bytes));
+      } catch (error) {
+        console.error("Gagal melakukan dekripsi API. Kunci mungkin salah.", error);
+        return [];
+      }
+    }
+
+    // --- VALIDASI HURUF ARAB ---
+    function enforceArabicOnly(input) {
+      // Hanya izinkan karakter Arab (termasuk harakat) dan spasi
+      const arabicRegex = /[^\u0600-\u06FF\s]/g;
+      if (arabicRegex.test(input.value)) {
+        input.value = input.value.replace(arabicRegex, '');
+      }
+    }
+
+    // --- State & Local Storage Management ---
+    const STORAGE_KEY = 'tazkiyah_app_data';
+
+    function val(id) { 
+      const el = document.getElementById(id);
+      if (!el) return '';
+      if (el.hasAttribute('contenteditable')) return el.innerHTML;
+      return el.value; 
+    }
+    
+    function setVal(id, value) { 
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.hasAttribute('contenteditable')) {
+        el.innerHTML = value || '';
+      } else {
+        el.value = value || ''; 
+      }
+    }
+
+    function loadLocal() {
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      setVal('s-nama-ar', data.namaAr);
+      setVal('s-gender', data.gender || 'L');
+      setVal('s-nama-en', data.namaEn);
+      setVal('s-id', data.idStr);
+      setVal('s-tujuan-ar', data.tujuanAr);
+      setVal('s-tujuan-en', data.tujuanEn);
+      setVal('s-tujuan-id', data.tujuanId);
+      setVal('r-nama', data.rNama);
+      setVal('r-jabatan', data.rJabatan);
+      setVal('r-lembaga', data.rLembaga);
+      setVal('g-tanggal', data.gTanggal);
+      setVal('g-lokasi', data.gLokasi);
+      
+      if(data.contentAr) setVal('editor-ar', data.contentAr);
+      if(data.contentEn) setVal('editor-en', data.contentEn);
+      if(data.contentId) setVal('editor-id', data.contentId);
+
+      const logoData = localStorage.getItem('tazkiyah_logo');
+      const sigData = localStorage.getItem('tazkiyah_sig');
+      if (logoData) updateImages('.sys-logo', logoData);
+      if (sigData) updateImages('.sys-sig', sigData);
+    }
+
+    function saveAndRender() {
+      const data = {
+        namaAr: val('s-nama-ar'),
+        gender: val('s-gender'),
+        namaEn: val('s-nama-en'),
+        idStr: val('s-id'),
+        tujuanAr: val('s-tujuan-ar'),
+        tujuanEn: val('s-tujuan-en'),
+        tujuanId: val('s-tujuan-id'),
+        rNama: val('r-nama'),
+        rJabatan: val('r-jabatan'),
+        rLembaga: val('r-lembaga'),
+        gTanggal: val('g-tanggal'),
+        gLokasi: val('g-lokasi'),
+        contentAr: val('editor-ar'),
+        contentEn: val('editor-en'),
+        contentId: val('editor-id')
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      renderPreview();
+    }
+
+    // --- Fetch Data from Backend ---
+    async function fetchTemplates() {
+      const statusEl = document.getElementById('conn-status');
+      if (!SCRIPT_URL) {
+        statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-400"></span> Mode Offline Lokal`;
+        populateTemplateSelect();
+        return;
+      }
+
+      try {
+        const response = await fetch(SCRIPT_URL);
+        const encryptedText = await response.text(); // Ambil sebagai text murni
+        
+        let data;
+        try {
+            // Coba parse jika ternyata yang dikirim masih JSON mentah
+            data = JSON.parse(encryptedText);
+        } catch (e) {
+            // Jika error saat JSON.parse, berarti data sudah terenkripsi dengan benar
+            data = decryptData(encryptedText, SECRET_KEY);
+        }
+
+        // Tangkap jika Google Sheets mengirim pesan error (misal: Sheet tidak ditemukan)
+        if (data && data.error) {
+            throw new Error("Backend Error: " + data.error);
+        }
+
+        // Pastikan data adalah array dan tidak kosong
+        if (data && Array.isArray(data) && data.length > 0) {
+          templatesData = data;
+          statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-green-400"></span> Terhubung & Aman`;
+        } else {
+          throw new Error("Data kosong atau dekripsi gagal");
+        }
+      } catch (error) {
+        console.error("Gagal memuat dari Sheets:", error);
+        statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-400"></span> Gagal memuat API`;
+        // Gunakan fallback dummy data jika terjadi error
+        templatesData = [{ id:"T0", title:"Template Offline", ar:"Gagal memuat data dari API. Anda dapat mengetik manual di sini.", en:"Failed to load data from API. You can type manually here.", id_lang:"Gagal memuat data dari API. Anda dapat mengetik manual di sini."}];
+      }
+      populateTemplateSelect();
+    }
+
+    function populateTemplateSelect() {
+      const select = document.getElementById('t-template');
+      select.innerHTML = '';
+      templatesData.forEach((t, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.text = t.title;
+        select.appendChild(opt);
+      });
+    }
+
+    // --- Template Processing (Logika Gender & Regex) ---
+    function processPlaceholders(text, lang) {
+      if (!text) return "";
+      
+      const gender = val('s-gender');
+      
+      let tujuanVal = '.......';
+      if (lang === 'ar') tujuanVal = val('s-tujuan-ar') || '.......';
+      else if (lang === 'en') tujuanVal = val('s-tujuan-en') || '.......';
+      else if (lang === 'id') tujuanVal = val('s-tujuan-id') || '.......';
+      
+      let result = text
+        .replace(/{{nama_ar}}/g, val('s-nama-ar') || '.......')
+        .replace(/{{nama_en}}/g, val('s-nama-en') || '.......')
+        .replace(/{{id}}/g, val('s-id') || '.......')
+        .replace(/{{tujuan}}/g, tujuanVal);
+
+      if (gender === 'L') {
+        result = result.replace(/{{tholib_ar}}/g, 'الطالب')
+                       .replace(/{{hamil_ar}}/g, 'الحامل')
+                       .replace(/{{hum_ar}}/g, 'ه')
+                       .replace(/{{ta_ar}}/g, '');
+        result = result.replace(/{{he_she_en}}/g, 'he')
+                       .replace(/{{his_her_en}}/g, 'his')
+                       .replace(/{{him_her_en}}/g, 'him');
+        result = result.replace(/{{siswa_id}}/g, 'Siswa/Mahasiswa');
+      } else {
+        result = result.replace(/{{tholib_ar}}/g, 'الطالبة')
+                       .replace(/{{hamil_ar}}/g, 'الحاملة')
+                       .replace(/{{hum_ar}}/g, 'ها')
+                       .replace(/{{ta_ar}}/g, 'ت');
+        result = result.replace(/{{he_she_en}}/g, 'she')
+                       .replace(/{{his_her_en}}/g, 'her')
+                       .replace(/{{him_her_en}}/g, 'her');
+        result = result.replace(/{{siswa_id}}/g, 'Siswi/Mahasiswi');
+      }
+
+      return result;
+    }
+
+    // --- Action Handlers ---
+    function applyTemplate() {
+      const idx = document.getElementById('t-template').value;
+      if (idx === "") return;
+
+      const t = templatesData[idx];
+      
+      if (val('editor-ar') && !confirm("Menerapkan template akan menimpa teks yang ada di editor. Lanjutkan?")) return;
+
+      setVal('editor-ar', processPlaceholders(t.ar, 'ar'));
+      setVal('editor-en', processPlaceholders(t.en, 'en'));
+      setVal('editor-id', processPlaceholders(t.id_lang || t.id, 'id')); 
+      
+      saveAndRender();
+    }
+
+    function renderPreview() {
+      document.getElementById('prev-ar').innerHTML = val('editor-ar') || '<p class="text-slate-300 text-center mt-20">Ketik di editor Arab...</p>';
+      document.getElementById('prev-en').innerHTML = val('editor-en') || '<p class="text-slate-300 text-center mt-20">Type in English editor...</p>';
+      document.getElementById('prev-id').innerHTML = val('editor-id') || '<p class="text-slate-300 text-center mt-20">Ketik di editor Indo...</p>';
+
+      const instansi = val('r-lembaga') || '......................';
+      document.querySelectorAll('.sys-instansi').forEach(el => el.textContent = instansi);
+      
+      const nama = val('r-nama') || '......................';
+      document.querySelectorAll('.sys-nama').forEach(el => el.textContent = nama);
+      
+      const jabatan = val('r-jabatan') || '......................';
+      document.querySelectorAll('.sys-jabatan').forEach(el => el.textContent = jabatan);
+
+      const tgl = val('g-tanggal') || '................';
+      const loc = val('g-lokasi') || '................';
+      
+      document.querySelectorAll('.sys-tgl').forEach((el, idx) => {
+        if (idx === 0) el.textContent = `التاريخ: ${tgl} | ${loc}`;
+        if (idx === 1) el.textContent = `Date: ${tgl} | ${loc}`;
+        if (idx === 2) el.textContent = `Tanggal: ${tgl} | ${loc}`
+      });
+    }
+
+    // --- UI Helpers ---
+    function switchTab(lang) {
+      ['ar', 'en', 'id'].forEach(l => {
+        document.getElementById(`editor-${l}`).classList.add('hidden');
+        const tab = document.getElementById(`tab-${l}`);
+        tab.classList.remove('bg-primary', 'text-white');
+        tab.classList.add('bg-slate-100', 'text-slate-500');
+      });
+
+      document.getElementById(`editor-${lang}`).classList.remove('hidden');
+      const activeTab = document.getElementById(`tab-${lang}`);
+      activeTab.classList.remove('bg-slate-100', 'text-slate-500');
+      activeTab.classList.add('bg-primary', 'text-white');
+    }
+
+    // --- Format Toolbar (Rich Text Editor) ---
+    function formatDoc(cmd, value = null) {
+      document.execCommand(cmd, false, value);
+      
+      // Auto focus back to active editor
+      ['ar', 'en', 'id'].forEach(l => {
+        const editor = document.getElementById(`editor-${l}`);
+        if (!editor.classList.contains('hidden')) {
+          editor.focus();
+        }
+      });
+      
+      saveAndRender();
+    }
+
+    function handleImageUpload(e, type) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const res = event.target.result;
+          const selector = type === 'logo' ? '.sys-logo' : '.sys-sig';
+          const storageKey = type === 'logo' ? 'tazkiyah_logo' : 'tazkiyah_sig';
+          
+          updateImages(selector, res);
+          try { localStorage.setItem(storageKey, res); } catch(err) { console.warn("Image too large"); }
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function updateImages(selector, src) {
+      document.querySelectorAll(selector).forEach(img => {
+        img.src = src;
+        img.classList.remove('hidden');
+      });
+    }
+
+    // --- Initialization ---
+    window.onload = async () => {
+      loadLocal();
+      renderPreview();
+      await fetchTemplates();
+    };
+
+  </script>
+</body>
+</html>
