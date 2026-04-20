@@ -136,11 +136,11 @@
     .layout-2 .contact-line { flex-direction: column; text-align: center; gap: 0.5mm; padding: 1.5mm 0;}
 
     /* LAYOUT 3: FOKUS SENTRAL */
-    .layout-3 { padding: 8mm 12mm; gap: 3mm 6mm; grid-template-columns: 1fr; grid-template-areas: "photo" "title" "contact" "summary" "edu" "exp" "rel" "awd" "skills"; align-content: start; text-align: center; }
-    .layout-3 .cv-heading { justify-content: center; gap: 4mm; background: var(--primary-bg); border-radius: 4px; padding: 1.5mm 0; margin-bottom: 1.5mm;}
-    .layout-3 #grid-photo { display: flex; justify-content: center; margin-bottom: 2mm; } .layout-3 #grid-title { margin-bottom: 0; }
-    .layout-3 #grid-contact { display: grid; grid-template-columns: 1fr 1fr; gap: 1mm 6mm; border-top: 1px solid var(--primary-bg); border-bottom: 1px solid var(--primary-bg); padding: 2mm 0; margin-bottom: 2mm; text-align: left; }
-    .layout-3 .contact-line { border: none; padding: 1mm 0; width: 100%; border-bottom: 1px dashed rgba(0,0,0,0.05); } .layout-3 .contact-line:last-child { grid-column: 1 / -1; border-bottom: none; }
+    .layout-3 { padding: 6mm 12mm; gap: 2.5mm 6mm; grid-template-columns: 1fr; grid-template-areas: "photo" "title" "contact" "summary" "edu" "exp" "rel" "awd" "skills"; align-content: start; text-align: center; }
+    .layout-3 .cv-heading { justify-content: center; gap: 4mm; background: var(--primary-bg); border-radius: 4px; padding: 1mm 0; margin-bottom: 1.5mm;}
+    .layout-3 #grid-photo { display: flex; justify-content: center; margin-bottom: 1.5mm; } .layout-3 #grid-title { margin-bottom: 0; }
+    .layout-3 #grid-contact { display: grid; grid-template-columns: 1fr 1fr; gap: 1mm 6mm; border-top: 1px solid var(--primary-bg); border-bottom: 1px solid var(--primary-bg); padding: 1.5mm 0; margin-bottom: 1.5mm; text-align: left; }
+    .layout-3 .contact-line { border: none; padding: 0.5mm 0; width: 100%; border-bottom: 1px dashed rgba(0,0,0,0.05); } .layout-3 .contact-line:last-child { grid-column: 1 / -1; border-bottom: none; }
 
     /* LAYOUT 4: GRID 2 KOLOM */
     .layout-4 { padding: 8mm 12mm; gap: 4mm 6mm; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto auto auto auto 1fr; grid-template-areas: "title title" "photo contact" "summary summary" "edu exp" "rel awd" "skills skills"; align-content: start; }
@@ -148,9 +148,9 @@
     .layout-4 #grid-contact { align-self: center; padding-left: 2mm; } .layout-4 #grid-photo { justify-self: end; padding-right: 6mm; border-right: 2px solid var(--primary-bg);}
 
     /* LAYOUT 5: HEADER LENGKUNG */
-    .layout-5 { padding: 0; gap: 4mm 6mm; grid-template-columns: 45mm 1fr; grid-template-rows: auto auto auto auto auto 1fr; grid-template-areas: "photo title" "photo contact" "summary summary" "edu exp" "rel awd" "skills skills"; }
-    .layout-5::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 70mm; background: var(--primary-bg); border-bottom-left-radius: 60px; border-bottom-right-radius: 60px; z-index: 1; }
-    .layout-5 #grid-photo { padding: 10mm 0 0 12mm; } .layout-5 #grid-photo .border-2 { width: 40mm; height: 55mm; border-radius: 16px; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+    .layout-5 { padding: 0; gap: 4mm 6mm; grid-template-columns: 70mm 1fr; grid-template-rows: auto auto auto auto auto 1fr; grid-template-areas: "photo title" "photo contact" "summary summary" "edu exp" "rel awd" "skills skills"; }
+    .layout-5::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 75mm; background: var(--primary-bg); border-bottom-left-radius: 60px; border-bottom-right-radius: 60px; z-index: 1; }
+    .layout-5 #grid-photo { padding: 10mm 0 0 12mm; } .layout-5 #grid-photo .border-2 { width: 45mm; height: 60mm; border-radius: 16px; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
     .layout-5 #grid-title { padding: 10mm 12mm 0 0; text-align: right; } .layout-5 #grid-contact { padding: 0 12mm 0 0; }
     .layout-5 #grid-summary { padding: 3mm 12mm 0 12mm; grid-column: 1 / -1; } .layout-5 #grid-edu, .layout-5 #grid-exp, .layout-5 #grid-rel, .layout-5 #grid-awd, .layout-5 #grid-skills { padding: 0 12mm; }
     .layout-5 .cv-heading { border-bottom: 2px dashed var(--primary); padding-bottom: 1mm; }
@@ -300,7 +300,7 @@
           <p class="text-[10px] text-slate-500 mt-2 font-medium">Klik gambar QR untuk mengunduh ke galeri.</p>
 
           <!-- Tombol Konfirmasi WA -->
-          <a href="https://wa.me/6281247992545?text=Assalamu%20a%27alaikum%20kak%2C%0A%0ASaya%20sudah%20melakukan%20pembayaran%20sejumlah%20*Rp.%2015.000*.%0A%0ABerikut%20saya%20lampirkan%20bukti%20pembayarannya%20untuk%20mendapatkan%20Token%20Akses%20Premium.%0A%0ATerima%20kasih." target="_blank" class="mt-3 inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white py-2.5 px-5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-colors shadow-md w-full sm:w-auto">
+          <a href="https://wa.me/6281234567890?text=Assalamu%20a%27alaikum%20kak%2C%0A%0ASaya%20sudah%20melakukan%20pembayaran%20sejumlah%20*Rp.%2015.000*.%0A%0ABerikut%20saya%20lampirkan%20bukti%20pembayarannya%20untuk%20mendapatkan%20Token%20Akses%20Premium.%0A%0ATerima%20kasih." target="_blank" class="mt-3 inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white py-2.5 px-5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-colors shadow-md w-full sm:w-auto">
             <i data-lucide="message-circle" class="w-4 h-4"></i> Konfirmasi via WhatsApp
           </a>
         </div>
@@ -566,8 +566,8 @@
             <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 mb-4 pb-2 border-b border-slate-100 uppercase tracking-wider">
               <i data-lucide="star" class="text-slate-400 w-4 h-4"></i> Ringkasan Profesional
             </h2>
-            <textarea id="in-summary-ar" maxlength="200" oninput="forceArabic(this)" class="w-full p-3 bg-white border border-slate-200 rounded-xl h-24 text-sm focus:border-indigo-500 outline-none shadow-sm font-medium mb-3 font-serif text-right" dir="rtl" placeholder="الملخص المهني (Arab) - Max 200 char"></textarea>
-            <textarea id="in-summary-en" maxlength="200" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl h-24 text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" placeholder="Professional Summary (English) - Max 200 char"></textarea>
+            <textarea id="in-summary-ar" maxlength="200" oninput="forceArabic(this)" class="w-full p-3 bg-white border border-slate-200 rounded-xl h-24 text-sm focus:border-indigo-500 outline-none shadow-sm font-medium mb-3 font-serif text-right" dir="rtl" placeholder="الملخص المهني (Arab) - Max 200 char">طالب في اللغة العربية وآدابها، مهتم بالتصميم ومعالجة البيانات، ومتمكن في ترجمة الوثائق الرسمية. أسعى للدراسة في الجامعة الإسلامية بالمدينة المنورة وخدمة المجتمع في المناطق النائية.</textarea>
+            <textarea id="in-summary-en" maxlength="200" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl h-24 text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" placeholder="Professional Summary (English) - Max 200 char">Arabic Language and Literature student with interests in design and data processing, skilled in translating official documents. Aspiring to study at Islamic University of Madinah and serve rural communities.</textarea>
           </section>
 
           <!-- PENDIDIKAN -->
@@ -1073,19 +1073,10 @@
     const translateDateToArabic = (dateStr) => {
       if (!dateStr) return '';
       const months = {
-  'january': 'يناير',
-  'february': 'فبراير',
-  'march': 'مارس',
-  'april': 'أبريل',
-  'may': 'مايو',
-  'june': 'يونيو',
-  'july': 'يوليو',
-  'august': 'أغسطس',
-  'september': 'سبتمبر',
-  'october': 'أكتوبر',
-  'november': 'نوفمبر',
-  'december': 'ديسمبر'
-};
+        'januari': 'يناير', 'februari': 'فبراير', 'maret': 'مارس', 'april': 'أبريل',
+        'mei': 'مايو', 'juni': 'يونيو', 'juli': 'يوليو', 'agustus': 'أغسطس',
+        'september': 'سبتمبر', 'oktober': 'أكتوبر', 'november': 'نوفمبر', 'desember': 'ديسمبر'
+      };
       let result = dateStr.toLowerCase();
       for (const [id, ar] of Object.entries(months)) { result = result.replace(id, ar); }
       return toArabicNumerals(result);
@@ -1130,7 +1121,12 @@
       syncSplit('in-address-ar', 'in-address', 'out-address-ar', 'out-address-en');
       syncShared('in-dob', 'out-dob-ar', 'out-dob-en', true);
       syncShared('in-phone', 'out-phone-ar', 'out-phone-en');
-      syncShared('in-email', 'out-email-ar', 'out-email-en');
+      
+      // Email khusus agar tidak direplace ke angka arab
+      let emailVal = document.getElementById('in-email') ? document.getElementById('in-email').value : '-';
+      if(document.getElementById('out-email-en')) document.getElementById('out-email-en').innerText = emailVal || '-';
+      if(document.getElementById('out-email-ar')) document.getElementById('out-email-ar').innerText = emailVal || '-';
+
       syncSplit('in-summary-ar', 'in-summary-en', 'out-summary-ar', 'out-summary-en');
       syncShared('in-edu-year', 'out-edu-year-ar', 'out-edu-year-en');
       syncShared('in-edu-gpa', 'out-edu-gpa-ar', 'out-edu-gpa-en');
@@ -1150,6 +1146,18 @@
       document.getElementById('out-skill-en').innerText = document.getElementById('in-skill-en').value || '-';
       document.getElementById('out-skill-tech').innerText = document.getElementById('in-skill-tech').value || '-';
       document.getElementById('out-skill-soft').innerText = document.getElementById('in-skill-soft').value || '-';
+
+      // Dinamis menyembunyikan blok Penghargaan jika kosong agar struktur tak berantakan
+      const awdTitleEn = document.getElementById('in-awd-title-en').value.trim();
+      const awdTitleAr = document.getElementById('in-awd-title-ar').value.trim();
+      const gridAwd = document.getElementById('grid-awd');
+      if(gridAwd) {
+        if (!awdTitleEn && !awdTitleAr) {
+          gridAwd.style.display = 'none';
+        } else {
+          gridAwd.style.display = 'block';
+        }
+      }
     };
 
     const exportPDF = () => {
