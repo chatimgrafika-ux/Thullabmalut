@@ -13,7 +13,21 @@
     tailwind.config = {
       theme: {
         extend: {
-          colors: { moe: '#1db1a2', moehover: '#168e82' }
+          colors: { 
+            moe: '#1db1a2', 
+            moehover: '#168e82',
+            slatebg: '#f8fafc' 
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.5s ease-out',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(10px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          }
         }
       }
     }
@@ -23,17 +37,27 @@
   
   <style>
     html[data-theme="light"] { --p: 66.4% 0.117 174.5; --pf: 56.4% 0.117 174.5; --pc: 100% 0 0; }
-    html, body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; user-select: none; }
+    html, body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; user-select: none; background-color: #f8fafc; }
     *::-webkit-scrollbar { display: none; }
     * { -ms-overflow-style: none; scrollbar-width: none; }
     [v-cloak] { display: none; }
+    
     .dynamic-island { animation: slideDown 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
-    @keyframes slideDown { from { transform: translate(-50%, -100%); } to { transform: translate(-50%, 0); } }
+    @keyframes slideDown { from { transform: translate(-50%, -100%); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+    
     .copy-active:active { background-color: rgba(29, 177, 162, 0.1); transform: scale(0.98); }
     .moe-link { color: #1db1a2; text-decoration: underline; }
+    
+    /* Smooth transitions for interactive elements */
+    .expand-enter-active, .expand-leave-active { transition: all 0.3s ease-in-out; overflow: hidden; }
+    .expand-enter-from, .expand-leave-to { max-height: 0; opacity: 0; }
+    .expand-enter-to, .expand-leave-from { max-height: 500px; opacity: 1; }
+
+    /* Bottom Nav Padding for safe area (iOS) */
+    .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
+<body class="bg-slatebg text-slate-900 font-sans antialiased">
   
   <!-- TEMPLATE SECTION -->
   <div id="app" v-cloak>
@@ -41,52 +65,52 @@
     <!-- Splash Screen -->
     <div v-if="showSplash" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center p-6 text-center">
       <div class="w-28 mb-6 animate-bounce">
-        <img :src="appLogo" class="w-full h-full object-contain">
+        <img :src="appLogo" class="w-full h-full object-contain drop-shadow-xl">
       </div>
-      <h3 class="text-center text-slate-700 font-bold">
-         <span class="block text-xl mb-1 font-black">نظام الدخول الموحد</span>
-         <span class="block text-sm font-normal text-slate-500 uppercase tracking-widest">Single Sign On</span>
+      <h3 class="text-center text-slate-700 font-bold animate-fade-in-up">
+         <span class="block text-2xl mb-1 font-black text-moe">نظام الدخول الموحد</span>
+         <span class="block text-sm font-medium text-slate-500 uppercase tracking-widest">Single Sign On</span>
       </h3>
-      <div class="mt-8 loading loading-dots loading-md text-primary"></div>
+      <div class="mt-8 loading loading-dots loading-md text-moe"></div>
     </div>
 
     <!-- Notification / Dynamic Island -->
-    <div v-if="toast.show" class="fixed top-4 left-1/2 -translate-x-1/2 z-[50] dynamic-island w-fit max-w-[90%] px-6 py-3 bg-slate-900 text-white rounded-full shadow-2xl flex items-center gap-3">
+    <div v-if="toast.show" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] dynamic-island w-fit max-w-[90%] px-6 py-3 bg-slate-800 text-white rounded-full shadow-2xl flex items-center gap-3 backdrop-blur-md bg-opacity-95">
       <span class="text-sm font-medium">{{ toast.msg }}</span>
     </div>
 
-    <div class="w-full max-w-md mx-auto min-h-[100dvh] bg-slate-50 shadow-xl relative overflow-x-hidden flex flex-col">
+    <div class="w-full max-w-md mx-auto min-h-[100dvh] bg-slatebg shadow-2xl relative overflow-x-hidden flex flex-col">
       
-      <!-- AUTH VIEW (MOE Saudi Style) -->
+      <!-- AUTH VIEW -->
       <div v-if="!user" class="flex-1 flex flex-col p-8 justify-center bg-white">
-        <div class="text-center mb-10">
+        <div class="text-center mb-10 animate-fade-in-up">
           <img :src="appLogo" class="w-24 mx-auto mb-6 object-contain">
-          <h3 class="text-center text-slate-700 font-bold">
-             <span class="block text-2xl mb-1 font-black">نظام الدخول الموحد</span>
-             <span class="block text-base font-normal text-slate-500 uppercase tracking-widest">Single Sign On</span>
+          <h3 class="text-center text-slate-800 font-bold">
+             <span class="block text-3xl mb-1 font-black">نظام الدخول الموحد</span>
+             <span class="block text-sm font-medium text-slate-400 uppercase tracking-widest">Portal Pelajar</span>
           </h3>
-          <p class="text-sm text-slate-600 font-bold mt-10" dir="rtl">الرجاء ادخال اسم المستخدم وكلمة المرور</p>
+          <p class="text-xs text-slate-500 font-medium mt-8 bg-slate-50 py-2 rounded-lg inline-block px-4" dir="rtl">الرجاء ادخال اسم المستخدم وكلمة المرور</p>
         </div>
-        <div class="space-y-4">
+        <div class="space-y-4 animate-fade-in-up" style="animation-delay: 0.1s;">
           <template v-if="authMode === 'register'">
-            <input v-model="authForm.nama" type="text" placeholder="Nama Lengkap / الاسم الكامل" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-xl h-12 text-center" dir="rtl">
-            <input v-model="authForm.asal" type="text" placeholder="Daerah Asal / المنطقة" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-xl h-12 text-center" dir="rtl">
+            <input v-model="authForm.nama" type="text" placeholder="Nama Lengkap / الاسم الكامل" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-2xl h-14 text-center transition-all" dir="rtl">
+            <input v-model="authForm.asal" type="text" placeholder="Daerah Asal / المنطقة" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-2xl h-14 text-center transition-all" dir="rtl">
           </template>
           
-          <input v-model="authForm.email" type="email" placeholder="Email / اسم المستخدم" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-xl h-12 text-center" dir="rtl">
-          <input v-model="authForm.password" :type="showPass ? 'text' : 'password'" placeholder="Kata Sandi / كلمة المرور" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-xl h-12 text-center" dir="rtl">
+          <input v-model="authForm.email" type="email" placeholder="Email / البريد الإلكتروني" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-2xl h-14 text-center transition-all" dir="rtl">
+          <input v-model="authForm.password" :type="showPass ? 'text' : 'password'" placeholder="Kata Sandi / كلمة المرور" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-2xl h-14 text-center transition-all" dir="rtl">
           
           <template v-if="authMode === 'register'">
-            <input v-model="authForm.confirmPassword" :type="showPass ? 'text' : 'password'" placeholder="Konfirmasi Sandi / تأكيد كلمة المرور" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-xl h-12 text-center" dir="rtl">
+            <input v-model="authForm.confirmPassword" :type="showPass ? 'text' : 'password'" placeholder="Konfirmasi Sandi / تأكيد كلمة المرور" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-2xl h-14 text-center transition-all" dir="rtl">
           </template>
 
-          <button @click="handleAuth" :disabled="isLoading" class="btn bg-moe hover:bg-moehover border-none w-full rounded-xl text-white font-bold h-12 text-lg">
+          <button @click="handleAuth" :disabled="isLoading" class="btn bg-moe hover:bg-moehover border-none w-full rounded-2xl text-white font-black h-14 text-lg shadow-lg shadow-moe/30 mt-2 transition-transform active:scale-95">
             <span v-if="isLoading" class="loading loading-spinner"></span>
-            {{ authMode === 'login' ? 'دخول' : 'تسجيل' }}
+            {{ authMode === 'login' ? 'دخول (Masuk)' : 'تسجيل (Daftar)' }}
           </button>
           <div class="flex flex-col gap-4 mt-8 text-center">
-            <a @click="toggleAuthMode" class="moe-link text-xs font-black cursor-pointer uppercase tracking-tighter">
-               {{ authMode === 'login' ? 'إنشاء حساب جديد (Daftar Akun Baru)' : 'تسجيل الدخول (Sudah Punya Akun)' }}
+            <a @click="toggleAuthMode" class="moe-link text-[11px] font-black cursor-pointer uppercase tracking-widest transition-colors hover:text-moehover">
+               {{ authMode === 'login' ? 'Belum punya akun? Buat Akun Baru' : 'Sudah punya akun? Masuk' }}
             </a>
           </div>
         </div>
@@ -94,455 +118,690 @@
 
       <!-- MAIN APP -->
       <template v-else>
-        <header class="sticky top-0 z-20 bg-white/95 backdrop-blur-md p-4 flex items-center justify-between border-b border-slate-100 shadow-sm">
-          <div class="flex items-center gap-3 cursor-pointer" @click="activeTab = 'home'">
-            <img :src="appLogo" class="w-10 h-10 object-contain">
+        
+        <!-- Header (Top App Bar) -->
+        <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-xl p-4 flex items-center justify-between border-b border-slate-100 shadow-sm">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center border border-slate-100 p-1">
+              <img :src="appLogo" class="w-full h-full object-contain">
+            </div>
             <div>
-              <h1 class="text-xs font-black text-slate-800 tracking-tighter">{{ appName }}</h1>
-              <p class="text-[9px] text-moe uppercase font-black tracking-widest">{{ user.role }}</p>
+              <h1 class="text-[13px] font-black text-slate-800 tracking-tight leading-tight">Portal Malut</h1>
+              <p class="text-[9px] text-moe uppercase font-black tracking-widest">{{ user.role === 'ADMIN' ? 'Administrator' : 'Pelajar Arab Saudi' }}</p>
             </div>
           </div>
-          <div class="flex items-center gap-2">
-            <button v-if="activeTab !== 'info'" @click="activeTab = 'info'" class="btn btn-circle btn-sm bg-slate-100 hover:bg-slate-200 border-none text-lg">📚</button>
-            <button v-if="activeTab !== 'profile'" @click="activeTab = 'profile'" class="btn btn-circle btn-sm bg-slate-100 hover:bg-slate-200 border-none text-lg">👤</button>
+          <!-- User Avatar Mini -->
+          <div @click="activeTab = 'profile'" class="w-9 h-9 rounded-full bg-gradient-to-tr from-moe to-teal-400 text-white flex items-center justify-center font-bold text-sm shadow-md cursor-pointer border-2 border-white ring-2 ring-slate-100">
+            {{ formData.nama_p1_id ? formData.nama_p1_id.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase() }}
           </div>
         </header>
 
-        <main class="flex-1 pb-10 overflow-y-auto">
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto pb-24 relative scroll-smooth">
           
-          <!-- HOME TAB -->
-          <div v-if="activeTab === 'home'" class="p-5 space-y-6">
+          <!-- ================= DASHBOARD TAB ================= -->
+          <div v-if="activeTab === 'dashboard'" class="p-5 space-y-6 animate-fade-in-up">
             
-            <!-- ADMIN PANEL -->
+            <!-- ADMIN DASHBOARD -->
             <div v-if="user.role === 'ADMIN'" class="space-y-4">
-              <h3 class="font-bold text-slate-800 px-1 text-xs uppercase tracking-widest opacity-40">Admin Control Panel</h3>
-              <div v-for="st in students" :key="st.id" @click="viewDetail(st)" class="p-4 bg-white border border-slate-100 rounded-3xl shadow-sm flex items-center gap-4 active:scale-95 transition-all cursor-pointer">
-                <div class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center font-bold text-moe border border-slate-100">{{ st.nama_lengkap_id ? st.nama_lengkap_id.charAt(0) : '?' }}</div>
+              <div class="bg-gradient-to-r from-slate-800 to-slate-900 rounded-[2rem] p-6 text-white shadow-xl relative overflow-hidden">
+                <div class="relative z-10">
+                  <h2 class="text-2xl font-black mb-1">Admin Panel</h2>
+                  <p class="text-xs font-medium text-slate-300">Kelola dan verifikasi berkas pelajar.</p>
+                </div>
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-moe opacity-20 rounded-full blur-3xl"></div>
+              </div>
+
+              <div class="flex justify-between items-end px-1 mt-6">
+                <h3 class="font-black text-slate-800 text-sm uppercase tracking-widest">Daftar Pelajar</h3>
+                <span class="text-[10px] font-bold text-moe bg-moe/10 px-2 py-1 rounded-md">{{ students.length }} Data</span>
+              </div>
+
+              <div v-if="students.length === 0" class="text-center p-8 border-2 border-dashed border-slate-200 rounded-3xl text-slate-400 font-bold text-xs">
+                Belum ada data pendaftar.
+              </div>
+
+              <div v-for="st in students" :key="st.id" @click="viewDetail(st)" class="p-4 bg-white border border-slate-100 rounded-3xl shadow-sm flex items-center gap-4 active:scale-95 transition-all cursor-pointer hover:shadow-md">
+                <div class="w-12 h-12 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center font-black text-slate-500 border border-slate-200 text-lg shadow-inner">
+                  {{ st.nama_lengkap_id ? st.nama_lengkap_id.charAt(0) : '?' }}
+                </div>
                 <div class="flex-1 overflow-hidden">
-                  <h4 class="font-bold text-sm truncate text-slate-700">{{ st.nama_lengkap_id || 'Tanpa Nama' }}</h4>
+                  <h4 class="font-black text-sm truncate text-slate-700">{{ st.nama_lengkap_id || 'Tanpa Nama' }}</h4>
                   <p class="text-[10px] text-slate-400 font-medium">{{ st.email }}</p>
                 </div>
-                <div class="badge text-[9px] font-black tracking-tighter" :class="st.status_dok === 'Disetujui' ? 'badge-success text-white' : st.status_dok === 'Ditolak' ? 'badge-error text-white' : 'badge-ghost'">{{ st.status_dok || 'PENDING' }}</div>
+                <div class="badge text-[9px] font-black tracking-tighter px-2 py-3 rounded-xl border-none" :class="st.status_dok === 'Disetujui' ? 'bg-emerald-100 text-emerald-600' : st.status_dok === 'Ditolak' ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600'">
+                  {{ st.status_dok || 'PENDING' }}
+                </div>
               </div>
             </div>
 
-            <!-- USER FORM -->
+            <!-- USER DASHBOARD -->
             <div v-else class="space-y-6">
-              <div class="flex items-center justify-between bg-slate-100 p-1.5 rounded-2xl shadow-inner">
-                <button @click="isViewMode = true" :class="isViewMode ? 'bg-white text-moe shadow-sm' : 'text-slate-400'" class="flex-1 py-2 rounded-xl text-[10px] font-black uppercase transition-all">Mode Lihat</button>
-                <button @click="isViewMode = false" :class="!isViewMode ? 'bg-white text-moe shadow-sm' : 'text-slate-400'" class="flex-1 py-2 rounded-xl text-[10px] font-black uppercase transition-all">Mode Ubah</button>
-              </div>
-
-              <!-- Banner Status -->
-              <div class="p-5 rounded-[2rem] flex items-center justify-between border" :class="formData.status_dok === 'Disetujui' ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : formData.status_dok === 'Ditolak' ? 'bg-red-50 border-red-100 text-red-700' : 'bg-moe/10 border-moe/20 text-moe shadow-lg shadow-moe/5'">
-                <div>
-                   <p class="text-[9px] font-black uppercase opacity-60 tracking-widest">Status Verifikasi</p>
-                   <h4 class="text-sm font-black">{{ formData.status_dok || 'Belum Diverifikasi' }}</h4>
+              <!-- Welcome Card -->
+              <div class="bg-gradient-to-br from-moe to-teal-500 rounded-[2rem] p-6 text-white shadow-xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl transform translate-x-10 -translate-y-10"></div>
+                <div class="relative z-10 flex justify-between items-start">
+                  <div>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-teal-100 mb-1">Selamat Datang,</p>
+                    <h2 class="text-2xl font-black truncate max-w-[200px]">{{ formData.nama_p1_id || user.email.split('@')[0] }}!</h2>
+                  </div>
                 </div>
-                <span class="text-2xl">{{ formData.status_dok === 'Disetujui' ? '✅' : formData.status_dok === 'Ditolak' ? '❌' : '⏳' }}</span>
               </div>
 
-              <div class="tabs tabs-boxed bg-slate-100 rounded-2xl p-1 overflow-x-auto flex-nowrap scrollbar-hide">
-                <a v-for="t in ['identitas', 'akademik', 'berkas', 'dokumen']" @click="formTab = t" :class="{'tab-active !bg-white !text-moe shadow-sm': formTab === t}" class="tab flex-1 font-bold text-[9px] uppercase min-w-fit">{{ t }}</a>
+              <!-- DEADLINE & TIMELINE STUDY IN SAUDI (NEW) -->
+              <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 relative overflow-hidden">
+                 <!-- Peringatan Alert -->
+                 <div class="bg-red-50 text-red-600 border border-red-100 rounded-[1.5rem] p-4 mb-6 flex gap-3 items-start shadow-sm">
+                    <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center shrink-0">⚠️</div>
+                    <div>
+                       <h4 class="text-[11px] font-black uppercase tracking-wider mb-1">Peringatan Penting!</h4>
+                       <p class="text-[10.5px] font-medium leading-relaxed">Portal utama Study in Saudi sedang dibuka. Tahap <strong class="font-black text-red-700">إضافة الرغبات</strong> (Penambahan Pilihan). Segera selesaikan kelengkapan berkas Anda dan mendaftar.</p>
+                    </div>
+                 </div>
+
+                 <!-- Countdown Hitung Mundur -->
+                 <h4 class="text-[10px] font-black text-center text-slate-400 uppercase tracking-widest mb-3">Sisa Waktu Pendaftaran</h4>
+                 <div class="flex justify-center gap-3 text-center mb-6">
+                    <div class="flex flex-col p-3 bg-slate-50 rounded-2xl text-slate-800 border border-slate-100 min-w-[3.5rem] shadow-inner">
+                       <span class="countdown font-mono text-2xl font-black justify-center text-moe">
+                          <span :style="`--value:${timeLeft.days};`"></span>
+                       </span>
+                       <span class="text-[8px] uppercase font-bold mt-1 text-slate-400">Hari</span>
+                    </div> 
+                    <div class="flex flex-col p-3 bg-slate-50 rounded-2xl text-slate-800 border border-slate-100 min-w-[3.5rem] shadow-inner">
+                       <span class="countdown font-mono text-2xl font-black justify-center text-slate-700">
+                          <span :style="`--value:${timeLeft.hours};`"></span>
+                       </span>
+                       <span class="text-[8px] uppercase font-bold mt-1 text-slate-400">Jam</span>
+                    </div> 
+                    <div class="flex flex-col p-3 bg-slate-50 rounded-2xl text-slate-800 border border-slate-100 min-w-[3.5rem] shadow-inner">
+                       <span class="countdown font-mono text-2xl font-black justify-center text-slate-700">
+                          <span :style="`--value:${timeLeft.minutes};`"></span>
+                       </span>
+                       <span class="text-[8px] uppercase font-bold mt-1 text-slate-400">Mnt</span>
+                    </div> 
+                    <div class="flex flex-col p-3 bg-slate-50 rounded-2xl text-slate-800 border border-slate-100 min-w-[3.5rem] shadow-inner">
+                       <span class="countdown font-mono text-2xl font-black justify-center text-slate-700">
+                          <span :style="`--value:${timeLeft.seconds};`"></span>
+                       </span>
+                       <span class="text-[8px] uppercase font-bold mt-1 text-slate-400">Dtk</span>
+                    </div>
+                 </div>
+
+                 <!-- Link ke Portal -->
+                 <a href="https://studyinsaudi.moe.gov.sa/" target="_blank" class="btn w-full bg-slate-800 hover:bg-slate-900 border-none text-white rounded-2xl h-14 font-black shadow-lg shadow-slate-800/20 mb-8 text-[11px] tracking-widest flex items-center justify-center gap-2">
+                    <span>BUKA PORTAL STUDY IN SAUDI</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                 </a>
+
+                 <!-- Chart Batang / Timeline Fase -->
+                 <div>
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Jadwal & Fase (الجدول الزمني)</h4>
+                    
+                    <div class="space-y-4">
+                       <!-- Phase 1 -->
+                       <div class="relative pl-6">
+                          <div class="absolute left-1.5 top-2 bottom-[-1rem] w-0.5 bg-moe/30"></div>
+                          <div class="absolute left-0 top-1 w-3.5 h-3.5 bg-moe rounded-full shadow-[0_0_10px_rgba(29,177,162,0.5)]"></div>
+                          <div class="bg-moe/10 border border-moe/20 rounded-2xl p-4">
+                             <div class="flex justify-between items-start mb-1">
+                                <span class="text-[10px] font-black text-moe uppercase tracking-wider">1. Aktif</span>
+                                <span class="text-[9px] font-bold text-slate-500 bg-white px-2 py-0.5 rounded-md">19 Apr - 21 May</span>
+                             </div>
+                             <p class="text-sm font-bold text-slate-800 font-serif mt-2" dir="rtl">إضافة الرغبات</p>
+                          </div>
+                       </div>
+                       
+                       <!-- Phase 2 -->
+                       <div class="relative pl-6">
+                          <div class="absolute left-1.5 top-2 bottom-[-1rem] w-0.5 bg-slate-200"></div>
+                          <div class="absolute left-0 top-1 w-3.5 h-3.5 bg-slate-300 rounded-full"></div>
+                          <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4">
+                             <div class="flex justify-between items-start mb-1">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">2. Mendatang</span>
+                                <span class="text-[9px] font-bold text-slate-400 bg-white px-2 py-0.5 rounded-md border border-slate-100">لم يحدد بعد</span>
+                             </div>
+                             <p class="text-[13px] font-bold text-slate-600 text-right leading-relaxed font-serif mt-2" dir="rtl">إظهار الفرص المتاحة للطلبة وإجراء المقابلات الشخصية واختبارات القبول</p>
+                          </div>
+                       </div>
+
+                       <!-- Phase 3 -->
+                       <div class="relative pl-6">
+                          <div class="absolute left-0 top-1 w-3.5 h-3.5 bg-slate-300 rounded-full"></div>
+                          <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4">
+                             <div class="flex justify-between items-start mb-1">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider">3. Mendatang</span>
+                                <span class="text-[9px] font-bold text-slate-400 bg-white px-2 py-0.5 rounded-md border border-slate-100">لم يحدد بعد</span>
+                             </div>
+                             <p class="text-[13px] font-bold text-slate-600 text-right font-serif mt-2" dir="rtl">تأكيد الاختيار و إعلان النتائج</p>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
               </div>
 
-              <!-- Tab Content Identitas -->
-              <div v-if="formTab === 'identitas'" class="space-y-6 animate-in fade-in">
+              <!-- Progress Kelengkapan Data -->
+              <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100">
+                <h3 class="font-black text-slate-800 text-sm uppercase tracking-widest mb-6">Progress Profil & Berkas</h3>
+                <div class="flex items-center gap-6">
+                  <!-- Radial Chart DaisyUI -->
+                  <div class="relative">
+                    <div class="radial-progress bg-slate-50 text-moe border-4 border-slate-50 font-black text-lg transition-all duration-1000" 
+                         :style="`--value:${dataProgress}; --size:6rem; --thickness: 0.6rem;`">
+                      {{ dataProgress }}%
+                    </div>
+                  </div>
+                  <div class="flex-1 space-y-2">
+                    <p class="text-[11px] font-bold text-slate-500 leading-relaxed">
+                      Lengkapi data identitas dan dokumen wajib agar persentase mencapai 100%.
+                    </p>
+                    <button @click="activeTab = 'form'; formTab = 'identitas'" class="btn btn-sm bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-[10px] tracking-widest border-none mt-2 px-4 shadow-md">
+                      LENGKAPI DATA ➜
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status Verifikasi Banner -->
+              <div class="bg-white rounded-[2rem] p-1 border border-slate-100 shadow-sm">
+                <div class="p-5 rounded-[1.8rem] flex items-center justify-between" 
+                     :class="formData.status_dok === 'Disetujui' ? 'bg-emerald-50 text-emerald-700' : formData.status_dok === 'Ditolak' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'">
+                  <div>
+                     <p class="text-[9px] font-black uppercase opacity-60 tracking-widest mb-1">Status Verifikasi Tim</p>
+                     <h4 class="text-sm font-black">{{ formData.status_dok || 'Belum Diverifikasi / Pending' }}</h4>
+                  </div>
+                  <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm text-2xl">
+                    {{ formData.status_dok === 'Disetujui' ? '✅' : formData.status_dok === 'Ditolak' ? '❌' : '⏳' }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Info / Kampus -->
+              <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2" @click="activeTab = 'form'; formTab = 'akademik'">
+                  <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center text-xl mb-1">🎓</div>
+                  <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Kampus Tujuan</h4>
+                  <p class="text-xl font-black text-slate-800">{{ pendaftaranKampus.length }}</p>
+                </div>
+                <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center gap-2" @click="activeTab = 'form'; formTab = 'berkas'">
+                  <div class="w-10 h-10 bg-purple-50 text-purple-500 rounded-full flex items-center justify-center text-xl mb-1">📂</div>
+                  <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Berkas Wajib</h4>
+                  <p class="text-xl font-black text-slate-800">{{ countBerkasWajib }} / {{ berkasWajib.length }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= FORM DATA TAB ================= -->
+          <div v-if="activeTab === 'form' && user.role !== 'ADMIN'" class="p-5 space-y-6 animate-fade-in-up">
+            
+            <div class="flex items-center justify-between">
+              <h2 class="text-2xl font-black text-slate-800 tracking-tight">Formulir Data</h2>
+            </div>
+
+            <!-- Mode Toggle -->
+            <div class="flex items-center justify-between bg-slate-200/50 p-1.5 rounded-[1.5rem]">
+              <button @click="isViewMode = true" :class="isViewMode ? 'bg-white text-moe shadow-sm' : 'text-slate-400'" class="flex-1 py-3 rounded-[1.2rem] text-[10px] font-black uppercase tracking-widest transition-all">Mode Lihat</button>
+              <button @click="isViewMode = false" :class="!isViewMode ? 'bg-white text-moe shadow-sm' : 'text-slate-400'" class="flex-1 py-3 rounded-[1.2rem] text-[10px] font-black uppercase tracking-widest transition-all">Mode Ubah</button>
+            </div>
+
+            <!-- Tabs Nav -->
+            <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x">
+              <button v-for="t in ['identitas', 'akademik', 'berkas', 'dokumen']" @click="formTab = t" 
+                      :class="formTab === t ? 'bg-moe text-white shadow-md' : 'bg-white text-slate-500 border border-slate-100'" 
+                      class="px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest min-w-fit transition-colors snap-center">
+                {{ t }}
+              </button>
+            </div>
+
+            <!-- Form Content (Reused existing form logic, upgraded styling) -->
+            <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm min-h-[50vh]">
+              
+              <!-- Identitas -->
+              <div v-if="formTab === 'identitas'" class="space-y-6 animate-fade-in-up">
                 <section class="space-y-4">
-                  <h4 class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] px-1">Informasi Identitas</h4>
+                  <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1 border-b border-slate-100 pb-2">Informasi Nama</h4>
                   <div class="grid grid-cols-2 gap-3">
                     <div v-for="n in [{k:'nama_p1_id', l:'Nama Pertama'}, {k:'nama_p2_id', l:'Nama Kedua'}, {k:'nama_p3_id', l:'Nama Ketiga'}, {k:'nama_p4_id', l:'Nama Keempat'}]" :key="n.k">
-                       <label class="label text-[9px] font-bold text-slate-400 uppercase">Indo - {{ n.l }}</label>
-                       <div v-if="isViewMode" @click="copy(formData[n.k], n.l)" class="p-3 bg-white border border-slate-100 rounded-2xl text-[13px] font-medium copy-active truncate shadow-sm">{{ formData[n.k] || '-' }}</div>
-                       <input v-else v-model="formData[n.k]" @input="formatIDName(n.k)" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs shadow-sm">
+                       <label class="label text-[9px] font-bold text-slate-400 uppercase pb-1">{{ n.l }} (ID)</label>
+                       <div v-if="isViewMode" @click="copy(formData[n.k], n.l)" class="p-3 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold text-slate-700 copy-active truncate">{{ formData[n.k] || '-' }}</div>
+                       <input v-else v-model="formData[n.k]" @input="formatIDName(n.k)" type="text" class="input input-bordered w-full bg-slate-50 focus:bg-white border-slate-200 focus:border-moe rounded-2xl text-xs font-bold">
                     </div>
                   </div>
-                  <div class="divider"></div>
-                  <div class="grid grid-cols-2 gap-3" dir="rtl">
+                  <div class="grid grid-cols-2 gap-3 mt-4" dir="rtl">
                     <div v-for="n in [{k:'nama_p1_ar', l:'الأول'}, {k:'nama_p2_ar', l:'الثاني'}, {k:'nama_p3_ar', l:'الثالث'}, {k:'nama_p4_ar', l:'الرابع'}]" :key="n.k">
-                       <label class="label text-[9px] font-bold text-slate-400 text-right uppercase">AR - {{ n.l }}</label>
-                       <div v-if="isViewMode" @click="copy(formData[n.k], n.l)" class="p-3 bg-white border border-slate-100 rounded-2xl text-base font-black font-serif text-right copy-active shadow-sm">{{ formData[n.k] || '-' }}</div>
-                       <input v-else v-model="formData[n.k]" @input="formatARName(n.k)" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-right font-serif text-base shadow-sm">
+                       <label class="label text-[9px] font-bold text-slate-400 text-right uppercase pb-1">{{ n.l }} (AR)</label>
+                       <div v-if="isViewMode" @click="copy(formData[n.k], n.l)" class="p-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-black font-serif text-right text-slate-800 copy-active">{{ formData[n.k] || '-' }}</div>
+                       <input v-else v-model="formData[n.k]" @input="formatARName(n.k)" type="text" class="input input-bordered w-full bg-slate-50 focus:bg-white border-slate-200 focus:border-moe rounded-2xl text-right font-serif text-sm">
                     </div>
                   </div>
                 </section>
 
-                <section class="space-y-4">
-                  <h4 class="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1">Tempat & Tanggal Lahir</h4>
+                <section class="space-y-4 pt-4 border-t border-slate-100">
+                  <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 pb-2">Tempat & Tanggal Lahir</h4>
                   <div class="grid grid-cols-2 gap-3">
-                    <div v-for="f in [{k:'tpt_lahir_id', l:'Tpt Lahir Indo'}, {k:'tpt_lahir_ar', l:'مكان الميلاد', ar:true}, {k:'tgl_lahir_id', l:'Tgl Lahir Indo', d:true}, {k:'tgl_lahir_ar', l:'تاريخ الميلاد', ar:true, ro:true}]" :key="f.k" :dir="f.ar ? 'rtl' : 'ltr'">
-                       <label class="label text-[9px] font-bold text-slate-400 uppercase" :class="{'text-right': f.ar}">{{ f.l }}</label>
-                       <div v-if="isViewMode" @click="copy(formData[f.k], f.l)" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs copy-active shadow-sm" :class="{'text-right font-serif font-black': f.ar}">{{ formData[f.k] || '-' }}</div>
-                       <input v-else-if="f.d" v-model="formData[f.k]" @change="generateHijri" type="date" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
-                       <input v-else-if="f.ro" v-model="formData[f.k]" readonly type="text" class="input input-bordered w-full bg-primary/5 border-primary/20 rounded-xl text-right font-serif text-base h-11">
-                       <input v-else v-model="formData[f.k]" @input="f.ar ? formatARName(f.k) : formatIDName(f.k)" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm" :class="{'text-right font-serif': f.ar}">
+                    <div v-for="f in [{k:'tpt_lahir_id', l:'Tpt Lahir ID'}, {k:'tpt_lahir_ar', l:'مكان الميلاد', ar:true}, {k:'tgl_lahir_id', l:'Tgl Lahir Masehi', d:true}, {k:'tgl_lahir_ar', l:'تاريخ الميلاد', ar:true, ro:true}]" :key="f.k" :dir="f.ar ? 'rtl' : 'ltr'">
+                       <label class="label text-[9px] font-bold text-slate-400 uppercase pb-1" :class="{'text-right': f.ar}">{{ f.l }}</label>
+                       <div v-if="isViewMode" @click="copy(formData[f.k], f.l)" class="p-3 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold text-slate-700 copy-active" :class="{'text-right font-serif text-sm': f.ar}">{{ formData[f.k] || '-' }}</div>
+                       <input v-else-if="f.d" v-model="formData[f.k]" @change="generateHijri" type="date" class="input input-bordered w-full bg-slate-50 focus:bg-white border-slate-200 focus:border-moe rounded-2xl text-xs font-bold h-12">
+                       <input v-else-if="f.ro" v-model="formData[f.k]" readonly type="text" class="input input-bordered w-full bg-slate-100 border-slate-200 rounded-2xl text-right font-serif text-sm h-12 text-slate-500">
+                       <input v-else v-model="formData[f.k]" @input="f.ar ? formatARName(f.k) : formatIDName(f.k)" type="text" class="input input-bordered w-full bg-slate-50 focus:bg-white border-slate-200 focus:border-moe rounded-2xl text-xs font-bold h-12" :class="{'text-right font-serif text-sm': f.ar}">
                     </div>
                   </div>
                 </section>
               </div>
 
-              <!-- Tab Akademik -->
-              <div v-if="formTab === 'akademik'" class="space-y-6 animate-in fade-in">
+              <!-- Akademik -->
+              <div v-if="formTab === 'akademik'" class="space-y-6 animate-fade-in-up">
                 <section class="space-y-4">
-                  <h4 class="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1">Pendidikan Terakhir</h4>
-                  <div v-for="edu in [{k:'asal_sek_id', l:'Asal Sekolah Indo'}, {k:'asal_sek_ar', l:'اسم المدرسة', ar:true}]" :key="edu.k" :dir="edu.ar ? 'rtl' : 'ltr'">
-                    <label class="label text-[9px] font-bold text-slate-400 uppercase">{{ edu.l }}</label>
-                    <div v-if="isViewMode" @click="copy(formData[edu.k], edu.l)" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs copy-active shadow-sm" :class="{'text-right font-serif font-black': edu.ar}">{{ formData[edu.k] || '-' }}</div>
-                    <input v-else v-model="formData[edu.k]" @input="edu.ar ? formatARName(edu.k) : formatIDName(edu.k)" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm" :class="{'text-right font-serif': edu.ar}">
+                  <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 border-b border-slate-100 pb-2">Pendidikan Terakhir</h4>
+                  <div v-for="edu in [{k:'asal_sek_id', l:'Asal Sekolah (ID)'}, {k:'asal_sek_ar', l:'اسم المدرسة (AR)', ar:true}]" :key="edu.k" :dir="edu.ar ? 'rtl' : 'ltr'">
+                    <label class="label text-[9px] font-bold text-slate-400 uppercase pb-1">{{ edu.l }}</label>
+                    <div v-if="isViewMode" @click="copy(formData[edu.k], edu.l)" class="p-3 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold text-slate-700 copy-active" :class="{'text-right font-serif text-sm': edu.ar}">{{ formData[edu.k] || '-' }}</div>
+                    <input v-else v-model="formData[edu.k]" @input="edu.ar ? formatARName(edu.k) : formatIDName(edu.k)" type="text" class="input input-bordered w-full bg-slate-50 focus:bg-white border-slate-200 focus:border-moe rounded-2xl text-xs font-bold h-12" :class="{'text-right font-serif text-sm': edu.ar}">
                   </div>
                   <div class="grid grid-cols-2 gap-3">
                     <div>
-                      <label class="label text-[9px] font-bold text-slate-400 uppercase">Tahun Lulus</label>
-                      <div v-if="isViewMode" @click="copy(formData.thn_lulus, 'Thn Lulus')" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs copy-active h-11 flex items-center shadow-sm">{{ formData.thn_lulus || '-' }}</div>
-                      <select v-else v-model="formData.thn_lulus" class="select select-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
+                      <label class="label text-[9px] font-bold text-slate-400 uppercase pb-1">Tahun Lulus</label>
+                      <div v-if="isViewMode" @click="copy(formData.thn_lulus, 'Thn Lulus')" class="p-3 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold text-slate-700 copy-active h-12 flex items-center">{{ formData.thn_lulus || '-' }}</div>
+                      <select v-else v-model="formData.thn_lulus" class="select select-bordered w-full bg-slate-50 focus:bg-white border-slate-200 focus:border-moe rounded-2xl text-xs font-bold h-12">
                         <option value="">Pilih</option>
                         <option v-for="y in graduationYears" :key="y" :value="y">{{ y }}</option>
                       </select>
                     </div>
                     <div>
-                      <label class="label text-[9px] font-bold text-slate-400 uppercase">No. Daftar Portal</label>
-                      <div v-if="isViewMode" @click="copy(formData.no_daftar, 'No Daftar')" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs copy-active h-11 flex items-center shadow-sm">{{ formData.no_daftar || '-' }}</div>
-                      <input v-else v-model="formData.no_daftar" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
+                      <label class="label text-[9px] font-bold text-slate-400 uppercase pb-1">No. Daftar Portal</label>
+                      <div v-if="isViewMode" @click="copy(formData.no_daftar, 'No Daftar')" class="p-3 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold text-slate-700 copy-active h-12 flex items-center">{{ formData.no_daftar || '-' }}</div>
+                      <input v-else v-model="formData.no_daftar" type="text" class="input input-bordered w-full bg-slate-50 focus:bg-white border-slate-200 focus:border-moe rounded-2xl text-xs font-bold h-12">
                     </div>
                   </div>
                 </section>
-                <section class="space-y-3">
-                  <p class="text-[10px] font-black text-slate-300 uppercase px-1 tracking-widest border-b border-slate-100 pb-2">Riwayat Pendaftaran Kampus</p>
+                
+                <section class="space-y-4 pt-4 border-t border-slate-100">
+                  <div class="flex justify-between items-end mb-2">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Riwayat Pendaftaran Kampus</h4>
+                  </div>
                   
-                  <!-- Mode Lihat: List Pendaftaran Kampus -->
                   <div v-if="isViewMode" class="space-y-3">
-                    <div v-if="pendaftaranKampus.length === 0" class="p-4 bg-slate-50 border border-slate-200 border-dashed rounded-[1.5rem] text-[11px] font-black text-slate-400 text-center shadow-sm">Belum Ada Data Pendaftaran</div>
-                    <div v-for="(pk, idx) in pendaftaranKampus" :key="pk.id" class="p-4 bg-white border border-slate-100 rounded-[1.5rem] shadow-sm flex flex-col gap-2 relative">
+                    <div v-if="pendaftaranKampus.length === 0" class="p-4 bg-slate-50 border border-slate-200 border-dashed rounded-2xl text-[11px] font-bold text-slate-400 text-center">Belum Ada Data</div>
+                    <div v-for="(pk, idx) in pendaftaranKampus" :key="pk.id" class="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col gap-2">
                         <div class="flex justify-between items-center">
-                            <span class="text-[12px] font-black text-slate-700">{{ pk.nama_kampus || 'Kampus Belum Dipilih' }}</span>
-                            <span class="badge text-[9px] font-bold px-3 py-2" :class="statusColor(pk.status)">{{ pk.status }}</span>
+                            <span class="text-[12px] font-black text-slate-800">{{ pk.nama_kampus || 'Kampus Belum Dipilih' }}</span>
+                            <span class="badge text-[9px] font-black px-2 py-2 border-none" :class="statusColor(pk.status)">{{ pk.status }}</span>
                         </div>
-                        <div class="text-[10px] font-bold text-slate-400 mt-1">No. Pendaftaran: <span @click="copy(pk.no_daftar, 'No Pendaftaran Kampus')" class="text-moe cursor-pointer active:scale-95 inline-block">{{ pk.no_daftar || 'Belum Diisi' }}</span></div>
+                        <div class="text-[10px] font-bold text-slate-500">No. Daftar: <span @click="copy(pk.no_daftar, 'No Pendaftaran')" class="text-moe cursor-pointer">{{ pk.no_daftar || '-' }}</span></div>
                     </div>
                   </div>
 
-                  <!-- Mode Ubah: Form Pendaftaran Kampus -->
                   <div v-else class="space-y-4">
-                    <div v-for="(pk, idx) in pendaftaranKampus" :key="pk.id" class="p-4 bg-slate-50 border border-slate-200 rounded-[1.5rem] relative space-y-3 shadow-inner">
-                        <button @click="hapusKampus(idx)" class="absolute top-3 right-3 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center font-bold text-xs hover:bg-red-500 hover:text-white transition-colors">✕</button>
-                        
+                    <div v-for="(pk, idx) in pendaftaranKampus" :key="pk.id" class="p-4 bg-slate-50 border border-slate-200 rounded-2xl relative space-y-3">
+                        <button @click="hapusKampus(idx)" class="absolute top-3 right-3 w-7 h-7 bg-white shadow-sm text-red-500 rounded-full flex items-center justify-center font-bold text-sm hover:bg-red-500 hover:text-white transition-colors">✕</button>
                         <div>
-                            <label class="label text-[9px] font-bold text-slate-400 uppercase">Nama Kampus</label>
-                            <select v-model="pk.nama_kampus" class="select select-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
+                            <label class="label text-[9px] font-bold text-slate-400 uppercase pb-1">Nama Kampus</label>
+                            <select v-model="pk.nama_kampus" class="select select-bordered w-full bg-white border-slate-200 focus:border-moe rounded-xl text-xs font-bold h-11">
                                 <option disabled value="">Pilih Kampus</option>
                                 <option v-for="u in universityList" :key="u" :value="u">{{ u }}</option>
                             </select>
                         </div>
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="label text-[9px] font-bold text-slate-400 uppercase">No. Pendaftaran</label>
-                                <input v-model="pk.no_daftar" type="text" placeholder="ID/No Daftar" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
+                                <label class="label text-[9px] font-bold text-slate-400 uppercase pb-1">No. Pendaftaran</label>
+                                <input v-model="pk.no_daftar" type="text" placeholder="ID Daftar" class="input input-bordered w-full bg-white border-slate-200 focus:border-moe rounded-xl text-xs font-bold h-11">
                             </div>
                             <div>
-                                <label class="label text-[9px] font-bold text-slate-400 uppercase">Status</label>
-                                <select v-model="pk.status" class="select select-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
+                                <label class="label text-[9px] font-bold text-slate-400 uppercase pb-1">Status</label>
+                                <select v-model="pk.status" class="select select-bordered w-full bg-white border-slate-200 focus:border-moe rounded-xl text-xs font-bold h-11">
                                     <option v-for="s in statusKampusList" :key="s" :value="s">{{ s }}</option>
                                 </select>
                             </div>
                         </div>
                     </div>
 
-                    <button @click="tambahKampus" class="btn btn-outline border-dashed border-2 border-slate-300 text-slate-500 hover:bg-slate-50 hover:border-moe hover:text-moe w-full rounded-[1.5rem] h-12 font-black text-[10px] tracking-widest bg-white">
-                        ➕ TAMBAH DATA KAMPUS
+                    <button @click="tambahKampus" class="btn border-dashed border-2 border-slate-300 text-slate-500 hover:bg-slate-50 hover:border-moe hover:text-moe w-full rounded-2xl h-12 font-black text-[10px] tracking-widest bg-white">
+                        + TAMBAH KAMPUS
                     </button>
                   </div>
                 </section>
               </div>
 
-              <!-- Tab Berkas (Checkbox List Berdasarkan Kategori) -->
-              <div v-if="formTab === 'berkas'" class="space-y-6 animate-in fade-in">
-                <!-- Berkas Wajib -->
-                <section class="space-y-3">
-                  <h4 class="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1 border-b border-slate-100 pb-2">- Berkas Wajib -</h4>
-                  <div v-for="file in berkasWajib" :key="file.key" @click="isViewMode ? copy(formData[file.key] ? 'YA' : 'TIDAK', file.label) : (formData[file.key] = !formData[file.key])" class="flex justify-between items-center p-4 bg-white border border-slate-100 rounded-[1.5rem] active:bg-slate-50 copy-active cursor-pointer shadow-sm transition-transform active:scale-[0.98]">
-                    <span class="text-[11px] font-bold text-slate-700">{{ file.label }}</span>
-                    <input v-if="!isViewMode" v-model="formData[file.key]" type="checkbox" class="checkbox checkbox-primary checkbox-sm rounded-md" @click.stop />
-                    <span v-else class="badge text-[9px] font-black px-2 py-3" :class="formData[file.key] ? 'bg-moe text-white border-none' : 'bg-slate-100 text-slate-400 border-none'">{{ formData[file.key] ? 'LENGKAP' : 'BELUM' }}</span>
+              <!-- Berkas -->
+              <div v-if="formTab === 'berkas'" class="space-y-8 animate-fade-in-up">
+                <div v-for="cat in [{title: 'Berkas Wajib', data: berkasWajib}, {title: 'Berkas Pendukung', data: berkasPendukung}, {title: 'Berkas Tambahan', data: berkasTambahan}]" :key="cat.title">
+                  <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 border-b border-slate-100 pb-2 mb-3">{{ cat.title }}</h4>
+                  <div class="space-y-2">
+                    <div v-for="file in cat.data" :key="file.key" @click="isViewMode ? copy(formData[file.key] ? 'YA' : 'TIDAK', file.label) : (formData[file.key] = !formData[file.key])" 
+                         class="flex justify-between items-center p-4 bg-slate-50 border border-slate-100 rounded-2xl cursor-pointer hover:bg-slate-100 transition-colors"
+                         :class="{'border-moe bg-moe/5': formData[file.key] && isViewMode}">
+                      <span class="text-[11px] font-bold text-slate-700" :class="{'text-moe': formData[file.key] && isViewMode}">{{ file.label }}</span>
+                      
+                      <div v-if="!isViewMode" class="relative flex items-center justify-center">
+                        <input v-model="formData[file.key]" type="checkbox" class="checkbox checkbox-primary checkbox-sm rounded-lg border-slate-300" @click.stop />
+                      </div>
+                      <div v-else>
+                        <span v-if="formData[file.key]" class="w-6 h-6 bg-moe text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm">✓</span>
+                        <span v-else class="w-6 h-6 bg-slate-200 text-slate-400 rounded-full flex items-center justify-center text-xs font-bold">-</span>
+                      </div>
+                    </div>
                   </div>
-                </section>
-
-                <!-- Berkas Pendukung -->
-                <section class="space-y-3">
-                  <h4 class="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1 border-b border-slate-100 pb-2">- Berkas Pendukung -</h4>
-                  <div v-for="file in berkasPendukung" :key="file.key" @click="isViewMode ? copy(formData[file.key] ? 'YA' : 'TIDAK', file.label) : (formData[file.key] = !formData[file.key])" class="flex justify-between items-center p-4 bg-white border border-slate-100 rounded-[1.5rem] active:bg-slate-50 copy-active cursor-pointer shadow-sm transition-transform active:scale-[0.98]">
-                    <span class="text-[11px] font-bold text-slate-700">{{ file.label }}</span>
-                    <input v-if="!isViewMode" v-model="formData[file.key]" type="checkbox" class="checkbox checkbox-primary checkbox-sm rounded-md" @click.stop />
-                    <span v-else class="badge text-[9px] font-black px-2 py-3" :class="formData[file.key] ? 'bg-moe text-white border-none' : 'bg-slate-100 text-slate-400 border-none'">{{ formData[file.key] ? 'LENGKAP' : 'BELUM' }}</span>
-                  </div>
-                </section>
-
-                <!-- Berkas Tambahan -->
-                <section class="space-y-3">
-                  <h4 class="text-[10px] font-black text-slate-300 uppercase tracking-widest px-1 border-b border-slate-100 pb-2">- Berkas Tambahan -</h4>
-                  <div v-for="file in berkasTambahan" :key="file.key" @click="isViewMode ? copy(formData[file.key] ? 'YA' : 'TIDAK', file.label) : (formData[file.key] = !formData[file.key])" class="flex justify-between items-center p-4 bg-white border border-slate-100 rounded-[1.5rem] active:bg-slate-50 copy-active cursor-pointer shadow-sm transition-transform active:scale-[0.98]">
-                    <span class="text-[11px] font-bold text-slate-700">{{ file.label }}</span>
-                    <input v-if="!isViewMode" v-model="formData[file.key]" type="checkbox" class="checkbox checkbox-primary checkbox-sm rounded-md" @click.stop />
-                    <span v-else class="badge text-[9px] font-black px-2 py-3" :class="formData[file.key] ? 'bg-moe text-white border-none' : 'bg-slate-100 text-slate-400 border-none'">{{ formData[file.key] ? 'LENGKAP' : 'BELUM' }}</span>
-                  </div>
-                </section>
+                </div>
               </div>
 
-              <!-- Tab Dokumen (Read-Only DB Links) -->
-              <div v-if="formTab === 'dokumen'" class="space-y-6 animate-in slide-in-from-bottom-4">
-                <div class="bg-blue-50 text-blue-700 p-5 rounded-[2rem] text-[11px] font-medium leading-relaxed border border-blue-100 shadow-sm flex items-start gap-3">
-                  <span class="text-xl">ℹ️</span>
-                  <div>
-                    <p>Daftar tautan dokumen di bawah ini diambil langsung dari database sistem. Klik ikon dokumen jika tersedia untuk mengunduh berkasnya.</p>
-                  </div>
+              <!-- Dokumen Links -->
+              <div v-if="formTab === 'dokumen'" class="space-y-6 animate-fade-in-up">
+                <div class="bg-blue-50/50 text-blue-700 p-4 rounded-2xl text-[11px] font-bold leading-relaxed border border-blue-100/50 flex gap-3">
+                  <span class="text-xl">💡</span>
+                  <p>Tautan dokumen diambil langsung dari sistem. Klik ikon untuk mengunduh format berkas.</p>
                 </div>
 
                 <div class="space-y-3">
-                  <div v-for="d in docFields" :key="d.k" class="p-5 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex items-center justify-between gap-4 transition-transform">
-                    <div class="flex-1">
+                  <div v-for="d in docFields" :key="d.k" class="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between">
+                    <div>
                       <h4 class="text-[11px] font-black text-slate-700 uppercase tracking-wide">{{ d.l }}</h4>
-                      <p v-if="formData[d.k]" class="text-[9px] font-bold text-emerald-500 mt-1">Tautan Tersedia</p>
-                      <p v-else class="text-[9px] font-bold text-slate-400 mt-1">Belum Ada Tautan</p>
+                      <p v-if="formData[d.k]" class="text-[9px] font-bold text-emerald-500 mt-1">Tersedia di Database</p>
+                      <p v-else class="text-[9px] font-bold text-slate-400 mt-1">Belum Tersedia</p>
                     </div>
                     
-                    <!-- Tombol buka dokumen jika link ada di database -->
-                    <button v-if="formData[d.k]" @click="openLink(formData[d.k])" class="btn btn-square bg-moe/10 hover:bg-moe hover:text-white border-none text-moe rounded-2xl shadow-sm transition-colors cursor-pointer">
-                      <span class="text-xl">📄</span>
+                    <button v-if="formData[d.k]" @click="openLink(formData[d.k])" class="btn btn-square btn-sm bg-moe hover:bg-moehover border-none text-white rounded-xl shadow-md">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                     </button>
-                    <!-- Tampilan dokumen non-aktif jika link kosong di database -->
-                    <div v-else class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-300">
-                      <span class="text-xl">📄</span>
+                    <div v-else class="w-8 h-8 bg-slate-200 rounded-xl flex items-center justify-center text-slate-400">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                     </div>
                   </div>
                 </div>
 
                 <div class="divider"></div>
-                <div class="flex flex-col gap-4 text-center">
-                   <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Finalisasi Seluruh Data</p>
-                   <button @click="formData.pengajuan_dok = 'YA'; saveData()" :disabled="isLoading || formData.status_dok === 'Disetujui'" class="btn bg-moe hover:bg-moehover border-none text-white rounded-[2rem] h-14 font-black shadow-lg shadow-moe/30 text-base">
+                <div class="text-center">
+                   <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Finalisasi Data</p>
+                   <button @click="formData.pengajuan_dok = 'YA'; saveData()" :disabled="isLoading || formData.status_dok === 'Disetujui'" class="btn w-full bg-slate-800 hover:bg-slate-900 border-none text-white rounded-2xl h-14 font-black shadow-xl">
                      AJUKAN VERIFIKASI SEKARANG
                    </button>
                 </div>
               </div>
 
-              <button v-if="!isViewMode && formTab !== 'dokumen'" @click="saveData" :disabled="isLoading" class="btn bg-slate-800 hover:bg-slate-900 border-none w-full rounded-[2rem] text-white mt-6 h-14 shadow-xl text-base font-black">
-                <span v-if="isLoading" class="loading loading-spinner"></span> SIMPAN PERUBAHAN
-              </button>
+            </div>
+
+            <!-- Save Button Global -->
+            <div v-if="!isViewMode && formTab !== 'dokumen'" class="sticky bottom-24 z-10 pt-4">
+               <button @click="saveData" :disabled="isLoading" class="btn bg-moe hover:bg-moehover border-none w-full rounded-[1.5rem] text-white h-14 shadow-lg shadow-moe/40 text-sm font-black">
+                 <span v-if="isLoading" class="loading loading-spinner"></span> SIMPAN PERUBAHAN
+               </button>
             </div>
           </div>
 
-          <!-- INFO TAB (TIMELINE WIZARD) -->
-          <div v-if="activeTab === 'info'" class="p-5 space-y-6 bg-slate-50 min-h-[80vh]">
-             <!-- Tombol Kembali Interaktif -->
-             <button @click="activeTab = 'home'" class="btn btn-sm bg-white border border-slate-200 text-slate-600 rounded-xl shadow-sm hover:bg-slate-50 px-4 font-black text-[10px] tracking-widest">
-               ⬅️ KEMBALI KE BERANDA
-             </button>
-
+          <!-- ================= PANDUAN TAB (INTERAKTIF) ================= -->
+          <div v-if="activeTab === 'info'" class="p-5 space-y-6 animate-fade-in-up">
+             
              <!-- Header Panduan -->
-             <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
-                <div class="absolute -right-6 -top-6 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl"></div>
-                <h3 class="font-black text-xl tracking-tighter mb-1 relative z-10">Pusat Panduan</h3>
-                <p class="text-[11px] font-medium opacity-70 tracking-wide relative z-10">Jejak langkah dan tips untuk mendaftar.</p>
+             <div class="bg-gradient-to-br from-moe to-moehover p-8 rounded-[2rem] text-white shadow-xl relative overflow-hidden">
+                <div class="absolute right-0 top-0 w-40 h-40 bg-white opacity-10 rounded-full blur-3xl translate-x-10 -translate-y-10"></div>
+                <div class="relative z-10">
+                  <span class="inline-block px-3 py-1 bg-white/20 rounded-full text-[10px] font-black tracking-widest mb-3 backdrop-blur-sm">PETUNJUK PENGGUNAAN</span>
+                  <h3 class="font-black text-2xl tracking-tight leading-tight mb-2">Panduan & Langkah Pendaftaran</h3>
+                  <p class="text-xs font-medium text-teal-50 opacity-90 leading-relaxed">Ikuti tahapan di bawah ini untuk memastikan berkas Anda valid dan siap diverifikasi.</p>
+                </div>
              </div>
              
-             <!-- Tampilkan data info dengan konsep TIMELINE (DIFILTER AGAR BEBAS BARIS KOSONG) -->
-             <div v-if="displayInfo.length > 0" class="relative py-4 pb-12">
-               <!-- Garis Vertikal Timeline -->
-               <div class="absolute left-[27px] top-4 bottom-8 w-1 bg-slate-200 rounded-full z-0"></div>
-               
-               <div v-for="(info, index) in displayInfo" :key="index" class="relative flex items-start gap-4 mb-8 last:mb-0 group">
-                  <!-- Node Angka -->
-                  <div class="w-14 h-14 shrink-0 rounded-full bg-white border-4 border-slate-100 flex items-center justify-center font-black text-lg text-slate-400 shadow-sm relative z-10 group-hover:border-moe/30 group-hover:text-moe transition-colors">
-                    {{ index + 1 }}
-                  </div>
-                  <!-- Konten Info -->
-                  <div class="flex-1 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                    <span v-if="info.step" class="inline-block bg-moe/10 text-moe text-[9px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest mb-3">{{ info.step }}</span>
-                    <div class="text-[12.5px] font-medium text-slate-600 leading-relaxed space-y-2" v-html="info.info"></div>
-                    
-                    <div v-if="info.gambar" class="mt-5 w-full rounded-[1.5rem] overflow-hidden bg-slate-50 border border-slate-100">
-                      <img :src="formatDriveUrl(info.gambar)" class="w-full h-auto object-cover hover:scale-105 transition-transform duration-500">
-                    </div>
-                    
-                    <button v-if="info.link" @click="openLink(info.link)" class="mt-5 btn bg-slate-50 hover:bg-moe hover:text-white text-slate-500 border-none w-full rounded-2xl text-[10px] h-12 font-black tracking-widest transition-colors">
-                      BUKA TAUTAN EXTERNAL ➜
-                    </button>
-                  </div>
-               </div>
+             <!-- Interactive Timeline Grouped Dynamically -->
+             <div v-if="displayInfo.length > 0" class="space-y-4 pt-4 pb-8">
+                
+                <div v-for="(group, gIndex) in displayInfo" :key="gIndex" class="bg-white rounded-[1.5rem] border border-slate-100 shadow-sm overflow-hidden transition-all duration-300" :class="isGroupExpanded(gIndex) ? 'ring-2 ring-moe/20 shadow-md' : 'hover:shadow-md'">
+                   
+                   <!-- Accordion Header (Grup Berdasarkan Nama Step) -->
+                   <div @click="toggleGroup(gIndex)" class="p-5 flex justify-between items-center cursor-pointer bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                      <div class="flex items-center gap-4">
+                         <div class="w-12 h-12 shrink-0 rounded-full bg-white shadow-sm flex items-center justify-center font-black text-lg border border-slate-100 transition-colors" :class="isGroupExpanded(gIndex) ? 'border-moe/50 text-moe' : 'text-slate-400'">
+                            {{ gIndex + 1 }}
+                         </div>
+                         <h4 class="text-sm font-black text-slate-800 uppercase tracking-widest">{{ group.groupName }}</h4>
+                      </div>
+                      <div class="text-slate-400 transition-transform duration-300 shrink-0" :class="{'rotate-180 text-moe': isGroupExpanded(gIndex)}">
+                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                      </div>
+                   </div>
+
+                   <!-- Accordion Body (Daftar list item yang step-nya sama) -->
+                   <transition name="expand">
+                      <div v-show="isGroupExpanded(gIndex)">
+                         <div class="w-full h-px bg-slate-100"></div>
+                         <div class="p-2">
+                            <div v-for="(info, index) in group.steps" :key="index" class="flex items-start gap-3 p-4 border-b border-slate-50 last:border-0 rounded-2xl hover:bg-slate-50/80 transition-colors">
+                               
+                               <!-- Konten Teks & Gambar -->
+                               <div class="flex-1 min-w-0 space-y-3">
+                                  <div class="text-[12px] font-medium text-slate-600 leading-relaxed text-justify" v-html="formatText(info.info)"></div>
+                                  
+                                  <!-- Penampil Gambar Profesional -->
+                                  <div v-if="info.gambar" class="mt-3 relative group cursor-pointer overflow-hidden rounded-xl border border-slate-200" @click="openLink(formatDriveUrl(info.gambar))">
+                                     <img :src="formatDriveUrl(info.gambar)" class="w-full max-h-56 object-cover object-top group-hover:scale-105 transition-transform duration-500">
+                                     <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center pointer-events-none">
+                                        <span class="bg-white/90 text-slate-800 text-[10px] font-black px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm shadow-sm">Buka Layar Penuh</span>
+                                     </div>
+                                  </div>
+                               </div>
+
+                               <!-- Tombol Icon Samping (Hanya muncul jika ada link) -->
+                               <button v-if="info.link" @click.stop="openLink(info.link)" class="btn btn-square bg-moe/10 hover:bg-moe text-moe hover:text-white border-none shrink-0 shadow-sm rounded-xl transition-colors mt-1" title="Buka Tautan">
+                                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                               </button>
+                               
+                            </div>
+                         </div>
+                      </div>
+                   </transition>
+                </div>
+
              </div>
           </div>
 
-          <!-- ACCOUNT TAB -->
-          <div v-if="activeTab === 'profile'" class="p-5 space-y-6 animate-in fade-in pb-8">
+          <!-- ================= PROFIL TAB ================= -->
+          <div v-if="activeTab === 'profile'" class="p-5 space-y-6 animate-fade-in-up">
              
-             <!-- Header Profil -->
+             <!-- Header -->
              <div class="flex justify-between items-center">
-                <h2 class="text-xl font-black text-slate-800 tracking-tighter">Profil Lengkap</h2>
-                <button @click="logout" class="btn btn-sm bg-red-50 text-red-500 hover:bg-red-500 hover:text-white border-none rounded-xl font-black text-[10px] tracking-widest shadow-sm">LOGOUT</button>
+                <h2 class="text-2xl font-black text-slate-800 tracking-tight">Profil Akun</h2>
+                <button @click="logout" class="btn btn-sm bg-red-50 text-red-500 hover:bg-red-500 hover:text-white border-none rounded-xl font-black text-[10px] tracking-widest">LOGOUT</button>
              </div>
 
              <!-- Avatar Banner -->
-             <div class="bg-gradient-to-br from-moe to-moehover p-6 rounded-[2rem] text-white shadow-xl flex items-center gap-5 relative overflow-hidden">
-                <div class="absolute -right-4 -top-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
-                <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-3xl font-black backdrop-blur-sm border border-white/30 shadow-inner relative z-10">
-                  {{ user.email.charAt(0).toUpperCase() }}
+             <div class="bg-slate-800 p-6 rounded-[2rem] text-white shadow-xl flex items-center gap-5 relative overflow-hidden">
+                <div class="absolute right-0 top-0 w-32 h-32 bg-slate-700 rounded-full blur-2xl translate-x-10 -translate-y-10"></div>
+                <div class="w-16 h-16 bg-gradient-to-tr from-moe to-teal-400 rounded-2xl flex items-center justify-center text-2xl font-black border-2 border-slate-700 shadow-inner relative z-10">
+                  {{ formData.nama_p1_id ? formData.nama_p1_id.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase() }}
                 </div>
                 <div class="flex-1 relative z-10 overflow-hidden">
-                   <h3 class="font-black text-lg truncate">{{ formData.nama_lengkap_id || user.email }}</h3>
-                   <p class="text-xs font-medium opacity-80 mt-0.5 truncate">{{ user.email }}</p>
-                   <div class="badge bg-white/20 border-none text-white text-[9px] font-black mt-2 tracking-widest uppercase">{{ user.role }}</div>
+                   <h3 class="font-black text-lg truncate">{{ formData.nama_lengkap_id || user.email.split('@')[0] }}</h3>
+                   <p class="text-[11px] font-medium text-slate-400 mt-0.5 truncate">{{ user.email }}</p>
+                   <div class="inline-block bg-slate-700 text-slate-300 text-[9px] font-black mt-2 px-2 py-1 rounded-md tracking-widest uppercase">{{ user.role }}</div>
                 </div>
              </div>
 
-             <!-- Toggle Edit Mode Profil -->
-             <div class="flex items-center justify-between bg-slate-100 p-1.5 rounded-2xl shadow-inner">
-                <button @click="isProfileViewMode = true" :class="isProfileViewMode ? 'bg-white text-moe shadow-sm' : 'text-slate-400'" class="flex-1 py-2 rounded-xl text-[10px] font-black uppercase transition-all">Lihat Profil</button>
-                <button @click="isProfileViewMode = false" :class="!isProfileViewMode ? 'bg-white text-moe shadow-sm' : 'text-slate-400'" class="flex-1 py-2 rounded-xl text-[10px] font-black uppercase transition-all">Ubah Data</button>
-             </div>
-
-             <!-- Form Profil Berdasarkan Aturan Baru -->
-             <div class="space-y-6">
-                
-                <!-- 1. Akun & Kontak -->
+             <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm space-y-6">
+                <!-- Kontak -->
                 <section class="space-y-4">
-                  <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 border-b border-slate-200 pb-2">- Info Akun & Kontak -</h4>
-                  <div class="grid grid-cols-2 gap-3">
-                     <div class="col-span-2">
-                        <label class="label text-[9px] font-bold text-slate-400 uppercase">Email Terdaftar</label>
-                        <div class="p-3 bg-slate-100 border border-slate-200 rounded-2xl text-xs font-medium text-slate-500 shadow-inner truncate">{{ user.email }}</div>
+                  <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Info Kontak</h4>
+                    <button @click="isProfileEdit = !isProfileEdit" class="text-[10px] font-black text-moe uppercase">{{ isProfileEdit ? 'Batal' : 'Ubah' }}</button>
+                  </div>
+                  <div class="grid grid-cols-1 gap-3">
+                     <div>
+                        <label class="label text-[9px] font-bold text-slate-400 uppercase pb-1">Nomor WhatsApp</label>
+                        <div v-if="!isProfileEdit" class="p-3 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold text-slate-700">{{ formData.wa || 'Belum diisi' }}</div>
+                        <input v-else v-model="formData.wa" type="tel" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-2xl text-xs font-bold" placeholder="08...">
                      </div>
                      <div>
-                        <label class="label text-[9px] font-bold text-slate-400 uppercase">Jenis Kelamin</label>
-                        <div v-if="isProfileViewMode" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs font-medium shadow-sm">{{ formData.gender || '-' }}</div>
-                        <select v-else v-model="formData.gender" class="select select-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
-                          <option value="Laki-laki">Laki-laki</option>
-                          <option value="Perempuan">Perempuan</option>
-                        </select>
-                     </div>
-                     <div>
-                        <label class="label text-[9px] font-bold text-slate-400 uppercase">Nomor WhatsApp</label>
-                        <div v-if="isProfileViewMode" @click="copy(formData.wa, 'No WA')" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs font-medium copy-active truncate shadow-sm">{{ formData.wa || '-' }}</div>
-                        <input v-else v-model="formData.wa" type="tel" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm" placeholder="Contoh: 0812...">
-                     </div>
-                     <div>
-                        <label class="label text-[9px] font-bold text-slate-400 uppercase">No. Handphone Pribadi</label>
-                        <div v-if="isProfileViewMode" @click="copy(formData.hp, 'No HP')" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs font-medium copy-active truncate shadow-sm">{{ formData.hp || '-' }}</div>
-                        <input v-else v-model="formData.hp" type="tel" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm" placeholder="Nomor Telepon">
+                        <label class="label text-[9px] font-bold text-slate-400 uppercase pb-1">Nomor HP</label>
+                        <div v-if="!isProfileEdit" class="p-3 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold text-slate-700">{{ formData.hp || 'Belum diisi' }}</div>
+                        <input v-else v-model="formData.hp" type="tel" class="input input-bordered w-full bg-slate-50 border-slate-200 focus:border-moe rounded-2xl text-xs font-bold" placeholder="08...">
                      </div>
                   </div>
                 </section>
 
-                <!-- 2. Domisili -->
+                <!-- Domisili -->
                 <section class="space-y-4">
-                  <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 border-b border-slate-200 pb-2">- Wilayah & Domisili -</h4>
+                  <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 border-b border-slate-100 pb-2">Domisili</h4>
                   <div class="grid grid-cols-2 gap-3">
                      <div>
-                        <label class="label text-[9px] font-bold text-slate-400 uppercase">Kabupaten / Kota</label>
-                        <div v-if="isProfileViewMode" @click="copy(formData.kota_kab, 'Kota/Kab')" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs font-medium copy-active shadow-sm truncate">{{ formData.kota_kab || '-' }}</div>
-                        <input v-else v-model="formData.kota_kab" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm" placeholder="Contoh: Ternate">
+                        <label class="label text-[9px] font-bold text-slate-400 uppercase pb-1">Kota/Kab</label>
+                        <div v-if="!isProfileEdit" class="p-3 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold text-slate-700 truncate">{{ formData.kota_kab || '-' }}</div>
+                        <input v-else v-model="formData.kota_kab" type="text" class="input input-bordered w-full bg-slate-50 border-slate-200 rounded-2xl text-xs font-bold">
                      </div>
                      <div>
-                        <label class="label text-[9px] font-bold text-slate-400 uppercase">Provinsi</label>
-                        <div v-if="isProfileViewMode" @click="copy(formData.provinsi, 'Provinsi')" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs font-medium copy-active shadow-sm truncate">{{ formData.provinsi || '-' }}</div>
-                        <input v-else v-model="formData.provinsi" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm" placeholder="Contoh: Maluku Utara">
+                        <label class="label text-[9px] font-bold text-slate-400 uppercase pb-1">Provinsi</label>
+                        <div v-if="!isProfileEdit" class="p-3 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold text-slate-700 truncate">{{ formData.provinsi || '-' }}</div>
+                        <input v-else v-model="formData.provinsi" type="text" class="input input-bordered w-full bg-slate-50 border-slate-200 rounded-2xl text-xs font-bold">
                      </div>
                      <div class="col-span-2">
-                        <label class="label text-[9px] font-bold text-slate-400 uppercase">Alamat Domisili Lengkap</label>
-                        <div v-if="isProfileViewMode" @click="copy(formData.domisili, 'Domisili')" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs font-medium copy-active shadow-sm min-h-[3rem]">{{ formData.domisili || '-' }}</div>
-                        <textarea v-else v-model="formData.domisili" class="textarea textarea-bordered w-full bg-white border-slate-200 rounded-2xl text-xs shadow-sm" rows="2" placeholder="Masukkan alamat lengkap..."></textarea>
+                        <label class="label text-[9px] font-bold text-slate-400 uppercase pb-1">Alamat Lengkap</label>
+                        <div v-if="!isProfileEdit" class="p-3 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold text-slate-700 min-h-[3rem]">{{ formData.domisili || '-' }}</div>
+                        <textarea v-else v-model="formData.domisili" class="textarea textarea-bordered w-full bg-slate-50 border-slate-200 rounded-2xl text-xs font-bold" rows="2"></textarea>
                      </div>
                   </div>
                 </section>
 
-                <!-- 3. Identitas Nama -->
-                <section class="space-y-4">
-                  <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1 border-b border-slate-200 pb-2">- Identitas Nama Paspor -</h4>
-                  <div class="grid grid-cols-2 gap-3">
-                    <div v-for="n in [{k:'nama_p1_id', l:'Pertama'}, {k:'nama_p2_id', l:'Kedua'}, {k:'nama_p3_id', l:'Ketiga'}, {k:'nama_p4_id', l:'Keempat'}]" :key="n.k">
-                       <label class="label text-[9px] font-bold text-slate-400 uppercase">Indo - {{ n.l }}</label>
-                       <div v-if="isProfileViewMode" @click="copy(formData[n.k], n.l)" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs font-medium copy-active truncate shadow-sm">{{ formData[n.k] || '-' }}</div>
-                       <input v-else v-model="formData[n.k]" @input="formatIDName(n.k)" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs shadow-sm h-11">
-                    </div>
-                  </div>
-                  <div class="divider my-1"></div>
-                  <div class="grid grid-cols-2 gap-3" dir="rtl">
-                    <div v-for="n in [{k:'nama_p1_ar', l:'الأول'}, {k:'nama_p2_ar', l:'الثاني'}, {k:'nama_p3_ar', l:'الثالث'}, {k:'nama_p4_ar', l:'الرابع'}]" :key="n.k">
-                       <label class="label text-[9px] font-bold text-slate-400 text-right uppercase">AR - {{ n.l }}</label>
-                       <div v-if="isProfileViewMode" @click="copy(formData[n.k], n.l)" class="p-3 bg-white border border-slate-100 rounded-2xl text-sm font-black font-serif text-right copy-active shadow-sm">{{ formData[n.k] || '-' }}</div>
-                       <input v-else v-model="formData[n.k]" @input="formatARName(n.k)" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-right font-serif text-sm h-11 shadow-sm">
-                    </div>
-                  </div>
-                </section>
-
-                <!-- 4. Tempat & Tanggal Lahir -->
-                <section class="space-y-4">
-                  <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 border-b border-slate-200 pb-2">- Tempat & Tanggal Lahir -</h4>
-                  <div class="grid grid-cols-2 gap-3">
-                    <div v-for="f in [{k:'tpt_lahir_id', l:'Tpt Lahir Indo'}, {k:'tpt_lahir_ar', l:'مكان الميلاد', ar:true}, {k:'tgl_lahir_id', l:'Tgl Lahir Indo', d:true}, {k:'tgl_lahir_ar', l:'تاريخ الميلاد', ar:true, ro:true}]" :key="f.k" :dir="f.ar ? 'rtl' : 'ltr'">
-                       <label class="label text-[9px] font-bold text-slate-400 uppercase" :class="{'text-right': f.ar}">{{ f.l }}</label>
-                       <div v-if="isProfileViewMode" @click="copy(formData[f.k], f.l)" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs copy-active shadow-sm" :class="{'text-right font-serif font-black': f.ar}">{{ formData[f.k] || '-' }}</div>
-                       <input v-else-if="f.d" v-model="formData[f.k]" @change="generateHijri" type="date" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
-                       <input v-else-if="f.ro" v-model="formData[f.k]" readonly type="text" class="input input-bordered w-full bg-primary/5 border-primary/20 rounded-xl text-right font-serif text-base h-11">
-                       <input v-else v-model="formData[f.k]" @input="f.ar ? formatARName(f.k) : formatIDName(f.k)" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm" :class="{'text-right font-serif': f.ar}">
-                    </div>
-                  </div>
-                </section>
-
-                <!-- 5. Akademik Dasar -->
-                <section class="space-y-4">
-                  <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 border-b border-slate-200 pb-2">- Info Sekolah Menengah Dasar -</h4>
-                  <div v-for="edu in [{k:'asal_sek_id', l:'Asal Sekolah Indo'}, {k:'asal_sek_ar', l:'اسم المدرسة', ar:true}]" :key="edu.k" :dir="edu.ar ? 'rtl' : 'ltr'">
-                    <label class="label text-[9px] font-bold text-slate-400 uppercase">{{ edu.l }}</label>
-                    <div v-if="isProfileViewMode" @click="copy(formData[edu.k], edu.l)" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs copy-active shadow-sm" :class="{'text-right font-serif font-black': edu.ar}">{{ formData[edu.k] || '-' }}</div>
-                    <input v-else v-model="formData[edu.k]" @input="edu.ar ? formatARName(edu.k) : formatIDName(edu.k)" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm" :class="{'text-right font-serif': edu.ar}">
-                  </div>
-                  <div class="grid grid-cols-2 gap-3">
-                    <div>
-                      <label class="label text-[9px] font-bold text-slate-400 uppercase">Tahun Lulus</label>
-                      <div v-if="isProfileViewMode" @click="copy(formData.thn_lulus, 'Thn Lulus')" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs copy-active h-11 flex items-center shadow-sm">{{ formData.thn_lulus || '-' }}</div>
-                      <select v-else v-model="formData.thn_lulus" class="select select-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
-                        <option value="">Pilih</option>
-                        <option v-for="y in graduationYears" :key="y" :value="y">{{ y }}</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label class="label text-[9px] font-bold text-slate-400 uppercase">No. Daftar Portal</label>
-                      <div v-if="isProfileViewMode" @click="copy(formData.no_daftar, 'No Daftar')" class="p-3 bg-white border border-slate-100 rounded-2xl text-xs copy-active h-11 flex items-center shadow-sm">{{ formData.no_daftar || '-' }}</div>
-                      <input v-else v-model="formData.no_daftar" type="text" class="input input-bordered w-full bg-white border-slate-200 rounded-xl text-xs h-11 shadow-sm">
-                    </div>
-                  </div>
-                </section>
-
-                <!-- Tombol Simpan Profil -->
-                <button v-if="!isProfileViewMode" @click="saveData" :disabled="isLoading" class="btn bg-slate-800 hover:bg-slate-900 border-none w-full rounded-[2rem] text-white mt-8 h-14 shadow-xl text-base font-black">
-                  <span v-if="isLoading" class="loading loading-spinner"></span> SIMPAN PERUBAHAN PROFIL
+                <button v-if="isProfileEdit" @click="saveProfileData" :disabled="isLoading" class="btn bg-slate-800 hover:bg-slate-900 border-none w-full rounded-2xl text-white mt-4 h-12 shadow-md text-xs font-black tracking-widest">
+                  <span v-if="isLoading" class="loading loading-spinner loading-sm"></span> SIMPAN PROFIL
                 </button>
-
              </div>
           </div>
+
         </main>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="fixed bottom-0 w-full max-w-md bg-white border-t border-slate-100 shadow-[0_-5px_20px_rgba(0,0,0,0.03)] z-40 pb-safe px-2 pt-2">
+          <div class="flex justify-between items-center h-16">
+            
+            <button @click="activeTab = 'dashboard'" class="flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative" :class="activeTab === 'dashboard' ? 'text-moe' : 'text-slate-400 hover:text-slate-600'">
+              <div v-if="activeTab === 'dashboard'" class="absolute -top-3 w-8 h-1 bg-moe rounded-full"></div>
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+              <span class="text-[9px] font-black uppercase tracking-wider">Beranda</span>
+            </button>
+
+            <button @click="activeTab = 'form'" class="flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative" :class="activeTab === 'form' ? 'text-moe' : 'text-slate-400 hover:text-slate-600'">
+              <div v-if="activeTab === 'form'" class="absolute -top-3 w-8 h-1 bg-moe rounded-full"></div>
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+              <span class="text-[9px] font-black uppercase tracking-wider">Formulir</span>
+            </button>
+
+            <button @click="activeTab = 'info'" class="flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative" :class="activeTab === 'info' ? 'text-moe' : 'text-slate-400 hover:text-slate-600'">
+              <div v-if="activeTab === 'info'" class="absolute -top-3 w-8 h-1 bg-moe rounded-full"></div>
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+              <span class="text-[9px] font-black uppercase tracking-wider">Panduan</span>
+            </button>
+
+            <button @click="activeTab = 'profile'" class="flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative" :class="activeTab === 'profile' ? 'text-moe' : 'text-slate-400 hover:text-slate-600'">
+              <div v-if="activeTab === 'profile'" class="absolute -top-3 w-8 h-1 bg-moe rounded-full"></div>
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+              <span class="text-[9px] font-black uppercase tracking-wider">Profil</span>
+            </button>
+
+          </div>
+        </nav>
+
       </template>
 
       <!-- ADMIN MODAL DETAIL -->
-      <dialog :open="selectedStudent !== null" class="modal modal-bottom z-[40] transition-all">
-        <div v-if="selectedStudent" class="modal-box p-0 rounded-t-[3.5rem] bg-white border border-slate-100 shadow-2xl">
-          <div class="h-24 bg-moe relative flex items-end justify-center">
-             <button @click="selectedStudent = null" class="absolute right-8 top-8 w-10 h-10 bg-black/10 hover:bg-black/20 rounded-full text-white flex items-center justify-center transition-all font-black">✕</button>
-             <div class="w-24 h-24 bg-white rounded-[2rem] translate-y-12 shadow-2xl flex items-center justify-center text-4xl font-black text-moe border-4 border-white">{{ selectedStudent.nama_lengkap_id ? selectedStudent.nama_lengkap_id.charAt(0) : '?' }}</div>
+      <dialog :open="selectedStudent !== null" class="modal modal-bottom sm:modal-middle z-[60] transition-all bg-black/40 backdrop-blur-sm">
+        <div v-if="selectedStudent" class="modal-box p-0 rounded-t-[2.5rem] sm:rounded-[2.5rem] bg-white border border-slate-100 shadow-2xl">
+          <div class="h-28 bg-gradient-to-r from-slate-800 to-slate-900 relative flex items-end justify-center">
+             <button @click="selectedStudent = null" class="absolute right-6 top-6 w-8 h-8 bg-white/20 hover:bg-white/40 rounded-full text-white flex items-center justify-center transition-all font-black text-sm backdrop-blur-sm">✕</button>
+             <div class="w-24 h-24 bg-white rounded-3xl translate-y-12 shadow-xl flex items-center justify-center text-4xl font-black text-moe border-4 border-white">{{ selectedStudent.nama_lengkap_id ? selectedStudent.nama_lengkap_id.charAt(0) : '?' }}</div>
           </div>
-          <div class="pt-16 px-8 pb-12 space-y-8">
+          <div class="pt-16 px-8 pb-10 space-y-6">
             <div class="text-center">
-              <h3 class="text-xl font-black text-slate-800 tracking-tighter">{{ selectedStudent.nama_lengkap_id }}</h3>
-              <p class="text-[11px] text-slate-400 font-bold uppercase tracking-widest">{{ selectedStudent.email }}</p>
+              <h3 class="text-xl font-black text-slate-800 tracking-tight">{{ selectedStudent.nama_lengkap_id }}</h3>
+              <p class="text-[11px] text-slate-500 font-bold uppercase tracking-widest mt-1">{{ selectedStudent.email }}</p>
             </div>
 
-            <div class="bg-slate-50 p-6 rounded-[3rem] space-y-5 border border-slate-100">
-               <p class="text-center text-[11px] font-black uppercase text-slate-500 tracking-widest">Aksi Persetujuan</p>
-               <div class="flex gap-4">
-                  <button @click="verifyDoc(selectedStudent.user_id, 'Disetujui')" class="btn flex-1 bg-emerald-500 border-none text-white rounded-2xl h-14 font-black shadow-lg shadow-emerald-500/20">SETUJUI</button>
-                  <button @click="verifyDoc(selectedStudent.user_id, 'Ditolak')" class="btn flex-1 bg-red-500 border-none text-white rounded-2xl h-14 font-black shadow-lg shadow-red-500/20">TOLAK</button>
+            <div class="bg-slate-50 p-6 rounded-[2rem] space-y-4 border border-slate-100">
+               <p class="text-center text-[10px] font-black uppercase text-slate-400 tracking-widest">Aksi Persetujuan</p>
+               <div class="flex gap-3">
+                  <button @click="verifyDoc(selectedStudent.user_id, 'Disetujui')" class="btn flex-1 bg-emerald-500 hover:bg-emerald-600 border-none text-white rounded-2xl h-12 font-black shadow-lg shadow-emerald-500/20 text-xs">SETUJUI</button>
+                  <button @click="verifyDoc(selectedStudent.user_id, 'Ditolak')" class="btn flex-1 bg-red-500 hover:bg-red-600 border-none text-white rounded-2xl h-12 font-black shadow-lg shadow-red-500/20 text-xs">TOLAK</button>
                </div>
-               <p class="text-center text-[9px] text-slate-400 font-bold mt-2">Status Saat Ini: {{ selectedStudent.status_dok || 'PENDING' }}</p>
+               <div class="text-center pt-2">
+                 <span class="inline-block bg-white px-4 py-2 rounded-xl text-[10px] text-slate-600 font-bold border border-slate-100 shadow-sm">Status Saat Ini: <span :class="selectedStudent.status_dok === 'Disetujui' ? 'text-emerald-500' : selectedStudent.status_dok === 'Ditolak' ? 'text-red-500' : 'text-amber-500'">{{ selectedStudent.status_dok || 'PENDING' }}</span></span>
+               </div>
             </div>
+          </div>
+        </div>
+      </dialog>
+
+      <!-- WELCOME / PANDUAN AWAL MODAL -->
+      <dialog :open="showWelcomePopup" class="modal modal-bottom sm:modal-middle z-[80] transition-all bg-black/60 backdrop-blur-sm">
+        <div class="modal-box p-0 rounded-t-[2.5rem] sm:rounded-[2.5rem] bg-slate-50 border border-slate-100 shadow-2xl max-h-[85vh] flex flex-col relative overflow-hidden">
+          
+          <!-- Header -->
+          <div class="bg-gradient-to-br from-moe to-teal-500 p-6 text-white shrink-0 relative overflow-hidden">
+             <div class="absolute right-0 top-0 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl translate-x-10 -translate-y-10"></div>
+             <div class="relative z-10">
+                <h3 class="font-black text-2xl mb-1 tracking-tight">Selamat Datang! 👋</h3>
+                <p class="text-[11px] font-medium text-teal-50 opacity-90 leading-relaxed">Sebelum memulai, mari kenali fungsi dan panduan penggunaan Portal Pelajar ini.</p>
+             </div>
+          </div>
+
+          <!-- Body -->
+          <div class="p-6 overflow-y-auto space-y-6 flex-1 scroll-smooth">
+             
+             <!-- Ketentuan -->
+             <section>
+                <div class="flex items-center gap-2 border-b border-slate-200 pb-2 mb-3">
+                   <span class="bg-red-100 text-red-500 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black">!</span>
+                   <h4 class="text-[11px] font-black text-slate-800 uppercase tracking-widest">Ketentuan Penggunaan</h4>
+                </div>
+                <ul class="text-[11.5px] text-slate-600 space-y-2.5 list-disc pl-5 text-justify leading-relaxed">
+                   <li>Seluruh data yang Anda masukkan harus <strong class="text-slate-800">valid, jujur, dan sesuai</strong> dengan dokumen asli (Paspor/Ijazah).</li>
+                   <li>Pastikan Anda selalu memeriksa kembali kelengkapan sebelum menekan tombol <strong class="text-moe">Ajukan Verifikasi</strong>.</li>
+                   <li>Kelalaian dalam melengkapi dokumen wajib akan menghambat proses verifikasi oleh tim Admin.</li>
+                </ul>
+             </section>
+             
+             <!-- Pengenalan Menu -->
+             <section>
+                <div class="flex items-center gap-2 border-b border-slate-200 pb-2 mb-3">
+                   <span class="bg-blue-100 text-blue-500 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black">⚙</span>
+                   <h4 class="text-[11px] font-black text-slate-800 uppercase tracking-widest">Pengenalan Fungsi Menu</h4>
+                </div>
+                
+                <div class="space-y-3">
+                   <div class="flex gap-3 bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm">
+                      <div class="w-10 h-10 bg-moe/10 text-moe rounded-xl flex items-center justify-center shrink-0 text-lg">🏠</div>
+                      <div>
+                         <h5 class="text-[11px] font-black text-slate-800 uppercase tracking-wide">Beranda (Dashboard)</h5>
+                         <p class="text-[10px] text-slate-500 leading-relaxed mt-1 text-justify">Pusat informasi Anda. Pantau <strong class="text-slate-700">Progress Kelengkapan Data</strong> (hingga 100%) dan lihat secara *real-time* <strong class="text-slate-700">Status Verifikasi</strong> dari tim Admin.</p>
+                      </div>
+                   </div>
+                   
+                   <div class="flex gap-3 bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm">
+                      <div class="w-10 h-10 bg-moe/10 text-moe rounded-xl flex items-center justify-center shrink-0 text-lg">📝</div>
+                      <div>
+                         <h5 class="text-[11px] font-black text-slate-800 uppercase tracking-wide">Formulir Pendaftaran</h5>
+                         <p class="text-[10px] text-slate-500 leading-relaxed mt-1 text-justify">Menu terpenting yang berisi 4 tab: <strong class="text-slate-700">Identitas, Akademik, Berkas, & Dokumen</strong>. Di sinilah Anda mengisi semua riwayat pendidikan dan daftar pilihan kampus.</p>
+                      </div>
+                   </div>
+
+                   <div class="flex gap-3 bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm">
+                      <div class="w-10 h-10 bg-moe/10 text-moe rounded-xl flex items-center justify-center shrink-0 text-lg">📚</div>
+                      <div>
+                         <h5 class="text-[11px] font-black text-slate-800 uppercase tracking-wide">Pusat Panduan</h5>
+                         <p class="text-[10px] text-slate-500 leading-relaxed mt-1 text-justify">Berisi langkah-langkah detail, terstruktur, dan tautan dokumen resmi. Periksa menu ini jika Anda bingung mengenai tahapan yang harus dilakukan.</p>
+                      </div>
+                   </div>
+
+                   <div class="flex gap-3 bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm">
+                      <div class="w-10 h-10 bg-moe/10 text-moe rounded-xl flex items-center justify-center shrink-0 text-lg">👤</div>
+                      <div>
+                         <h5 class="text-[11px] font-black text-slate-800 uppercase tracking-wide">Profil Akun</h5>
+                         <p class="text-[10px] text-slate-500 leading-relaxed mt-1 text-justify">Atur dan lengkapi <strong class="text-slate-700">Informasi Kontak (No. HP/WA)</strong> dan <strong class="text-slate-700">Alamat Domisili</strong> Anda di sini.</p>
+                      </div>
+                   </div>
+                </div>
+             </section>
+          </div>
+          
+          <!-- Footer / Action -->
+          <div class="p-5 border-t border-slate-100 bg-white shrink-0">
+             <button @click="closeWelcomePopup" class="btn w-full bg-slate-800 hover:bg-slate-900 border-none text-white rounded-[1.5rem] h-14 font-black shadow-xl shadow-slate-800/20 text-sm tracking-widest">SAYA MENGERTI & MULAI</button>
           </div>
         </div>
       </dialog>
@@ -552,26 +811,29 @@
 
   <!-- JS LOGIC SECTION -->
   <script>
-    const { createApp, ref, onMounted, watch, computed } = Vue;
+    const { createApp, ref, onMounted, watch, computed, onUnmounted } = Vue;
 
-    // --- API BACKEND (DIHUBUNGKAN KE APPS SCRIPT) ---
     const webAppUrl = "https://script.google.com/macros/s/AKfycbzrVhJu_vO6lYUqBUvYSAVjDLDCH31rFwULqyjDBLdPtuFTnl9fmoFl1zUmGvya8Tek/exec";
 
     createApp({
       setup() {
         const isGAS = typeof google !== 'undefined' && google.script && google.script.run;
-        const appName = "Portal Pelajar Malut Arab Saudi";
         const appLogo = "https://lh3.googleusercontent.com/d/1T_gjbh4D8xTkoE3zVF0WoQl5xdhb3nCJ";
         
         const showSplash = ref(true);
         const isLoading = ref(false);
         const isViewMode = ref(true);
-        const isProfileViewMode = ref(true);
+        const isProfileEdit = ref(false);
         const user = ref(null);
         const authMode = ref('login');
         const showPass = ref(false);
-        const activeTab = ref('home');
+        const activeTab = ref('dashboard');
         const formTab = ref('identitas');
+        const expandedGroupId = ref(0); // Track expanded group index, default open first group
+        const showWelcomePopup = ref(false);
+        const timeLeft = ref({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        let countdownTimer = null;
+        
         const students = ref([]);
         const infoData = ref([]);
         const selectedStudent = ref(null);
@@ -580,11 +842,9 @@
         
         const universityList = ["UIM", "KSU", "KAU", "IU", "PNU", "KFUPM", "KAUST", "QU", "KFU", "TAIBAHU"];
         const graduationYears = Array.from({length: 21}, (_, i) => (new Date().getFullYear() - i).toString());
-        
         const statusKampusList = ["Belum Mendaftar", "Sedang Mendaftar", "Diterima", "Ditolak", "Cadangan"];
         const pendaftaranKampus = ref([]);
 
-        // MENDIFINISIKAN TAUTAN DOKUMEN DATABASE DI SINI
         const docFields = [
           { k: 'sertifikat_hafalan', l: 'Sertifikat Hafalan' },
           { k: 'tazkiyah_immit', l: 'Tazkiyah IMMIT' },
@@ -610,8 +870,6 @@
           { key: 'piagam', label: 'Piagam Penghargaan' }
         ];
 
-        const fileList = [...berkasWajib, ...berkasPendukung, ...berkasTambahan];
-
         const formData = ref({
           id: '', user_id: '', email: '', gender: 'Laki-laki', status_dok: '', pengajuan_dok: 'TIDAK',
           nama_p1_id: '', nama_p2_id: '', nama_p3_id: '', nama_p4_id: '',
@@ -620,6 +878,52 @@
           tpt_lahir_id: '', tpt_lahir_ar: '', tgl_lahir_id: '', tgl_lahir_ar: '',
           wa: '', hp: '', thn_lulus: '', no_daftar: '', kampus: '',
           kota_kab: '', provinsi: '', domisili: ''
+        });
+
+        // ---------------- COUNTDOWN LOGIC ----------------
+        const startCountdown = () => {
+          const deadline = new Date("May 21, 2026 23:59:59").getTime();
+          countdownTimer = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = deadline - now;
+            
+            if (distance < 0) {
+              clearInterval(countdownTimer);
+              timeLeft.value = { days: 0, hours: 0, minutes: 0, seconds: 0 };
+              return;
+            }
+            
+            timeLeft.value = {
+              days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+              hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+              minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+              seconds: Math.floor((distance % (1000 * 60)) / 1000)
+            };
+          }, 1000);
+        };
+
+        onUnmounted(() => {
+           if (countdownTimer) clearInterval(countdownTimer);
+        });
+
+        // ---------------- CALCULATE PROGRESS ----------------
+        const countBerkasWajib = computed(() => {
+           let count = 0;
+           berkasWajib.forEach(b => { if(formData.value[b.key]) count++; });
+           return count;
+        });
+
+        const dataProgress = computed(() => {
+           let total = 0; let filled = 0;
+           // Profil Dasar
+           const keys = ['nama_p1_id', 'tpt_lahir_id', 'tgl_lahir_id', 'asal_sek_id', 'thn_lulus', 'kota_kab', 'wa'];
+           keys.forEach(k => { total++; if(formData.value[k]) filled++; });
+           // Berkas Wajib
+           berkasWajib.forEach(b => { total++; if(formData.value[b.key]) filled++; });
+           // Kampus (Minimal 1)
+           total++; if(pendaftaranKampus.value.length > 0) filled++;
+
+           return total === 0 ? 0 : Math.round((filled / total) * 100);
         });
 
         const callGAS = (action, data) => {
@@ -634,27 +938,57 @@
                 method: "POST",
                 headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify({ action, data })
-              })
-              .then(res => res.json())
-              .then(resolve)
-              .catch(err => reject(err));
+              }).then(res => res.json()).then(resolve).catch(err => reject(err));
             }
           });
         };
 
-        // Data Default Apabila Database Info (Panduan) Masih Kosong
-        const defaultInfoData = [
-          { id: 1, step: 'Langkah 1', info: '<b>Siapkan Dokumen Eksternal</b><br>Pastikan Anda telah mengunduh dan mengisi format template dokumen resmi yang disediakan pada menu Dokumen.', link: 'https://drive.google.com/', gambar: '' },
-          { id: 2, step: 'Langkah 2', info: '<b>Lengkapi Biodata Anda</b><br>Isi seluruh informasi identitas dan riwayat pendidikan Anda dengan benar dan valid sesuai Paspor.', link: '', gambar: '' },
-          { id: 3, step: 'Langkah 3', info: '<b>Finalisasi & Pengajuan</b><br>Periksa kembali kelengkapan seluruh berkas Anda, lalu klik tombol <i>Ajukan Verifikasi Sekarang</i> agar diproses oleh Tim Admin.', link: '', gambar: '' }
+        const defaultGroupedInfo = [
+          {
+            groupName: "Tahap 1: Persiapan Dokumen",
+            steps: [
+              { info: '<b>Siapkan Dokumen Eksternal</b><br>Pastikan Anda telah menyiapkan dokumen format khusus yang dapat diunduh pada tab Dokumen. Isi dengan lengkap dan valid.', link: 'https://drive.google.com/', gambar: '' },
+              { info: '<b>Pindai Berkas Anda</b><br>Scan semua berkas asli Anda (Paspor, Ijazah, Transkrip) ke dalam bentuk PDF.', link: '', gambar: '' }
+            ]
+          },
+          {
+            groupName: "Tahap 2: Pengisian Formulir",
+            steps: [
+              { info: '<b>Lengkapi Biodata Anda</b><br>Masuk ke menu <b>Formulir</b>. Isi seluruh informasi identitas, akademik, hingga riwayat pendaftaran kampus dengan data terbaru Anda.', link: '', gambar: '' },
+              { info: '<b>Unggah Berkas Wajib</b><br>Ceklist semua berkas wajib yang telah Anda miliki. Berkas ini adalah kunci verifikasi awal kelulusan Anda.', link: '', gambar: '' }
+            ]
+          },
+          {
+            groupName: "Tahap 3: Finalisasi",
+            steps: [
+              { info: '<b>Finalisasi & Pengajuan</b><br>Jika Chart Kelengkapan Data di Dashboard sudah 100%, masuk ke menu Formulir > Dokumen, lalu klik tombol <b>Ajukan Verifikasi Sekarang</b>.', link: '', gambar: '' }
+            ]
+          }
         ];
 
-        // Filter data kosong dari Spreadsheet (mengabaikan baris yang terlanjur diformat tapi kosong isinya)
+        // Memfilter dan Mengelompokkan data berdasarkan 'step'
         const displayInfo = computed(() => {
             const validData = infoData.value ? infoData.value.filter(item => item.step || item.info) : [];
-            return validData.length > 0 ? validData : defaultInfoData;
+            if (validData.length > 0) {
+                const groupedMap = {};
+                validData.forEach(item => {
+                    const gName = item.step ? item.step.trim() : 'Informasi Umum';
+                    if (!groupedMap[gName]) {
+                        groupedMap[gName] = { groupName: gName, steps: [] };
+                    }
+                    groupedMap[gName].steps.push(item);
+                });
+                return Object.values(groupedMap);
+            }
+            return defaultGroupedInfo;
         });
-        
+
+        // Kontrol Accordion Group
+        const toggleGroup = (index) => {
+            expandedGroupId.value = expandedGroupId.value === index ? null : index;
+        };
+        const isGroupExpanded = (index) => expandedGroupId.value === index;
+
         const formatDriveUrl = (id) => (!id || id.includes('http')) ? id : `https://lh3.googleusercontent.com/d/${id}`;
 
         const copy = (text, label) => {
@@ -664,7 +998,7 @@
           textArea.select(); 
           try { 
               document.execCommand('copy'); 
-              showToast(`${label} Berhasil Disalin!`); 
+              showToast(`${label} Disalin!`); 
           } catch (err) { 
               showToast("Gagal menyalin."); 
           }
@@ -682,31 +1016,27 @@
         const formatIDName = (k) => { if (formData.value[k]) formData.value[k] = formData.value[k].split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '); };
         const formatARName = (k) => { if (formData.value[k]) formData.value[k] = formData.value[k].replace(/[^\u0600-\u06FF\s]/g, ''); };
 
+        // Parse format bold *text* menjadi tag <strong>
+        const formatText = (text) => {
+            if (!text) return '';
+            return text.replace(/\*(.*?)\*/g, '<strong class="font-black text-slate-800">$1</strong>');
+        };
+
         watch(() => [formData.value.nama_p1_id, formData.value.nama_p2_id, formData.value.nama_p3_id, formData.value.nama_p4_id], (n) => formData.value.nama_lengkap_id = n.filter(x => x).join(' '));
         watch(() => [formData.value.nama_p1_ar, formData.value.nama_p2_ar, formData.value.nama_p3_ar, formData.value.nama_p4_ar], (n) => formData.value.nama_lengkap_ar = n.filter(x => x).join(' '));
 
         const showToast = (msg) => { toast.value = { show: true, msg }; setTimeout(() => { toast.value.show = false }, 3000); };
         const openLink = (url) => url && window.open(url, '_blank');
         
-        const tambahKampus = () => {
-            pendaftaranKampus.value.push({
-                id: 'KMP-' + Date.now().toString(),
-                no_daftar: '',
-                nama_kampus: '',
-                status: 'Belum Mendaftar'
-            });
-        };
-
-        const hapusKampus = (idx) => {
-            pendaftaranKampus.value.splice(idx, 1);
-        };
+        const tambahKampus = () => pendaftaranKampus.value.push({ id: 'KMP-' + Date.now().toString(), no_daftar: '', nama_kampus: '', status: 'Belum Mendaftar' });
+        const hapusKampus = (idx) => pendaftaranKampus.value.splice(idx, 1);
 
         const statusColor = (status) => {
             if(status === 'Diterima') return 'bg-emerald-100 text-emerald-700';
             if(status === 'Ditolak') return 'bg-red-100 text-red-700';
             if(status === 'Sedang Mendaftar') return 'bg-blue-100 text-blue-700';
             if(status === 'Cadangan') return 'bg-orange-100 text-orange-700';
-            return 'bg-slate-100 text-slate-500';
+            return 'bg-slate-200 text-slate-500';
         };
 
         const toggleAuthMode = () => { 
@@ -719,9 +1049,7 @@
             if (!authForm.value.nama || !authForm.value.asal || !authForm.value.email || !authForm.value.password || !authForm.value.confirmPassword) {
               return showToast("Lengkapi semua form pendaftaran!");
             }
-            if (authForm.value.password !== authForm.value.confirmPassword) {
-              return showToast("Kata sandi tidak cocok!");
-            }
+            if (authForm.value.password !== authForm.value.confirmPassword) return showToast("Kata sandi tidak cocok!");
           } else {
             if (!authForm.value.email || !authForm.value.password) return showToast("Lengkapi form!");
           }
@@ -729,11 +1057,7 @@
           isLoading.value = true;
           try {
             const res = await callGAS('handleAuth', { 
-               mode: authMode.value, 
-               email: authForm.value.email, 
-               password: authForm.value.password,
-               nama: authForm.value.nama,
-               asal: authForm.value.asal
+               mode: authMode.value, email: authForm.value.email, password: authForm.value.password, nama: authForm.value.nama, asal: authForm.value.asal
             });
             isLoading.value = false;
             if (res.success) {
@@ -742,21 +1066,18 @@
               if (res.data) {
                  formData.value = { ...formData.value, ...res.data };
                  if (res.data.kampus) {
-                    try {
-                        pendaftaranKampus.value = JSON.parse(res.data.kampus);
-                    } catch(e) {
-                        // Fallback handling legacy data
-                        pendaftaranKampus.value = res.data.kampus.split(', ').map(k => ({
-                            id: 'KMP-' + Math.random().toString(36).substr(2, 9),
-                            no_daftar: '',
-                            nama_kampus: k,
-                            status: 'Belum Mendaftar'
-                        }));
-                    }
+                    try { pendaftaranKampus.value = JSON.parse(res.data.kampus); } 
+                    catch(e) { pendaftaranKampus.value = res.data.kampus.split(', ').map(k => ({ id: 'KMP-' + Math.random().toString(36).substr(2, 9), no_daftar: '', nama_kampus: k, status: 'Belum Mendaftar' })); }
                  }
               }
               if (res.students) students.value = res.students;
-              showToast("Berhasil!");
+              showToast("Berhasil Masuk!");
+              
+              // Trigger Popup untuk User Biasa (Selain Admin) saat baru login
+              if (user.value.role !== 'ADMIN' && !localStorage.getItem('welcome_seen_' + user.value.id)) {
+                  showWelcomePopup.value = true;
+              }
+
             } else showToast(res.msg);
           } catch (e) { isLoading.value = false; showToast("Error: " + e.toString()); }
         };
@@ -769,54 +1090,58 @@
           try {
             const res = await callGAS('saveData', payload);
             isLoading.value = false;
-            
-            if (res && res.success === false) {
-               showToast("Gagal: " + res.msg);
-            } else {
+            if (res && res.success === false) showToast("Gagal: " + res.msg);
+            else {
                showToast("Data Tersimpan!"); 
                isViewMode.value = true; 
-               isProfileViewMode.value = true;
             }
-          } catch (e) { 
-            isLoading.value = false; 
-            showToast("Sistem Error: " + e.message); 
-            console.error(e);
-          }
+          } catch (e) { isLoading.value = false; showToast("Sistem Error: " + e.message); console.error(e); }
+        };
+
+        const saveProfileData = async () => {
+          await saveData();
+          isProfileEdit.value = false;
         };
 
         const verifyDoc = async (uid, status) => {
            try {
              await callGAS('updateStatus', { uid, status });
-             showToast(`Status: ${status}`); selectedStudent.value = null; handleAuth();
+             showToast(`Status Diubah: ${status}`); selectedStudent.value = null; handleAuth();
            } catch (e) { showToast("Gagal Update"); }
+        };
+
+        const closeWelcomePopup = () => {
+            if (user.value) {
+                localStorage.setItem('welcome_seen_' + user.value.id, 'true');
+            }
+            showWelcomePopup.value = false;
         };
 
         const logout = () => { localStorage.removeItem('portal_malut_session'); user.value = null; showToast("Berhasil Keluar"); };
         const viewDetail = (st) => selectedStudent.value = st;
 
         onMounted(() => {
-          setTimeout(() => showSplash.value = false, 2500);
+          setTimeout(() => showSplash.value = false, 2000);
+          
+          startCountdown(); // Start the timer when app loads
+          
           const session = localStorage.getItem('portal_malut_session');
           if (session) { 
-            const p = JSON.parse(session); 
-            user.value = p; 
+            const p = JSON.parse(session); user.value = p; 
+            
+            // Tampilkan Popup jika user sudah punya session tapi belum pernah klik mengerti
+            if (p.role !== 'ADMIN' && !localStorage.getItem('welcome_seen_' + p.id)) {
+                showWelcomePopup.value = true;
+            }
+
             callGAS('fetchInitial', p).then(res => {
               if (res.success) {
                 infoData.value = res.infoData || [];
                 if (res.data) {
                   formData.value = { ...formData.value, ...res.data };
                   if (res.data.kampus) {
-                    try {
-                        pendaftaranKampus.value = JSON.parse(res.data.kampus);
-                    } catch(e) {
-                        // Fallback handling legacy data
-                        pendaftaranKampus.value = res.data.kampus.split(', ').map(k => ({
-                            id: 'KMP-' + Math.random().toString(36).substr(2, 9),
-                            no_daftar: '',
-                            nama_kampus: k,
-                            status: 'Belum Mendaftar'
-                        }));
-                    }
+                    try { pendaftaranKampus.value = JSON.parse(res.data.kampus); } 
+                    catch(e) { pendaftaranKampus.value = res.data.kampus.split(', ').map(k => ({ id: 'KMP-' + Math.random().toString(36).substr(2, 9), no_daftar: '', nama_kampus: k, status: 'Belum Mendaftar' })); }
                   }
                 }
                 if (res.students) students.value = res.students;
@@ -826,9 +1151,10 @@
         });
 
         return {
-          appName, appLogo, showSplash, isLoading, isViewMode, isProfileViewMode, user, authMode, authForm, showPass,
-          activeTab, formTab, formData, toast, students, docFields, fileList, berkasWajib, berkasPendukung, berkasTambahan, universityList, graduationYears, pendaftaranKampus, statusKampusList, displayInfo, selectedStudent,
-          toggleAuthMode, handleAuth, saveData, verifyDoc, viewDetail, logout, openLink, copy, generateHijri, formatIDName, formatARName, formatDriveUrl, tambahKampus, hapusKampus, statusColor
+          appLogo, showSplash, isLoading, isViewMode, isProfileEdit, user, authMode, authForm, showPass,
+          activeTab, formTab, formData, toast, students, docFields, fileList: [...berkasWajib, ...berkasPendukung, ...berkasTambahan], berkasWajib, berkasPendukung, berkasTambahan, universityList, graduationYears, pendaftaranKampus, statusKampusList, displayInfo, selectedStudent,
+          expandedGroupId, toggleGroup, isGroupExpanded, dataProgress, countBerkasWajib, showWelcomePopup, timeLeft,
+          toggleAuthMode, handleAuth, saveData, saveProfileData, verifyDoc, viewDetail, logout, openLink, copy, generateHijri, formatIDName, formatARName, formatDriveUrl, tambahKampus, hapusKampus, statusColor, formatText, closeWelcomePopup
         };
       }
     }).mount('#app');
