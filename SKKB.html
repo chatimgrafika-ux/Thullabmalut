@@ -32,10 +32,11 @@
       font-size: 15px;
     }
     
+    /* Arabic Professional Font adjustments */
     .font-arab {
       font-family: 'Amiri', 'Times New Roman', serif;
-      line-height: 2;
-      font-size: 18px;
+      line-height: 1.8;
+      font-size: 21px; /* Ukuran lebih besar agar profesional */
     }
 
     /* Custom Scrollbars */
@@ -57,7 +58,7 @@
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
       position: relative;
       box-sizing: border-box;
-      padding: 20mm; 
+      padding: 10mm 20mm 20mm 20mm; /* Margin atas dikurangi sisa 1cm (10mm) */
       overflow: hidden;
     }
 
@@ -97,7 +98,7 @@
         width: 210mm;
         height: 297mm;
         margin: 0;
-        padding: 20mm;
+        padding: 10mm 20mm 20mm 20mm; /* Margin atas dikurangi sisa 1cm (10mm) */
         page-break-after: always;
       }
       .paper:last-child {
@@ -162,11 +163,17 @@
       <!-- Tanda Tangan Configuration -->
       <section class="bg-slate-50 p-4 rounded-2xl border border-slate-200" id="section-ttd">
         <h2 class="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center justify-between">
-          <span>Tanda Tangan Kepsek</span>
-          <label class="cursor-pointer bg-white border border-slate-200 hover:border-[var(--primary)] text-slate-500 hover:text-[var(--primary)] px-2 py-1 rounded text-[9px] flex items-center gap-1 transition-colors">
-            <i data-lucide="pen-tool" class="w-3 h-3"></i> Upload TTD
-            <input type="file" accept="image/*" class="hidden" onchange="handleSignatureUpload(event)">
-          </label>
+          <span>Tanda Tangan & Cap</span>
+          <div class="flex gap-2">
+            <label class="cursor-pointer bg-white border border-slate-200 hover:border-[var(--primary)] text-slate-500 hover:text-[var(--primary)] px-2 py-1 rounded text-[9px] flex items-center gap-1 transition-colors">
+              <i data-lucide="pen-tool" class="w-3 h-3"></i> Upload TTD
+              <input type="file" accept="image/*" class="hidden" onchange="handleSignatureUpload(event)">
+            </label>
+            <label class="cursor-pointer bg-white border border-slate-200 hover:border-[var(--primary)] text-slate-500 hover:text-[var(--primary)] px-2 py-1 rounded text-[9px] flex items-center gap-1 transition-colors">
+              <i data-lucide="stamp" class="w-3 h-3"></i> Upload Cap
+              <input type="file" accept="image/*" class="hidden" onchange="handleStampUpload(event)">
+            </label>
+          </div>
         </h2>
       </section>
 
@@ -222,7 +229,7 @@
     <div class="paper-wrapper w-full max-w-[210mm] flex justify-center">
       <div class="paper font-doc" id="page-1">
         
-        <!-- KOP SURAT (Uncompressed, Skala 1:4 / Lebar penuh aspect ratio 4:1) -->
+        <!-- KOP SURAT -->
         <img src="https://lh3.googleusercontent.com/d/1gddxdDoeT6M-DbleE1wu789Antxa7epB" class="kop-surat" alt="Kop Surat" />
         
         <!-- CONTENT -->
@@ -245,7 +252,7 @@
 
           <table class="w-full ml-4 mt-2 mb-4">
             <tr><td class="w-40 pb-1">Nama</td><td class="w-4 pb-1">:</td><td class="font-bold pb-1" id="out-nama-id"></td></tr>
-            <tr><td class="pb-1">NIS</td><td class="pb-1">:</td><td class="pb-1 out-nis"></td></tr>
+            <tr><td class="pb-1">NIS</td><td class="pb-1">:</td><td class="pb-1" id="out-nis-id"></td></tr>
             <tr><td class="pb-1">Tempat Tgl Lahir</td><td class="pb-1">:</td><td class="pb-1" id="out-ttl-id"></td></tr>
             <tr><td class="align-top pb-1">Alamat</td><td class="align-top pb-1">:</td><td class="pb-1" id="out-alamat-id"></td></tr>
           </table>
@@ -262,11 +269,18 @@
             <div class="text-center w-72">
                <p>Ternate, <span id="out-tgl-id"></span></p>
                <p>Kepala Sekolah</p>
-               <div class="h-24 flex items-center justify-center relative my-2">
-                  <img src="" class="sig-img hidden max-h-full max-w-full mix-blend-multiply z-10" />
+               
+               <div class="mt-16 relative w-full flex flex-col items-center justify-center">
+                  <!-- Text Nama & NIP (z-10) -->
+                  <p class="font-bold underline relative z-10">Moch. Ansor, S.Pd.,M.Pd</p>
+                  <p class="relative z-10">NIP. 19650921 198812 1 002</p>
+
+                  <!-- Tanda Tangan menimpa teks (z-20) -->
+                  <img src="" class="sig-img hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[60%] w-60 h-40 object-contain mix-blend-multiply z-20 pointer-events-none" />
+
+                  <!-- Cap/Stempel besar menimpa tanda tangan dan teks (z-30) -->
+                  <img src="" class="cap-img hidden absolute top-1/2 left-[-1rem] -translate-y-1/2 w-44 h-44 object-contain mix-blend-multiply z-30 pointer-events-none opacity-90" />
                </div>
-               <p class="font-bold underline">Moch. Ansor, S.Pd.,M.Pd</p>
-               <p>NIP. 19650921 198812 1 002</p>
             </div>
           </div>
         </div>
@@ -287,14 +301,14 @@
         <!-- CONTENT -->
         <div class="px-4">
           <div class="mb-8 text-center">
-             <h1 class="font-bold text-[22px]">شهادة حسن السيرة والسلوك</h1>
-             <p class="mt-1 text-[17px]"><span class="out-nomor font-sans text-right" dir="ltr" style="display:inline-block; text-align:right;"></span> : رقم الرسالة </p>
+             <h1 class="font-bold text-[28px]">شهادة حسن السيرة والسلوك</h1>
+             <p class="mt-1 text-[20px]"><span class="out-nomor font-sans text-right" dir="ltr" style="display:inline-block; text-align:right;"></span> : رقم الرسالة </p>
           </div>
 
           <p>ب الموقع أدناه:و</p>
           <p>عزيزي املوقع أدناه : س</p>
 
-          <table class="w-full mt-2 mb-4 text-[17px]">
+          <table class="w-full mt-2 mb-4 text-[21px]">
             <tr><td class="w-40 pb-1 align-top">الاسم</td><td class="w-4 pb-1 align-top">:</td><td class="pb-1">محمد أنصار، بكالوريوس في التربية، ماجستير في التربية</td></tr>
             <tr><td class="pb-1 align-top">المنصب</td><td class="pb-1 align-top">:</td><td class="pb-1">مدير مدرسة الثانوية لقمان الحكيم مدينة ترناتي</td></tr>
             <tr><td class="pb-1 align-top">العنوان</td><td class="pb-1 align-top">:</td><td class="pb-1">شارع إسناين إبراهيم، حي قامبيسي</td></tr>
@@ -302,9 +316,9 @@
 
           <p>يشهد بأن :</p>
 
-          <table class="w-full mt-2 mb-4 text-[17px]">
+          <table class="w-full mt-2 mb-4 text-[21px]">
             <tr><td class="w-40 pb-1 align-top">الاسم</td><td class="w-4 pb-1 align-top">:</td><td class="font-bold pb-1" id="out-nama-ar"></td></tr>
-            <tr><td class="pb-1 align-top">رقم الطالب</td><td class="pb-1 align-top">:</td><td class="pb-1 out-nis font-sans text-right" dir="ltr" style="text-align: right;"></td></tr>
+            <tr><td class="pb-1 align-top">رقم الطالب</td><td class="pb-1 align-top">:</td><td class="pb-1" id="out-nis-ar"></td></tr>
             <tr><td class="pb-1 align-top">مكان وتاريخ الميلاد</td><td class="pb-1 align-top">:</td><td class="pb-1" id="out-ttl-ar"></td></tr>
             <tr><td class="pb-1 align-top">العنوان</td><td class="pb-1 align-top">:</td><td class="pb-1" id="out-alamat-ar"></td></tr>
           </table>
@@ -321,11 +335,19 @@
             <div class="text-center w-72">
                <p>ترناتي، <span id="out-tgl-ar"></span></p>
                <p>مدير المدرسة</p>
-               <div class="h-24 flex items-center justify-center relative my-2">
-                  <img src="" class="sig-img hidden max-h-full max-w-full mix-blend-multiply z-10" />
+               
+               <div class="mt-16 relative w-full flex flex-col items-center justify-center">
+                  <!-- Text Nama & NIP (z-10) -->
+                  <p class="font-bold relative z-10">محمد أنصار الماجستير في التربية</p>
+                  <p class="relative z-10">رقم الموظف ١٩٦٥٠٩٢١١٩٨٨١٢١٠٠٢</p>
+                  
+                  <!-- Tanda Tangan menimpa teks (z-20) -->
+                  <img src="" class="sig-img hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[60%] w-60 h-40 object-contain mix-blend-multiply z-20 pointer-events-none" />
+
+                  <!-- Cap/Stempel besar menimpa tanda tangan dan teks (z-30) -->
+                  <!-- Di halaman bahasa arab cap diletakkan di sebelah kanan (right-[-1rem]) -->
+                  <img src="" class="cap-img hidden absolute top-1/2 right-[-1rem] -translate-y-1/2 w-44 h-44 object-contain mix-blend-multiply z-30 pointer-events-none opacity-90" />
                </div>
-               <p class="font-bold">محمد أنصار الماجستير في التربية</p>
-               <p>رقم الموظف ١٩٦٥٠٩٢١١٩٨٨١٢١٠٠٢</p>
             </div>
           </div>
         </div>
@@ -340,6 +362,7 @@
     lucide.createIcons();
     
     let currentSignature = null;
+    let currentStamp = null;
 
     // Bulan dalam bahasa Indonesia dan Arab
     const indoMonths = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -422,8 +445,12 @@
       document.getElementById('out-tgl-id').textContent = val('f-tgl-id', '..............');
       document.getElementById('out-tgl-ar').textContent = val('f-tgl-ar', '..............');
       
+      // Update NIS
       const nis = val('f-nis');
-      document.querySelectorAll('.out-nis').forEach(el => el.textContent = nis);
+      const outNisId = document.getElementById('out-nis-id');
+      const outNisAr = document.getElementById('out-nis-ar');
+      if (outNisId) outNisId.textContent = nis;
+      if (outNisAr) outNisAr.textContent = toArabicNumeral(nis);
 
       // Data Indo
       document.getElementById('out-nama-id').textContent = val('f-nama-id');
@@ -446,6 +473,23 @@
           const sigImgs = document.querySelectorAll('.sig-img');
           sigImgs.forEach(img => {
             img.src = currentSignature;
+            img.classList.remove('hidden');
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // Upload & Handle Stamp/Cap
+    function handleStampUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          currentStamp = event.target.result;
+          const capImgs = document.querySelectorAll('.cap-img');
+          capImgs.forEach(img => {
+            img.src = currentStamp;
             img.classList.remove('hidden');
           });
         };
