@@ -1073,10 +1073,19 @@
     const translateDateToArabic = (dateStr) => {
       if (!dateStr) return '';
       const months = {
-        'januari': 'يناير', 'februari': 'فبراير', 'maret': 'مارس', 'april': 'أبريل',
-        'mei': 'مايو', 'juni': 'يونيو', 'juli': 'يوليو', 'agustus': 'أغسطس',
-        'september': 'سبتمبر', 'oktober': 'أكتوبر', 'november': 'نوفمبر', 'desember': 'ديسمبر'
-      };
+  'january': 'يناير',
+  'february': 'فبراير',
+  'march': 'مارس',
+  'april': 'أبريل',
+  'may': 'مايو',
+  'june': 'يونيو',
+  'july': 'يوليو',
+  'august': 'أغسطس',
+  'september': 'سبتمبر',
+  'october': 'أكتوبر',
+  'november': 'نوفمبر',
+  'december': 'ديسمبر'
+};
       let result = dateStr.toLowerCase();
       for (const [id, ar] of Object.entries(months)) { result = result.replace(id, ar); }
       return toArabicNumerals(result);
