@@ -565,10 +565,15 @@
                       <div v-show="isGroupExpanded(gIndex)">
                          <div class="w-full h-px bg-slate-100"></div>
                          <div class="p-2">
-                            <div v-for="(info, index) in group.steps" :key="index" class="flex items-start gap-3 p-4 border-b border-slate-50 last:border-0 rounded-2xl hover:bg-slate-50/80 transition-colors">
+                            <div v-for="(info, index) in group.steps" :key="index" class="flex items-start gap-3 p-4 border-b border-slate-50 last:border-0 rounded-2xl hover:bg-slate-50/80 transition-all duration-300" :class="{'bg-emerald-50/40': completedSteps[`${gIndex}-${index}`]}">
                                
+                               <!-- Checkbox Selesai -->
+                               <div class="pt-0.5 shrink-0 cursor-pointer" title="Tandai Selesai">
+                                  <input type="checkbox" :checked="completedSteps[`${gIndex}-${index}`]" @change="toggleStepCompletion(gIndex, index)" class="checkbox checkbox-sm border-slate-300 rounded-md checked:bg-emerald-500 checked:border-emerald-500 transition-colors" />
+                               </div>
+
                                <!-- Konten Teks & Gambar -->
-                               <div class="flex-1 min-w-0 space-y-3">
+                               <div class="flex-1 min-w-0 space-y-3 transition-opacity duration-300" :class="{'opacity-75': completedSteps[`${gIndex}-${index}`]}">
                                   <div class="text-[12px] font-medium text-slate-600 leading-relaxed text-justify" v-html="formatText(info.info)"></div>
                                   
                                   <!-- Penampil Gambar Profesional -->
@@ -582,7 +587,7 @@
 
                                <!-- Tombol Icon Samping (Hanya muncul jika ada link) -->
                                <button v-if="info.link" @click.stop="openLink(info.link)" class="btn btn-square bg-moe/10 hover:bg-moe text-moe hover:text-white border-none shrink-0 shadow-sm rounded-xl transition-colors mt-1" title="Buka Tautan">
-                                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                                </button>
                                
                             </div>
@@ -832,6 +837,7 @@
         const expandedGroupId = ref(0); // Track expanded group index, default open first group
         const showWelcomePopup = ref(false);
         const timeLeft = ref({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        const completedSteps = ref({}); // State untuk checkbox panduan
         let countdownTimer = null;
         
         const students = ref([]);
@@ -1016,6 +1022,15 @@
         const formatIDName = (k) => { if (formData.value[k]) formData.value[k] = formData.value[k].split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '); };
         const formatARName = (k) => { if (formData.value[k]) formData.value[k] = formData.value[k].replace(/[^\u0600-\u06FF\s]/g, ''); };
 
+        // Toggle checkbox panduan dan simpan ke localStorage
+        const toggleStepCompletion = (gIndex, index) => {
+            const key = `${gIndex}-${index}`;
+            completedSteps.value[key] = !completedSteps.value[key];
+            if (user.value) {
+                localStorage.setItem(`guide_steps_${user.value.id}`, JSON.stringify(completedSteps.value));
+            }
+        };
+
         // Parse format bold *text* menjadi tag <strong>
         const formatText = (text) => {
             if (!text) return '';
@@ -1073,6 +1088,11 @@
               if (res.students) students.value = res.students;
               showToast("Berhasil Masuk!");
               
+              // Load data checkbox panduan
+              const savedSteps = localStorage.getItem(`guide_steps_${user.value.id}`);
+              if (savedSteps) completedSteps.value = JSON.parse(savedSteps);
+              else completedSteps.value = {};
+
               // Trigger Popup untuk User Biasa (Selain Admin) saat baru login
               if (user.value.role !== 'ADMIN' && !localStorage.getItem('welcome_seen_' + user.value.id)) {
                   showWelcomePopup.value = true;
@@ -1117,7 +1137,7 @@
             showWelcomePopup.value = false;
         };
 
-        const logout = () => { localStorage.removeItem('portal_malut_session'); user.value = null; showToast("Berhasil Keluar"); };
+        const logout = () => { localStorage.removeItem('portal_malut_session'); user.value = null; completedSteps.value = {}; showToast("Berhasil Keluar"); };
         const viewDetail = (st) => selectedStudent.value = st;
 
         onMounted(() => {
@@ -1129,6 +1149,10 @@
           if (session) { 
             const p = JSON.parse(session); user.value = p; 
             
+            // Load checkbox data
+            const savedSteps = localStorage.getItem(`guide_steps_${p.id}`);
+            if (savedSteps) completedSteps.value = JSON.parse(savedSteps);
+
             // Tampilkan Popup jika user sudah punya session tapi belum pernah klik mengerti
             if (p.role !== 'ADMIN' && !localStorage.getItem('welcome_seen_' + p.id)) {
                 showWelcomePopup.value = true;
@@ -1153,8 +1177,8 @@
         return {
           appLogo, showSplash, isLoading, isViewMode, isProfileEdit, user, authMode, authForm, showPass,
           activeTab, formTab, formData, toast, students, docFields, fileList: [...berkasWajib, ...berkasPendukung, ...berkasTambahan], berkasWajib, berkasPendukung, berkasTambahan, universityList, graduationYears, pendaftaranKampus, statusKampusList, displayInfo, selectedStudent,
-          expandedGroupId, toggleGroup, isGroupExpanded, dataProgress, countBerkasWajib, showWelcomePopup, timeLeft,
-          toggleAuthMode, handleAuth, saveData, saveProfileData, verifyDoc, viewDetail, logout, openLink, copy, generateHijri, formatIDName, formatARName, formatDriveUrl, tambahKampus, hapusKampus, statusColor, formatText, closeWelcomePopup
+          expandedGroupId, toggleGroup, isGroupExpanded, dataProgress, countBerkasWajib, showWelcomePopup, timeLeft, completedSteps,
+          toggleAuthMode, handleAuth, saveData, saveProfileData, verifyDoc, viewDetail, logout, openLink, copy, generateHijri, formatIDName, formatARName, formatDriveUrl, tambahKampus, hapusKampus, statusColor, formatText, closeWelcomePopup, toggleStepCompletion
         };
       }
     }).mount('#app');
