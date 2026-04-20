@@ -36,7 +36,7 @@
     .font-arab {
       font-family: 'Amiri', 'Times New Roman', serif;
       line-height: 1.8;
-      font-size: 21px; /* Ukuran lebih besar agar profesional */
+      font-size: 18px; /* Ukuran disesuaikan agar profesional dan tidak terlalu besar */
     }
 
     /* Custom Scrollbars */
@@ -52,7 +52,7 @@
     
     .paper {
       width: 210mm;
-      min-height: 297mm;
+      height: 297mm; /* Diubah ke fixed height agar persis 1 lembar A4 (sebelumnya min-height) */
       margin: 0 auto;
       background: white;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
@@ -291,24 +291,24 @@
     <!-- PAGE BREAK FOR PRINTING -->
     <div class="page-break hidden print:block w-full"></div>
 
-    <!-- PAGE 2: ARABIC -->
+    <!-- PAGE 2: ARABIC (Tanpa Margin / Padding 0) -->
     <div class="paper-wrapper w-full max-w-[210mm] flex justify-center pb-10 print:pb-0">
-      <div class="paper font-arab text-right" dir="rtl" id="page-2">
+      <div class="paper font-arab text-right" dir="rtl" id="page-2" style="padding: 0 !important;">
         
-        <!-- KOP SURAT -->
-        <img src="https://lh3.googleusercontent.com/d/1gddxdDoeT6M-DbleE1wu789Antxa7epB" class="kop-surat" alt="Kop Surat" />
+        <!-- KOP SURAT (Menempel ke pojok kiri atas tanpa margin) -->
+        <img src="https://lh3.googleusercontent.com/d/1gddxdDoeT6M-DbleE1wu789Antxa7epB" class="kop-surat" alt="Kop Surat" style="object-position: top left; margin-bottom: 20px;" />
         
-        <!-- CONTENT -->
-        <div class="px-4">
+        <!-- CONTENT (Margin/Padding diatur di sini karena wadah kertas tidak punya padding) -->
+        <div style="padding: 0 20mm 20mm 20mm;">
           <div class="mb-8 text-center">
-             <h1 class="font-bold text-[28px]">شهادة حسن السيرة والسلوك</h1>
-             <p class="mt-1 text-[20px]"><span class="out-nomor font-sans text-right" dir="ltr" style="display:inline-block; text-align:right;"></span> : رقم الرسالة </p>
+             <h1 class="font-bold text-[24px]">شهادة حسن السيرة والسلوك</h1>
+             <p class="mt-1 text-[18px]"><span class="out-nomor font-sans text-right" dir="ltr" style="display:inline-block; text-align:right;"></span> : رقم الرسالة </p>
           </div>
 
           <p>ب الموقع أدناه:و</p>
           <p>عزيزي املوقع أدناه : س</p>
 
-          <table class="w-full mt-2 mb-4 text-[21px]">
+          <table class="w-full mt-2 mb-4 text-[18px]">
             <tr><td class="w-40 pb-1 align-top">الاسم</td><td class="w-4 pb-1 align-top">:</td><td class="pb-1">محمد أنصار، بكالوريوس في التربية، ماجستير في التربية</td></tr>
             <tr><td class="pb-1 align-top">المنصب</td><td class="pb-1 align-top">:</td><td class="pb-1">مدير مدرسة الثانوية لقمان الحكيم مدينة ترناتي</td></tr>
             <tr><td class="pb-1 align-top">العنوان</td><td class="pb-1 align-top">:</td><td class="pb-1">شارع إسناين إبراهيم، حي قامبيسي</td></tr>
@@ -316,7 +316,7 @@
 
           <p>يشهد بأن :</p>
 
-          <table class="w-full mt-2 mb-4 text-[21px]">
+          <table class="w-full mt-2 mb-4 text-[18px]">
             <tr><td class="w-40 pb-1 align-top">الاسم</td><td class="w-4 pb-1 align-top">:</td><td class="font-bold pb-1" id="out-nama-ar"></td></tr>
             <tr><td class="pb-1 align-top">رقم الطالب</td><td class="pb-1 align-top">:</td><td class="pb-1" id="out-nis-ar"></td></tr>
             <tr><td class="pb-1 align-top">مكان وتاريخ الميلاد</td><td class="pb-1 align-top">:</td><td class="pb-1" id="out-ttl-ar"></td></tr>
