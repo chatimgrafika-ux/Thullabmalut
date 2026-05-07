@@ -237,6 +237,10 @@
                   <span dir="rtl" class="font-serif text-[12px] font-bold ar text-right">جواز السفر: <span id="out-passport-ar" class="font-normal">-</span></span>
                 </div>
                 <div class="contact-line">
+                  <span class="font-semibold en text-left">Exp: <span id="out-passport-exp-en" class="font-normal">-</span></span>
+                  <span dir="rtl" class="font-serif text-[12px] font-bold ar text-right">تاريخ الانتهاء: <span id="out-passport-exp-ar" class="font-normal">-</span></span>
+                </div>
+                <div class="contact-line">
                   <span class="font-semibold en text-left">Add: <span id="out-address-en" class="font-normal">-</span></span>
                   <span dir="rtl" class="font-serif text-[12px] font-bold ar text-right">العنوان: <span id="out-address-ar" class="font-normal">-</span></span>
                 </div>
@@ -384,10 +388,14 @@
               </div>
 
               <!-- Baris Paspor Baru -->
-              <div class="grid grid-cols-1 gap-4">
+              <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">No. Paspor / ID</label>
-                  <input type="text" id="in-passport" maxlength="30" oninput="syncCV()" placeholder="ex: C1234567" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" />
+                  <input type="text" id="in-passport" maxlength="30" oninput="this.value = this.value.toUpperCase(); syncCV();" placeholder="ex: C1234567" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Berlaku Hingga</label>
+                  <input type="text" id="in-passport-exp" maxlength="30" oninput="syncCV()" placeholder="ex: 12 Jan 2030" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" />
                 </div>
               </div>
 
@@ -805,8 +813,13 @@
       syncShared('in-dob', 'out-dob-ar', 'out-dob-en', true);
       syncShared('in-phone', 'out-phone-ar', 'out-phone-en');
       
-      // Sinkronisasi Passport
-      syncShared('in-passport', 'out-passport-ar', 'out-passport-en');
+      // Sinkronisasi Passport (Angka tidak diubah ke format Arab)
+      let passportVal = document.getElementById('in-passport') ? document.getElementById('in-passport').value : '-';
+      if(document.getElementById('out-passport-en')) document.getElementById('out-passport-en').innerText = passportVal || '-';
+      if(document.getElementById('out-passport-ar')) document.getElementById('out-passport-ar').innerText = passportVal || '-';
+
+      // Sinkronisasi Masa Berlaku Paspor
+      syncShared('in-passport-exp', 'out-passport-exp-ar', 'out-passport-exp-en', true);
       
       // Email khusus agar tidak direplace ke angka arab
       let emailVal = document.getElementById('in-email') ? document.getElementById('in-email').value : '-';
