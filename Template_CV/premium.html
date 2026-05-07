@@ -35,6 +35,8 @@
     .pdf-container {
       width: 210mm;
       height: 297mm;
+      max-width: 210mm;
+      max-height: 297mm;
       overflow: hidden; 
       box-sizing: border-box;
       position: relative;
@@ -48,31 +50,45 @@
       html, body {
         width: 210mm !important;
         height: 297mm !important;
-        min-width: 210mm !important;
-        min-height: 297mm !important;
         margin: 0 !important;
         padding: 0 !important;
-        border: 0 !important;
-        overflow: hidden !important;
         background-color: white !important;
+        overflow: hidden !important;
       }
       header, #form-section, #splash-screen, #premium-modal, .md\:hidden {
         display: none !important;
       }
-      #main-app, #preview-wrapper {
-        display: block !important; position: static !important; margin: 0 !important;
-        padding: 0 !important; width: 100% !important; height: auto !important;
-        border: none !important; transform: none !important; text-align: left !important;
-        overflow: visible !important;
+      #main-app {
+        display: block !important; 
+        width: 210mm !important;
+        height: 297mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
       }
-      body * { visibility: hidden; }
-      #cv-preview, #cv-preview * { visibility: visible; }
+      #preview-wrapper {
+        display: block !important; 
+        width: 210mm !important; 
+        height: 297mm !important; 
+        margin: 0 !important;
+        padding: 0 !important; 
+        border: none !important; 
+        overflow: hidden !important;
+      }
       #cv-preview {
-        position: fixed !important; left: 0 !important; top: 0 !important;
-        width: 210mm !important; height: 297mm !important;
-        margin: 0 !important; padding: 0 !important;
-        box-shadow: none !important; border: none !important;
-        transform: none !important; transform-origin: 0 0 !important;
+        position: relative !important; 
+        left: 0 !important; 
+        top: 0 !important;
+        width: 210mm !important; 
+        height: 297mm !important;
+        margin: 0 !important; 
+        padding: 0 !important;
+        box-shadow: none !important; 
+        border: none !important;
+        transform: scale(0.98) !important; /* Safety margin mencegah tepian terpotong di printer/mobile */
+        transform-origin: top center !important;
+        page-break-after: avoid !important;
+        page-break-before: avoid !important;
+        page-break-inside: avoid !important;
       }
       * {
         -webkit-print-color-adjust: exact !important;
@@ -93,7 +109,7 @@
     /* ========================================================
        SISTEM GRID CV
        ======================================================== */
-    #cv-grid { display: grid; width: 100%; height: 100%; box-sizing: border-box; position: relative; z-index: 20; }
+    #cv-grid { display: grid; width: 100%; height: 100%; box-sizing: border-box; position: relative; z-index: 20; overflow: hidden; }
     .grid-item { box-sizing: border-box; position: relative; z-index: 2; }
     
     #grid-title { grid-area: title; } #grid-photo { grid-area: photo; } #grid-contact { grid-area: contact; }
@@ -168,8 +184,9 @@
     .layout-7 #grid-title { background: transparent; box-shadow: none; text-align: center; padding-bottom: 0; }
     .layout-7 #grid-photo { display: flex; justify-content: flex-end; align-items: center; background: transparent; box-shadow: none; } .layout-7 #grid-photo .border-2 { border-radius: 16px; border-width: 3px;}
     .layout-7 #grid-skills { background: transparent; box-shadow: none; padding-left: 2mm; }
-    .layout-7 #grid-contact { display: contents; } 
-    .layout-7 .contact-line { display: flex; flex-direction: row; justify-content: space-between; align-items: center; background: var(--primary-bg); padding: 1.5mm 3mm; border-radius: 12px; margin-bottom: 1mm; width: 100%; border: none; }
+    .layout-7 #grid-contact { display: block; background: transparent; box-shadow: none; padding: 0; }
+    .layout-7 #grid-contact .flex.flex-col { display: grid !important; grid-template-columns: 1fr 1fr; gap: 1.5mm 4mm; }
+    .layout-7 .contact-line { display: flex; flex-direction: row; justify-content: space-between; align-items: center; background: var(--primary-bg); padding: 1.5mm 3mm; border-radius: 12px; margin-bottom: 0; width: 100%; border: none; }
     .layout-7 .cv-heading { justify-content: center; margin-bottom: 2mm; border: none; } .layout-7 .cv-heading .en, .layout-7 .cv-heading .ar { background: var(--primary); color: white; padding: 1.5mm 6mm; border-radius: 20px; }
 
     /* LAYOUT 8: SPLIT DINAMIS (35:65) */
@@ -232,11 +249,15 @@
     .layout-15 #grid-photo { display: flex; justify-content: center; } .layout-15 .cv-heading { background: var(--primary); padding: 1.5mm 15mm; margin: 0 -15mm 3mm -15mm; } .layout-15 .cv-heading .en, .layout-15 .cv-heading .ar { color: white; }
 
     /* LAYOUT 16: HEADER GELAP */
-    .layout-16 { padding: 0; gap: 4mm 8mm; grid-template-columns: 50mm 1fr; grid-template-areas: "photo title" "contact summary" "skills edu" "skills exp" "skills rel" "skills awd"; }
+    .layout-16 { padding: 0; gap: 4mm 6mm; grid-template-columns: 35fr 65fr; grid-template-areas: "photo title" "contact summary" "skills edu" "skills exp" "skills rel" "skills awd"; }
     .layout-16::before { content:''; position:absolute; top:0; left:0; width:100%; height: 50mm; background: var(--primary-dark); z-index: 1;}
-    .layout-16 #grid-title h1, .layout-16 #grid-title h2 { color: white !important; } .layout-16 #grid-photo { padding: 10mm 0 0 12mm; } .layout-16 #grid-photo .border-2 { border-color: white; border-radius: 8px;}
-    .layout-16 #grid-title { padding: 12mm 12mm 0 0; text-align: right; } .layout-16 #grid-contact, .layout-16 #grid-skills { padding: 0 0 0 12mm; }
-    .layout-16 .grid-item:not(#grid-title):not(#grid-photo) { margin-top: 4mm; padding-right: 12mm;} .layout-16 .cv-heading { border-bottom: 2px solid var(--primary-dark); }
+    .layout-16 #grid-title h1, .layout-16 #grid-title h2 { color: white !important; } .layout-16 #grid-photo { padding: 10mm 0 0 10mm; display: flex; justify-content: center; } .layout-16 #grid-photo .border-2 { border-color: white; border-radius: 8px;}
+    .layout-16 #grid-title { padding: 12mm 12mm 0 0; text-align: right; } 
+    .layout-16 #grid-contact, .layout-16 #grid-skills { padding: 0 4mm 0 10mm; word-break: break-word; }
+    .layout-16 .grid-item:not(#grid-title):not(#grid-photo) { margin-top: 2mm; padding-right: 12mm;} 
+    .layout-16 #grid-edu, .layout-16 #grid-exp, .layout-16 #grid-rel, .layout-16 #grid-awd { margin-top: -40mm; }
+    .layout-16 .cv-heading { border-bottom: 2px solid var(--primary-dark); }
+    .layout-16 .contact-line { flex-direction: column; text-align: center; gap: 0.5mm; padding: 1.5mm 0; border-bottom: 1px dashed rgba(0,0,0,0.1); }
 
     /* LAYOUT 17: AKADEMIK FORMAL (35:65, Skills Under Awd, Split Contact) */
     .layout-17 { padding: 10mm 12mm; gap: 3mm 6mm; grid-template-columns: 35fr 65fr; grid-template-areas: "photo title" "summary summary" "contact contact" "edu exp" "rel awd" "rel skills"; text-align: left; }
@@ -273,10 +294,16 @@
     .layout-21 .cv-heading { background: var(--primary-bg); padding: 1mm 3mm; border-radius: 8px; margin-bottom: 2mm; }
 
     /* LAYOUT 22: ELEGAN PREMIUM */
-    .layout-22 { padding: 12mm; gap: 5mm; grid-template-columns: 1fr 1fr; grid-template-areas: "photo photo" "title title" "contact contact" "summary summary" "edu exp" "rel awd" "skills skills"; text-align: center; border: 2mm solid var(--primary-bg); outline: 1px solid var(--primary); outline-offset: -3mm; }
-    .layout-22 #grid-photo { display: flex; justify-content: center; } .layout-22 #grid-photo .border-2 { border-radius: 50%; }
-    .layout-22 #grid-contact { display: flex; flex-wrap: wrap; justify-content: center; gap: 4mm; } .layout-22 .contact-line { border: none; }
-    .layout-22 .cv-heading { justify-content: center; border-top: 1px solid var(--primary); border-bottom: 1px solid var(--primary); padding: 1.5mm 0; margin-bottom: 3mm; }
+    .layout-22 { padding: 10mm 12mm; gap: 2.5mm 5mm; grid-template-columns: 1fr 1fr; grid-template-areas: "photo photo" "title title" "contact contact" "summary summary" "edu exp" "rel awd" "skills skills"; text-align: center; border: 2mm solid var(--primary-bg); outline: 1px solid var(--primary); outline-offset: -3mm; }
+    .layout-22 #grid-photo { display: flex; justify-content: center; margin-bottom: 0.5mm; } .layout-22 #grid-photo .border-2 { border-radius: 50%; width: 40mm; height: 40mm; object-fit: cover; }
+    .layout-22 #grid-contact { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5mm 4mm; margin-top: -1mm; } .layout-22 .contact-line { border: none; padding: 0; }
+    .layout-22 .cv-heading { justify-content: center; border-top: 1px solid var(--primary); border-bottom: 1px solid var(--primary); padding: 1mm 0; margin-bottom: 1.5mm; }
+    /* Pemangkasan jarak & kerapatan baris khusus untuk Elegan Premium */
+    .layout-22 .leading-relaxed { line-height: 1.3 !important; }
+    .layout-22 .font-serif { line-height: 1.35 !important; }
+    .layout-22 .mt-1 { margin-top: 0.5mm !important; }
+    .layout-22 .gap-2 { gap: 1mm !important; }
+    .layout-22 #grid-summary p { margin-bottom: 0.5mm !important; }
 
     /* LAYOUT 23: MODERN MINIMAL */
     .layout-23 { padding: 8mm 15mm; gap: 4mm 8mm; grid-template-columns: 1fr 1fr; grid-template-areas: "title photo" "contact contact" "summary summary" "edu exp" "rel awd" "skills skills"; }
@@ -900,8 +927,8 @@
     window.addEventListener('beforeprint', () => {
       const preview = document.getElementById('cv-preview');
       if(preview) {
-        preview.style.transform = 'none';
-        preview.style.marginBottom = '0';
+        preview.style.transform = '';
+        preview.style.marginBottom = '';
       }
     });
 
@@ -915,8 +942,8 @@
       if (!wrapper || !preview) return;
       if (window.matchMedia && window.matchMedia('print').matches) return;
 
-      preview.style.transform = 'none';
-      preview.style.marginBottom = '0';
+      preview.style.transform = '';
+      preview.style.marginBottom = '';
 
       const wrapperWidth = wrapper.clientWidth;
       const padding = window.innerWidth < 768 ? 32 : 64; 
@@ -930,6 +957,10 @@
         preview.style.transformOrigin = 'top center';
         const heightDiff = originalHeight - (originalHeight * scale);
         preview.style.marginBottom = `-${heightDiff}px`;
+      } else {
+        preview.style.transform = `scale(1)`;
+        preview.style.transformOrigin = 'top center';
+        preview.style.marginBottom = `0px`;
       }
     };
     window.addEventListener('resize', adjustPreviewScale);
