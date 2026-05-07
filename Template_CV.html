@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal Pelajar - CV Builder F4</title>
+  <title>Portal Pelajar - CV Builder Premium A4</title>
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -26,36 +26,54 @@
     .font-serif { font-family: 'Amiri', serif; line-height: 1.6; }
     
     /* Custom Scrollbars */
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
-    /* F4 PDF Container (210mm x 330mm) */
+    /* A4 PDF Container Strict (210mm x 297mm) */
     .pdf-container {
       width: 210mm;
-      min-height: 330mm;
-      max-height: 330mm;
+      height: 297mm;
       overflow: hidden; 
       box-sizing: border-box;
       position: relative;
       background: white;
+      margin: 0 auto;
     }
 
-    /* Print Configuration */
     @media print {
-      @page {
-        size: 210mm 330mm; 
-        margin: 0; 
+      @page { size: A4 portrait; margin: 0; }
+      html, body {
+        width: 210mm !important;
+        height: 297mm !important;
+        min-width: 210mm !important;
+        min-height: 297mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        overflow: hidden !important;
+        background-color: white !important;
+      }
+      /* Sembunyikan UI saat print */
+      header, #form-section, #splash-screen, .md\:hidden {
+        display: none !important;
+      }
+      /* Reset container pembungkus agar posisinya di kiri atas mutlak */
+      #main-app, #preview-wrapper {
+        display: block !important; position: static !important; margin: 0 !important;
+        padding: 0 !important; width: 100% !important; height: auto !important;
+        border: none !important; transform: none !important; text-align: left !important;
+        overflow: visible !important;
       }
       body * { visibility: hidden; }
       #cv-preview, #cv-preview * { visibility: visible; }
       #cv-preview {
-        position: fixed;
-        left: 0; top: 0;
-        width: 210mm; height: 330mm;
-        margin: 0; padding: 0;
+        position: fixed !important; left: 0 !important; top: 0 !important;
+        width: 210mm !important; height: 297mm !important;
+        margin: 0 !important; padding: 0 !important;
         box-shadow: none !important; border: none !important;
+        transform: none !important; transform-origin: 0 0 !important;
       }
       * {
         -webkit-print-color-adjust: exact !important;
@@ -63,10 +81,51 @@
       }
     }
 
-    /* Efek transisi warna halus */
-    * {
-      transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-    }
+    /* Efek transisi global */
+    * { transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
+
+    /* ========================================================
+       SISTEM GRID CV (3 STRUKTUR LAYOUT TERSISA)
+       ======================================================== */
+    #cv-grid { display: grid; width: 100%; height: 100%; box-sizing: border-box; position: relative; z-index: 20; }
+    .grid-item { box-sizing: border-box; position: relative; z-index: 2; }
+    
+    #grid-title { grid-area: title; } #grid-photo { grid-area: photo; } #grid-contact { grid-area: contact; }
+    #grid-summary { grid-area: summary; } #grid-edu { grid-area: edu; } #grid-exp { grid-area: exp; }
+    #grid-rel { grid-area: rel; } #grid-awd { grid-area: awd; } #grid-skills { grid-area: skills; }
+
+    .cv-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1mm; font-size: 11px; text-transform: uppercase; font-weight: 900; color: var(--primary-dark); }
+    .cv-heading .ar { font-family: 'Amiri', serif; font-size: 14px; text-transform: none; font-weight: 700; }
+    .contact-line { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05); padding: 0.5mm 0; }
+    .contact-line:last-child { border-bottom: none; }
+    #grid-photo .border-2 { border-radius: 4px; border: 2px solid var(--primary); transition: all 0.3s ease; width: 35mm; height: 50mm; }
+
+    /* LAYOUT 0: KLASIK MINIMALIS */
+    .layout-0 { padding: 8mm 12mm; gap: 3mm 6mm; grid-template-columns: 35fr 65fr; grid-template-rows: auto auto auto auto auto auto auto; grid-template-areas: "title title" "photo contact" "summary summary" "edu edu" "exp exp" "rel awd" "skills skills"; align-content: start; }
+    .layout-0 .cv-heading { background: var(--primary-bg); border-left: 4px solid var(--primary); padding: 1mm 4mm; border-radius: 2px;}
+    .layout-0 #grid-title { border-bottom: 3px solid var(--primary-bg); margin-bottom: 2mm; padding-bottom: 2mm; text-align: center; }
+    .layout-0 #grid-contact { align-self: center; border-left: 2px solid var(--primary-bg); padding-left: 6mm; }
+    .layout-0 .contact-line { border-bottom: 1px dashed rgba(0,0,0,0.1); padding: 1mm 0;}
+    .layout-0 #grid-photo .border-2 { width: 35mm; height: 50mm; }
+
+    /* LAYOUT 1: SIDEBAR KIRI */
+    .layout-1 { grid-template-columns: 70mm 1fr; grid-template-rows: auto auto auto auto auto 1fr; grid-template-areas: "photo title" "contact summary" "skills edu" "skills exp" "skills rel" "skills awd"; gap: 0; padding: 0; }
+    .layout-1 #grid-photo, .layout-1 #grid-contact, .layout-1 #grid-skills { background: var(--primary-bg); padding: 0 6mm; }
+    .layout-1 #grid-photo { padding-top: 12mm; display: flex; justify-content: center; } .layout-1 #grid-contact { padding-bottom: 2mm; } .layout-1 #grid-skills { padding-bottom: 12mm; }
+    .layout-1 #grid-title { padding: 12mm 10mm 2mm 6mm; text-align: left; } .layout-1 #grid-title h1 { text-align: left; } .layout-1 #grid-title h2 { text-align: right; }
+    .layout-1 #grid-summary, .layout-1 #grid-edu, .layout-1 #grid-exp, .layout-1 #grid-rel, .layout-1 #grid-awd { padding: 0 10mm 3mm 6mm; }
+    .layout-1 .cv-heading { border-bottom: 1.5px solid var(--primary); padding-bottom: 1mm; } .layout-1 #grid-skills .cv-heading { border-bottom: 1.5px solid rgba(0,0,0,0.1); }
+    .layout-1 .contact-line { flex-direction: column; text-align: center; gap: 0.5mm; padding: 1.5mm 0;}
+
+    /* LAYOUT 2: SIDEBAR KANAN */
+    .layout-2 { grid-template-columns: 1fr 70mm; grid-template-rows: auto auto auto auto auto 1fr; grid-template-areas: "title photo" "summary contact" "edu skills" "exp skills" "rel skills" "awd skills"; gap: 0; padding: 0; }
+    .layout-2 #grid-photo, .layout-2 #grid-contact, .layout-2 #grid-skills { background: var(--primary-bg); padding: 0 6mm; }
+    .layout-2 #grid-photo { padding-top: 12mm; display: flex; justify-content: center; } .layout-2 #grid-contact { padding-bottom: 2mm; } .layout-2 #grid-skills { padding-bottom: 12mm; }
+    .layout-2 #grid-title { padding: 12mm 6mm 2mm 10mm; text-align: right; } .layout-2 #grid-title h1 { text-align: left; } .layout-2 #grid-title h2 { text-align: right; }
+    .layout-2 #grid-summary, .layout-2 #grid-edu, .layout-2 #grid-exp, .layout-2 #grid-rel, .layout-2 #grid-awd { padding: 0 6mm 3mm 10mm; }
+    .layout-2 .cv-heading { border-bottom: 1.5px solid var(--primary); padding-bottom: 1mm; } .layout-2 #grid-skills .cv-heading { border-bottom: 1.5px solid rgba(0,0,0,0.1); }
+    .layout-2 .contact-line { flex-direction: column; text-align: center; gap: 0.5mm; padding: 1.5mm 0;}
+
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900 overflow-hidden">
@@ -83,424 +142,382 @@
   </div>
 
   <!-- ================= MAIN APP (CV BUILDER) ================= -->
-  <div id="main-app" class="hidden min-h-screen bg-slate-100 flex-col md:flex-row font-sans text-slate-800">
+  <div id="main-app" class="hidden h-screen w-full bg-slate-100 flex-col font-sans text-slate-800 overflow-hidden">
     
-    <!-- LEFT: FORM INPUT -->
-    <div class="w-full md:w-1/2 lg:w-2/5 p-0 bg-white border-r border-slate-200 shadow-2xl z-10 flex flex-col h-screen relative">
-      <header class="sticky top-0 z-20 bg-white/95 backdrop-blur-md p-6 flex items-center justify-between border-b border-slate-100 shadow-sm">
-        <div class="flex items-center gap-3">
-          <img src="https://lh3.googleusercontent.com/d/1T_gjbh4D8xTkoE3zVF0WoQl5xdhb3nCJ" class="w-10 h-10 object-contain" alt="Logo" />
-          <div>
-            <h1 class="text-[13px] font-black text-slate-800 tracking-tighter uppercase">Portal Pelajar</h1>
-            <p class="text-[9px] text-[var(--primary)] uppercase font-black tracking-widest">CV Builder Terintegrasi (F4)</p>
-          </div>
+    <!-- GLOBAL HEADER -->
+    <header class="flex-none z-20 bg-white/95 backdrop-blur-md p-4 md:px-6 md:py-4 flex items-center justify-between border-b border-slate-200 shadow-sm">
+      <div class="flex items-center gap-3">
+        <img src="https://lh3.googleusercontent.com/d/1T_gjbh4D8xTkoE3zVF0WoQl5xdhb3nCJ" class="w-10 h-10 object-contain" alt="Logo" />
+        <div>
+          <h1 class="text-[13px] md:text-[14px] font-black text-slate-800 tracking-tighter uppercase">Portal Pelajar</h1>
+          <p class="text-[9px] text-[var(--primary)] uppercase font-black tracking-widest">CV Builder Premium (A4)</p>
         </div>
-        <div class="flex items-center gap-2">
-          <!-- TOMBOL MODEL LAIN (MENU BARU) -->
-          <!-- Sesuaikan href dengan URL sub-domain premium Anda, misal href="https://premium.domainanda.com" -->
-          <a href="Template_CV/premium" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl font-bold transition-colors shadow-sm text-xs tracking-wider border border-slate-200">
-            <i data-lucide="layout-grid" class="w-4 h-4"></i> MODEL LAIN
-          </a>
-          
-          <button onclick="exportPDF()" class="flex items-center gap-2 bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white px-4 py-2 rounded-xl font-bold transition-colors shadow-md text-xs tracking-wider">
-            <i data-lucide="printer" class="w-4 h-4"></i> EXPORT PDF
-          </button>
-        </div>
-      </header>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="Template_CV/premium" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl font-bold transition-colors shadow-sm text-xs tracking-wider border border-slate-200">
+          <i data-lucide="layout-grid" class="w-4 h-4"></i> <span class="hidden md:inline">MODEL LAIN</span><span class="md:hidden">Model</span>
+        </a>
+        <button onclick="exportPDF()" class="flex items-center gap-1.5 md:gap-2 bg-slate-800 hover:bg-slate-900 text-white px-4 md:px-5 py-2 md:py-2.5 rounded-xl font-bold transition-colors shadow-md text-[10px] md:text-xs tracking-widest uppercase">
+          <i data-lucide="printer" class="w-4 h-4"></i> <span class="hidden md:inline">Cetak PDF</span><span class="md:hidden">Cetak</span>
+        </button>
+      </div>
+    </header>
 
-      <div class="flex-1 overflow-y-auto p-6 space-y-8 pb-20 custom-scrollbar">
-        
-        <!-- TEMA WARNA -->
-        <section class="bg-slate-50 p-5 rounded-[1.5rem] border border-slate-200">
-          <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 mb-4 uppercase tracking-wider">
-            <i data-lucide="palette" class="text-[var(--primary)] w-4 h-4"></i> Tema Warna (20 Pilihan)
-          </h2>
-          <div id="theme-container" class="grid grid-cols-5 sm:grid-cols-10 gap-3">
-            <!-- Tombol tema akan di-generate via JavaScript -->
-          </div>
-        </section>
-
-        <!-- FOTO UPLOAD -->
-        <section class="bg-slate-50 p-5 rounded-[1.5rem] border border-slate-200">
-          <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 mb-4 uppercase tracking-wider">
-            <i data-lucide="image" class="text-[var(--primary)] w-4 h-4"></i> Pas Foto (4x6)
-          </h2>
-          <div class="flex items-center gap-4">
-            <div id="photo-preview-container" class="w-20 h-30 bg-white border-2 border-dashed border-[var(--primary)] rounded-xl flex items-center justify-center overflow-hidden shadow-sm" style="aspect-ratio: 2/3;">
-              <i data-lucide="user" class="text-[var(--primary)] w-8 h-8 opacity-50"></i>
-            </div>
-            <div>
-              <label class="cursor-pointer bg-white border border-slate-200 hover:border-[var(--primary)] hover:text-[var(--primary)] text-slate-600 py-2 px-4 rounded-xl shadow-sm inline-flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-wider">
-                <i data-lucide="upload" class="w-4 h-4"></i> Unggah Foto
-                <input type="file" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)" />
-              </label>
-              <p class="text-[10px] text-slate-400 mt-2 font-medium">Latar formal dianjurkan.</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- DATA PRIBADI -->
-        <section>
-          <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 mb-4 pb-2 border-b border-slate-100 uppercase tracking-wider">
-            <i data-lucide="user" class="text-[var(--primary)] w-4 h-4"></i> Data Pribadi
-          </h2>
-          <div class="grid grid-cols-1 gap-4">
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Nama Lengkap</label>
-                <input type="text" id="in-name" maxlength="40" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] outline-none shadow-sm font-medium" />
-              </div>
-              <div>
-                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Nama Arab (الاسم الكامل)</label>
-                <input type="text" id="in-name-ar" maxlength="40" oninput="forceArabic(this)" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm text-right font-serif focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] outline-none shadow-sm font-medium" dir="rtl" />
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Tanggal Lahir</label>
-                <input type="text" id="in-dob" maxlength="30" oninput="syncCV()" placeholder="ex: 15 Januari 2000" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] outline-none shadow-sm font-medium" />
-              </div>
-              <div class="grid grid-cols-2 gap-2">
-                <div>
-                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Warga Negara</label>
-                  <input type="text" id="in-nationality" maxlength="30" value="Indonesia" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] outline-none shadow-sm font-medium" />
-                </div>
-                <div>
-                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">الجنسية</label>
-                  <input type="text" id="in-nationality-ar" maxlength="30" value="إندونيسيا" oninput="forceArabic(this)" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm text-right font-serif focus:border-[var(--primary)] outline-none shadow-sm font-medium" dir="rtl" />
-                </div>
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Nomor WA/HP</label>
-                <input type="text" id="in-phone" maxlength="20" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] outline-none shadow-sm font-medium" />
-              </div>
-              <div>
-                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Email Akun</label>
-                <input type="email" id="in-email" maxlength="40" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[var(--primary)] outline-none shadow-sm font-medium" />
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Alamat (Latin)</label>
-                <input type="text" id="in-address" maxlength="60" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[var(--primary)] outline-none shadow-sm font-medium" />
-              </div>
-              <div>
-                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Alamat (Arab)</label>
-                <input type="text" id="in-address-ar" maxlength="60" oninput="forceArabic(this)" dir="rtl" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-serif text-right focus:border-[var(--primary)] outline-none shadow-sm font-medium" />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- SUMMARY -->
-        <section>
-          <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 mb-4 pb-2 border-b border-slate-100 uppercase tracking-wider">
-            <i data-lucide="star" class="text-[var(--primary)] w-4 h-4"></i> Ringkasan Profesional
-          </h2>
-          <textarea id="in-summary-ar" maxlength="200" oninput="forceArabic(this)" class="w-full p-3 bg-white border border-slate-200 rounded-xl h-24 text-sm focus:border-[var(--primary)] outline-none shadow-sm font-medium mb-3 font-serif text-right" dir="rtl" placeholder="الملخص المهني (Arab) - Max 200 char"></textarea>
-          <textarea id="in-summary-en" maxlength="200" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl h-24 text-sm focus:border-[var(--primary)] outline-none shadow-sm font-medium" placeholder="Professional Summary (English) - Max 200 char"></textarea>
-        </section>
-
-        <!-- PENDIDIKAN -->
-        <section>
-          <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
-            <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 uppercase tracking-wider"><i data-lucide="book-open" class="text-[var(--primary)] w-4 h-4"></i> Pendidikan Terakhir</h2>
-          </div>
-          <div class="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-200 shadow-sm space-y-3 mt-1">
-            <input type="text" id="in-edu-year" maxlength="20" oninput="syncCV()" placeholder="Tahun (ex: 2019 - 2022)" value="2019 - 2022" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[var(--primary)]" />
-            <div class="grid grid-cols-2 gap-2">
-              <input type="text" id="in-edu-inst-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Institusi (Arab)" value="مدرسة لقمان الحكيم الثانوية" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[var(--primary)]" dir="rtl" />
-              <input type="text" id="in-edu-inst-en" maxlength="60" oninput="syncCV()" placeholder="Institution (English)" value="SMA Lukmanul Hakim Kota Ternate" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[var(--primary)]" />
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <input type="text" id="in-edu-deg-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Jurusan (Arab)" value="العلوم الطبيعية" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[var(--primary)]" dir="rtl" />
-              <input type="text" id="in-edu-deg-en" maxlength="60" oninput="syncCV()" placeholder="Major (English)" value="Ilmu Pengetahuan Alam (IPA)" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[var(--primary)]" />
-            </div>
-            <input type="text" id="in-edu-gpa" maxlength="20" oninput="syncCV()" placeholder="Nilai / GPA" value="90/100" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[var(--primary)]" />
-          </div>
-        </section>
-
-        <!-- PENGALAMAN AGAMA -->
-        <section>
-          <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
-            <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 uppercase tracking-wider"><i data-lucide="award" class="text-[var(--primary)] w-4 h-4"></i> Keahlian Keagamaan</h2>
-          </div>
-          <div class="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-200 shadow-sm space-y-3 mt-1">
-            <div class="grid grid-cols-2 gap-2">
-              <input type="text" id="in-rel-title-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Judul (Arab)" value="حفظ القرآن ٣٠ جزءًا" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[var(--primary)]" dir="rtl" />
-              <input type="text" id="in-rel-title-en" maxlength="60" oninput="syncCV()" placeholder="Title (English)" value="30 Juz Quran" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[var(--primary)]" />
-            </div>
-            <textarea id="in-rel-desc-ar" maxlength="150" oninput="forceArabic(this)" placeholder="Deskripsi (Arab)" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[var(--primary)]" dir="rtl" rows="2">حفظ القرآن كاملاً، والأجرومية، وتحفة الأطفال</textarea>
-            <textarea id="in-rel-desc-en" maxlength="150" oninput="syncCV()" placeholder="Description (English)" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[var(--primary)]" rows="2">Memorized 30 Juz, Al-Jurumiyah, and Tuhfatul Athfal</textarea>
-          </div>
-        </section>
-
-        <!-- PENGHARGAAN -->
-        <section>
-          <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
-            <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 uppercase tracking-wider"><i data-lucide="medal" class="text-[var(--primary)] w-4 h-4"></i> Penghargaan Tertinggi</h2>
-          </div>
-          <div class="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-200 shadow-sm space-y-3 mt-1">
-            <input type="text" id="in-awd-year" maxlength="20" oninput="syncCV()" placeholder="Tahun" value="2023" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[var(--primary)]" />
-            <div class="grid grid-cols-2 gap-2">
-              <input type="text" id="in-awd-title-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Penghargaan (Arab)" value="بطل مسابقة تلاوة القرآن" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[var(--primary)]" dir="rtl" />
-              <input type="text" id="in-awd-title-en" maxlength="60" oninput="syncCV()" placeholder="Award (English)" value="1st Place Provincial MTQ" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[var(--primary)]" />
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <input type="text" id="in-awd-desc-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Penyelenggara (Arab)" value="على مستوى المحافظة" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[var(--primary)]" dir="rtl" />
-              <input type="text" id="in-awd-desc-en" maxlength="60" oninput="syncCV()" placeholder="Issuer (English)" value="Provincial Level Championship" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[var(--primary)]" />
-            </div>
-          </div>
-        </section>
-
-        <!-- PENGALAMAN KERJA -->
-        <section>
-          <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
-            <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 uppercase tracking-wider"><i data-lucide="briefcase" class="text-[var(--primary)] w-4 h-4"></i> Pengalaman Organisasi</h2>
-          </div>
-          <div class="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-200 shadow-sm space-y-3 mt-1">
-            <input type="text" id="in-exp-year" maxlength="20" oninput="syncCV()" placeholder="Tahun (ex: 2020 - 2022)" value="2022 - 2026" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[var(--primary)]" />
-            <div class="grid grid-cols-2 gap-2">
-              <input type="text" id="in-exp-role-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Posisi (Arab)" value="مدرس وإمام" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[var(--primary)]" dir="rtl" />
-              <input type="text" id="in-exp-role-en" maxlength="60" oninput="syncCV()" placeholder="Role (English)" value="Pengajar & Imam" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[var(--primary)]" />
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <input type="text" id="in-exp-org-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Organisasi (Arab)" value="مؤسسة هداية الله" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[var(--primary)]" dir="rtl" />
-              <input type="text" id="in-exp-org-en" maxlength="60" oninput="syncCV()" placeholder="Organization (English)" value="Yayasan Hidayatullah" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[var(--primary)]" />
-            </div>
-            <textarea id="in-exp-desc-ar" maxlength="150" oninput="forceArabic(this)" placeholder="Deskripsi (Arab)" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-[var(--primary)]" dir="rtl" rows="2">تدريس العلوم الإسلامية وإمامة الصلوات.</textarea>
-            <textarea id="in-exp-desc-en" maxlength="150" oninput="syncCV()" placeholder="Description (English)" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-[var(--primary)]" rows="2">Teaching Islamic sciences and leading prayers.</textarea>
-          </div>
-        </section>
-
-        <!-- SKILLS -->
-        <section>
-          <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 mb-4 pb-2 border-b border-slate-100 uppercase tracking-wider"><i data-lucide="settings" class="text-[var(--primary)] w-4 h-4"></i> Keahlian Tambahan</h2>
-          <div class="grid grid-cols-1 gap-4">
-            <div>
-              <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Bahasa Arab</label>
-              <input type="text" id="in-skill-ar" list="lang-levels" maxlength="40" oninput="syncCV()" placeholder="Pilih atau ketik sendiri..." value="ممتاز / Fluent" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[var(--primary)] outline-none shadow-sm font-medium" autocomplete="off" />
-              <datalist id="lang-levels">
-                <option value="مبتدئ / Beginner"></option>
-                <option value="متوسط / Intermediate"></option>
-                <option value="جيد / Good"></option>
-                <option value="جيد جداً / Very Good"></option>
-                <option value="ممتاز / Fluent"></option>
-              </datalist>
-            </div>
-            <div>
-              <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Bahasa Inggris</label>
-              <input type="text" id="in-skill-en" list="lang-levels" maxlength="40" oninput="syncCV()" placeholder="Pilih atau ketik sendiri..." value="جيد جداً / Very Good" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[var(--primary)] outline-none shadow-sm font-medium" autocomplete="off" />
-            </div>
-            <div>
-              <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Teknis (Komputer, dll)</label>
-              <input type="text" id="in-skill-tech" list="tech-list" maxlength="60" oninput="syncCV()" placeholder="Pilih atau ketik sendiri..." value="MS Office, Academic Research" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[var(--primary)] outline-none shadow-sm font-medium" autocomplete="off" />
-              <datalist id="tech-list">
-                <option value="MS Office (Word, Excel, PowerPoint)"></option>
-                <option value="Graphic Design (Photoshop)"></option>
-                <option value="Video Editing (Premiere, CapCut)"></option>
-              </datalist>
-            </div>
-            <div>
-              <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Soft Skills</label>
-              <input type="text" id="in-skill-soft" list="soft-list" maxlength="60" oninput="syncCV()" placeholder="Pilih atau ketik sendiri..." value="Leadership, Public Speaking" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-[var(--primary)] outline-none shadow-sm font-medium" autocomplete="off" />
-              <datalist id="soft-list">
-                <option value="Leadership & Teamwork"></option>
-                <option value="Public Speaking & Presentation"></option>
-                <option value="Problem Solving & Critical Thinking"></option>
-              </datalist>
-            </div>
-          </div>
-        </section>
-
+    <!-- MOBILE PREVIEW CONTROLS -->
+    <div class="md:hidden bg-slate-900 text-slate-200 px-4 py-2 flex items-center justify-between shrink-0 shadow-md z-30 border-b border-slate-800">
+      <button onclick="togglePreviewState('collapse')" class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[var(--primary)] hover:text-white transition-colors">
+        <i data-lucide="eye" id="icon-eye" class="w-4 h-4"></i>
+        <i data-lucide="eye-off" id="icon-eye-off" class="w-4 h-4 hidden"></i>
+        <span id="preview-text-status">Preview (Sebagian)</span>
+      </button>
+      <div class="flex items-center gap-1">
+        <button onclick="togglePreviewState('minimized')" class="p-1.5 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition-colors" title="Minimize">
+          <i data-lucide="minimize-2" class="w-4 h-4"></i>
+        </button>
+        <button onclick="togglePreviewState('maximized')" class="p-1.5 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition-colors" title="Maximize">
+          <i data-lucide="maximize" class="w-4 h-4"></i>
+        </button>
       </div>
     </div>
 
-    <!-- RIGHT: F4 PREVIEW -->
-    <div class="w-full md:w-1/2 lg:w-3/5 bg-slate-200 p-4 md:p-8 overflow-y-auto flex justify-center items-start h-screen custom-scrollbar relative">
+    <!-- CONTENT FLEX CONTAINER -->
+    <div class="flex flex-col md:flex-row flex-1 overflow-hidden relative">
       
-      <!-- F4 Container (210x330mm) -->
-      <div id="cv-preview" class="shadow-2xl relative pdf-container flex flex-col">
+      <!-- ================= PREVIEW SECTION ================= -->
+      <div id="preview-wrapper" class="order-1 md:order-2 w-full md:w-1/2 lg:w-3/5 bg-slate-200 overflow-auto text-center custom-scrollbar transition-all duration-300 ease-in-out shrink-0 border-b md:border-b-0 md:border-l border-slate-300 h-[35vh] md:h-auto md:flex-1 p-4 md:p-8">
         
-        <!-- Header Accents -->
-        <div class="h-4 bg-[var(--primary)] w-full absolute top-0 left-0 right-0 print-accent z-10"></div>
-        <div class="h-1 bg-[var(--accent)] w-full absolute top-4 left-0 right-0 print-accent z-10"></div>
+        <!-- A4 Container -->
+        <div id="cv-preview" class="inline-block text-left shadow-2xl relative pdf-container bg-white shrink-0 mx-auto align-top">
+          <!-- Decorative Accents -->
+          <div class="h-4 bg-[var(--primary)] w-full absolute top-0 left-0 right-0 z-30 print-accent"></div>
+          <div class="h-1 bg-[var(--accent)] w-full absolute top-4 left-0 right-0 z-30 print-accent"></div>
+          <div class="h-3 bg-[var(--primary)] w-full absolute bottom-0 left-0 right-0 z-30 print-accent"></div>
 
-        <div class="px-7 py-8 pdf-inner-content flex-1 box-border mt-3 flex flex-col">
-          
-          <!-- TITLES -->
-          <div class="text-center mb-5 border-b-2 border-slate-100 pb-3">
-            <h1 class="text-xl font-black uppercase tracking-[0.2em] text-[var(--primary-dark)]">Curriculum Vitae</h1>
-            <h2 class="text-2xl font-serif font-bold text-[var(--primary-dark)] mt-1" dir="rtl">السيرة الذاتية</h2>
-          </div>
-
-          <!-- Header Profile Section -->
-          <div class="flex items-start justify-between border-b-2 border-[var(--primary)] pb-4 mb-4">
-            <!-- Photo 4x6 -->
-            <div class="border-2 border-[var(--primary)] rounded overflow-hidden shrink-0 shadow-md bg-slate-50 flex items-center justify-center" style="width: 35mm; height: 50mm">
-              <img id="out-photo" src="" alt="" class="w-full h-full object-cover hidden" />
-              <span id="out-photo-placeholder" class="text-slate-300 text-[10px] text-center p-2 font-medium">Foto<br/>4x6</span>
+          <!-- GRID SYSTEM INNER -->
+          <div id="cv-grid" class="layout-0">
+            <!-- TITLE -->
+            <div id="grid-title" class="grid-item">
+              <h1 class="text-[22px] font-black uppercase tracking-[0.2em] text-[var(--primary-dark)] leading-none">Curriculum Vitae</h1>
+              <h2 class="text-[24px] font-serif font-bold text-[var(--primary-dark)] mt-1 leading-none" dir="rtl">السيرة الذاتية</h2>
+            </div>
+            <!-- PHOTO -->
+            <div id="grid-photo" class="grid-item">
+              <div class="border-2 overflow-hidden shadow-md bg-slate-50 flex items-center justify-center relative">
+                <img id="out-photo" src="" alt="" class="w-full h-full object-cover hidden absolute inset-0 z-10" />
+                <span id="out-photo-placeholder" class="text-slate-300 text-[10px] text-center p-2 font-medium z-0">Foto<br/>4x6</span>
+              </div>
+            </div>
+            
+            <!-- CONTACT -->
+            <div id="grid-contact" class="grid-item">
+              <div class="text-center w-full mb-2">
+                 <h1 id="out-name-en" class="text-[16px] font-black text-slate-800 tracking-wide uppercase break-words whitespace-pre-wrap leading-tight">Nama Lengkap</h1>
+                 <p id="out-name-ar" class="text-[18px] text-slate-800 font-serif font-bold mt-1 break-words whitespace-pre-wrap leading-tight" dir="rtl">الاسم الكامل</p>
+              </div>
+              <div class="flex flex-col text-[10px] text-slate-600 w-full">
+                <div class="contact-line">
+                  <span class="font-semibold en text-left">DOB: <span id="out-dob-en" class="font-normal">-</span></span>
+                  <span dir="rtl" class="font-serif text-[12px] font-bold ar text-right">تاريخ الميلاد: <span id="out-dob-ar" class="font-normal">-</span></span>
+                </div>
+                <div class="contact-line">
+                  <span class="font-semibold en text-left">Nat: <span id="out-nat-en" class="font-normal">Indonesia</span></span>
+                  <span dir="rtl" class="font-serif text-[12px] font-bold ar text-right">الجنسية: <span id="out-nat-ar" class="font-normal">إندونيسيا</span></span>
+                </div>
+                <div class="contact-line">
+                  <span class="font-semibold en text-left">Ph: <span id="out-phone-en" class="font-normal">-</span></span>
+                  <span dir="rtl" class="font-serif text-[12px] font-bold ar text-right">الهاتف: <span id="out-phone-ar" class="font-normal">-</span></span>
+                </div>
+                <div class="contact-line">
+                  <span class="font-semibold en text-left">Mail: <span id="out-email-en" class="font-normal break-all">-</span></span>
+                  <span dir="rtl" class="font-serif text-[12px] font-bold ar text-right">البريد: <span id="out-email-ar" class="font-normal text-[9px] break-all">-</span></span>
+                </div>
+                <!-- Menambahkan Output Passport -->
+                <div class="contact-line">
+                  <span class="font-semibold en text-left">Pass: <span id="out-passport-en" class="font-normal">-</span></span>
+                  <span dir="rtl" class="font-serif text-[12px] font-bold ar text-right">جواز السفر: <span id="out-passport-ar" class="font-normal">-</span></span>
+                </div>
+                <div class="contact-line">
+                  <span class="font-semibold en text-left">Add: <span id="out-address-en" class="font-normal">-</span></span>
+                  <span dir="rtl" class="font-serif text-[12px] font-bold ar text-right">العنوان: <span id="out-address-ar" class="font-normal">-</span></span>
+                </div>
+              </div>
             </div>
 
-            <!-- Title & Contact -->
-            <div class="flex-1 px-4 flex flex-col justify-center">
-              <div class="text-center w-full mb-3">
-                 <h1 id="out-name-en" class="text-xl font-black text-slate-800 tracking-wide uppercase break-words whitespace-pre-wrap">Nama Lengkap</h1>
-                 <p id="out-name-ar" class="text-2xl text-slate-800 font-serif font-bold mt-1 break-words whitespace-pre-wrap" dir="rtl">الاسم الكامل</p>
+            <!-- SUMMARY -->
+            <div id="grid-summary" class="grid-item">
+              <div class="cv-heading">
+                <span class="en">Professional Summary</span>
+                <span class="ar" dir="rtl">ملخص احترافي</span>
+              </div>
+              <div class="text-slate-700 font-medium text-[11px] leading-relaxed break-words whitespace-pre-wrap">
+                <p id="out-summary-ar" class="font-serif text-[13px] text-right w-full mb-1" dir="rtl"></p>
+                <p id="out-summary-en" class="w-full text-justify"></p>
+              </div>
+            </div>
+            <!-- EDUCATION -->
+            <div id="grid-edu" class="grid-item">
+              <div class="cv-heading"><span class="en">Education</span><span class="ar" dir="rtl">المؤهلات التعليمية</span></div>
+              <div class="grid grid-cols-2 gap-2 text-[11px] font-black text-slate-800"><span id="out-edu-inst-en" class="text-left break-words"></span><span id="out-edu-inst-ar" class="text-right font-serif text-[13px] break-words" dir="rtl"></span></div>
+              <div class="grid grid-cols-2 gap-2 text-[var(--primary)] font-bold text-[11px] mt-0.5"><span id="out-edu-deg-en" class="text-left break-words"></span><span id="out-edu-deg-ar" class="text-right font-serif text-[12px] break-words" dir="rtl"></span></div>
+              <div class="grid grid-cols-2 gap-2 text-slate-500 font-medium text-[10px] mt-0.5"><span class="text-left"><span id="out-edu-year-en"></span> | GPA: <span id="out-edu-gpa-en"></span></span><span class="text-right font-serif text-[11px]" dir="rtl"><span id="out-edu-year-ar"></span> | التقدير: <span id="out-edu-gpa-ar"></span></span></div>
+            </div>
+            <!-- EXPERIENCE -->
+            <div id="grid-exp" class="grid-item">
+              <div class="cv-heading"><span class="en">Experience</span><span class="ar" dir="rtl">الخبرات العملية</span></div>
+              <div class="grid grid-cols-2 gap-2 text-[11px] font-black text-slate-800"><span id="out-exp-role-en" class="text-left break-words"></span><span id="out-exp-role-ar" class="text-right font-serif text-[13px] break-words" dir="rtl"></span></div>
+              <div class="grid grid-cols-2 gap-2 text-[var(--primary)] font-bold text-[10px] mt-0.5"><span class="text-left break-words"><span id="out-exp-org-en"></span> | <span id="out-exp-year-en"></span></span><span class="text-right font-serif text-[12px] break-words" dir="rtl"><span id="out-exp-org-ar"></span> | <span id="out-exp-year-ar"></span></span></div>
+              <div class="grid grid-cols-2 gap-2 text-slate-600 font-medium text-[10px] mt-1"><span id="out-exp-desc-en" class="text-left break-words pr-1"></span><span id="out-exp-desc-ar" class="text-right font-serif text-[12px] break-words pl-1" dir="rtl"></span></div>
+            </div>
+            <!-- RELIGIOUS AWARDS -->
+            <div id="grid-rel" class="grid-item">
+              <div class="cv-heading"><span class="en">Religious Skills</span><span class="ar" dir="rtl">الخبرات الدينية</span></div>
+              <div class="grid grid-cols-2 gap-2 text-[11px] font-black text-slate-800"><span class="text-left break-words">• <span id="out-rel-title-en"></span></span><span class="text-right font-serif text-[13px] break-words" dir="rtl"><span id="out-rel-title-ar"></span> •</span></div>
+              <div class="grid grid-cols-2 gap-2 text-slate-600 font-medium text-[10px] mt-1 leading-tight"><span id="out-rel-desc-en" class="text-left break-words pr-1"></span><span id="out-rel-desc-ar" class="text-right font-serif text-[12px] break-words pl-1" dir="rtl"></span></div>
+            </div>
+            <!-- AWARDS -->
+            <div id="grid-awd" class="grid-item">
+              <div class="cv-heading"><span class="en">Awards & Honors</span><span class="ar" dir="rtl">الجوائز والشهادات</span></div>
+              <div class="grid grid-cols-2 gap-2 text-[11px] font-black text-slate-800"><span class="text-left break-words"><span id="out-awd-title-en"></span> (<span id="out-awd-year-en"></span>)</span><span class="text-right font-serif text-[13px] break-words" dir="rtl"><span id="out-awd-title-ar"></span> (<span id="out-awd-year-ar"></span>)</span></div>
+              <div class="grid grid-cols-2 gap-2 text-slate-600 font-medium text-[10px] mt-1"><span id="out-awd-desc-en" class="text-left break-words pr-1"></span><span id="out-awd-desc-ar" class="text-right font-serif text-[12px] break-words pl-1" dir="rtl"></span></div>
+            </div>
+            <!-- SKILLS -->
+            <div id="grid-skills" class="grid-item">
+              <div class="cv-heading"><span class="en">Skills Profile</span><span class="ar" dir="rtl">المهارات</span></div>
+              <div class="grid grid-cols-2 gap-x-6 gap-y-1.5 text-[10px] text-slate-700">
+                <div class="flex justify-between items-start border-b border-slate-100 pb-0.5"><span class="font-bold w-1/3">Arabic:</span><span id="out-skill-ar" class="font-medium w-2/3 text-right break-words"></span></div>
+                <div class="flex justify-between items-start border-b border-slate-100 pb-0.5"><span class="font-bold w-1/3">English:</span><span id="out-skill-en" class="font-medium w-2/3 text-right break-words"></span></div>
+                <div class="flex justify-between items-start border-b border-slate-100 pb-0.5"><span class="font-bold w-1/3">Technical:</span><span id="out-skill-tech" class="font-medium w-2/3 text-right break-words"></span></div>
+                <div class="flex justify-between items-start border-b border-slate-100 pb-0.5"><span class="font-bold w-1/3">Soft Skills:</span><span id="out-skill-soft" class="font-medium w-2/3 text-right break-words"></span></div>
+              </div>
+            </div>
+          </div> <!-- END GRID SYSTEM -->
+        </div>
+      </div>
+
+      <!-- ================= FORM SECTION ================= -->
+      <div id="form-section" class="order-2 md:order-1 w-full md:w-1/2 lg:w-2/5 p-0 bg-white z-10 flex flex-col flex-1 overflow-y-auto custom-scrollbar relative">
+        <div class="p-6 space-y-8 pb-20">
+          
+          <!-- LAYOUT STRUCTURE -->
+          <section class="bg-indigo-50 p-5 rounded-[1.5rem] border border-indigo-100 relative">
+            <h2 class="text-sm font-black flex items-center gap-2 text-indigo-900 mb-4 uppercase tracking-wider">
+              <i data-lucide="layout-template" class="text-indigo-600 w-4 h-4"></i> Struktur CV Eksklusif
+            </h2>
+            <div id="layout-container" class="grid grid-cols-3 sm:grid-cols-3 gap-2">
+              <!-- Tombol Layout via JS -->
+            </div>
+          </section>
+
+          <!-- TEMA WARNA -->
+          <section class="bg-slate-50 p-5 rounded-[1.5rem] border border-slate-200 relative">
+            <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 mb-4 uppercase tracking-wider">
+              <i data-lucide="palette" class="text-[var(--primary)] w-4 h-4"></i> Tema Warna Premium
+            </h2>
+            <div id="theme-container" class="flex gap-3">
+              <!-- Tombol tema via JS -->
+            </div>
+          </section>
+
+          <!-- FOTO UPLOAD -->
+          <section class="bg-slate-50 p-5 rounded-[1.5rem] border border-slate-200">
+            <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 mb-4 uppercase tracking-wider">
+              <i data-lucide="image" class="text-slate-400 w-4 h-4"></i> Pas Foto (4x6)
+            </h2>
+            <div class="flex items-center gap-4">
+              <div id="photo-preview-container" class="w-20 h-30 bg-white border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center overflow-hidden shadow-sm" style="aspect-ratio: 2/3;">
+                <i data-lucide="user" class="text-slate-300 w-8 h-8 opacity-50"></i>
+              </div>
+              <div>
+                <label class="cursor-pointer bg-white border border-slate-200 hover:border-indigo-500 hover:text-indigo-600 text-slate-600 py-2 px-4 rounded-xl shadow-sm inline-flex items-center gap-2 transition-all text-xs font-bold uppercase tracking-wider">
+                  <i data-lucide="upload" class="w-4 h-4"></i> Unggah Foto
+                  <input type="file" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)" />
+                </label>
+                <p class="text-[10px] text-slate-400 mt-2 font-medium">Latar formal dianjurkan.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- DATA PRIBADI -->
+          <section>
+            <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 mb-4 pb-2 border-b border-slate-100 uppercase tracking-wider">
+              <i data-lucide="user" class="text-slate-400 w-4 h-4"></i> Data Pribadi
+            </h2>
+            <div class="grid grid-cols-1 gap-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Nama Lengkap</label>
+                  <input type="text" id="in-name" maxlength="40" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Nama Arab</label>
+                  <input type="text" id="in-name-ar" maxlength="40" oninput="forceArabic(this)" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm text-right font-serif focus:border-indigo-500 outline-none shadow-sm font-medium" dir="rtl" />
+                </div>
               </div>
               
-              <div class="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[11px] text-slate-600">
-                <div class="text-right break-words"><span dir="rtl" class="font-serif text-[13px] font-bold">تاريخ الميلاد: <span id="out-dob-ar" class="font-normal">-</span></span></div>
-                <div class="text-left border-l border-slate-300 pl-3 break-words font-semibold">DOB: <span id="out-dob-en" class="font-normal">-</span></div>
-
-                <div class="text-right break-words"><span dir="rtl" class="font-serif text-[13px] font-bold">الجنسية: <span id="out-nat-ar" class="font-normal">إندونيسيا</span></span></div>
-                <div class="text-left border-l border-slate-300 pl-3 break-words font-semibold">Nationality: <span id="out-nat-en" class="font-normal">Indonesia</span></div>
-
-                <div class="text-right break-words"><span dir="rtl" class="font-serif text-[13px] font-bold">الهاتف: <span id="out-phone-ar" class="font-normal">-</span></span></div>
-                <div class="text-left border-l border-slate-300 pl-3 break-words font-semibold">Phone: <span id="out-phone-en" class="font-normal">-</span></div>
-
-                <div class="text-right break-all"><span dir="rtl" class="font-serif text-[13px] font-bold">البريد: <span id="out-email-ar" class="font-normal text-[10px]">-</span></span></div>
-                <div class="text-left border-l border-slate-300 pl-3 break-all font-semibold">Email: <span id="out-email-en" class="font-normal">-</span></div>
-              </div>
-
-              <div class="mt-2 text-[11px] text-slate-600 border-t border-slate-100 pt-1.5">
-                <div class="text-right break-words w-full" dir="rtl">
-                   <span class="font-serif text-[13px] font-bold">العنوان: </span><span id="out-address-ar" class="font-serif text-[13px]">-</span>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Tanggal Lahir</label>
+                  <input type="text" id="in-dob" maxlength="30" oninput="syncCV()" placeholder="ex: 15 Jan 2000" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" />
                 </div>
-                <div class="text-left break-words w-full font-semibold">
-                   Address: <span id="out-address-en" class="font-normal">-</span>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Warga Negara</label>
+                    <input type="text" id="in-nationality" maxlength="30" value="Indonesia" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">الجنسية</label>
+                    <input type="text" id="in-nationality-ar" maxlength="30" value="إندونيسيا" oninput="forceArabic(this)" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm text-right font-serif focus:border-indigo-500 outline-none shadow-sm font-medium" dir="rtl" />
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <!-- Summary -->
-          <div class="mb-4">
-            <div class="flex justify-between items-center bg-[var(--primary-bg)] px-2 py-0.5 border-l-4 border-r-4 border-[var(--primary)] mb-1.5">
-              <h2 class="text-[var(--primary-dark)] font-black uppercase text-[11px] tracking-wider">Professional Summary</h2>
-              <h2 class="text-[var(--primary-dark)] font-bold font-serif text-[14px]" dir="rtl">ملخص احترافي</h2>
-            </div>
-            <div class="px-1 text-slate-700 font-medium text-[11px] leading-relaxed break-words whitespace-pre-wrap">
-              <p id="out-summary-ar" class="font-serif text-[13px] text-right w-full mb-1" dir="rtl"></p>
-              <p id="out-summary-en" class="w-full text-justify"></p>
-            </div>
-          </div>
+              <!-- Baris Kontak & Paspor -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Nomor WA/HP</label>
+                  <input type="text" id="in-phone" maxlength="20" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Email Akun</label>
+                  <input type="email" id="in-email" maxlength="40" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" />
+                </div>
+              </div>
 
-          <!-- Education -->
-          <div class="mb-4">
-            <div class="flex justify-between items-center bg-[var(--primary-bg)] px-2 py-0.5 border-l-4 border-r-4 border-[var(--primary)] mb-1.5">
-              <h2 class="text-[var(--primary-dark)] font-black uppercase text-[11px] tracking-wider">Education</h2>
-              <h2 class="text-[var(--primary-dark)] font-bold font-serif text-[14px]" dir="rtl">المؤهلات التعليمية</h2>
-            </div>
-            <div class="px-1">
-              <div class="grid grid-cols-2 gap-3 text-[11px] font-black text-slate-800">
-                <span id="out-edu-inst-en" class="text-left break-words"></span>
-                <span id="out-edu-inst-ar" class="text-right font-serif text-[14px] break-words" dir="rtl"></span>
+              <!-- Baris Paspor Baru -->
+              <div class="grid grid-cols-1 gap-4">
+                <div>
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">No. Paspor / ID</label>
+                  <input type="text" id="in-passport" maxlength="30" oninput="syncCV()" placeholder="ex: C1234567" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" />
+                </div>
               </div>
-              <div class="grid grid-cols-2 gap-3 text-[var(--primary)] font-bold text-[11px] mt-0.5">
-                <span id="out-edu-deg-en" class="text-left break-words"></span>
-                <span id="out-edu-deg-ar" class="text-right font-serif text-[13px] break-words" dir="rtl"></span>
-              </div>
-              <div class="grid grid-cols-2 gap-3 text-slate-500 font-medium text-[10px] mt-0.5">
-                <span class="text-left"><span id="out-edu-year-en"></span> | GPA: <span id="out-edu-gpa-en"></span></span>
-                <span class="text-right font-serif text-[12px]" dir="rtl"><span id="out-edu-year-ar"></span> | التقدير: <span id="out-edu-gpa-ar"></span></span>
-              </div>
-            </div>
-          </div>
 
-          <!-- Religious Achievements -->
-          <div class="mb-4">
-            <div class="flex justify-between items-center bg-[var(--primary-bg)] px-2 py-0.5 border-l-4 border-r-4 border-[var(--primary)] mb-1.5">
-              <h2 class="text-[var(--primary-dark)] font-black uppercase text-[11px] tracking-wider">Religious Achievements</h2>
-              <h2 class="text-[var(--primary-dark)] font-bold font-serif text-[14px]" dir="rtl">الخبرات الدينية</h2>
-            </div>
-            <div class="px-1 flex flex-col border-b border-slate-100 pb-1">
-              <div class="grid grid-cols-2 gap-3 text-[11px] font-black text-slate-800">
-                <span class="text-left break-words">• <span id="out-rel-title-en"></span></span>
-                <span class="text-right font-serif text-[14px] break-words" dir="rtl"><span id="out-rel-title-ar"></span> •</span>
-              </div>
-              <div class="grid grid-cols-2 gap-3 text-slate-600 font-medium text-[10px] mt-1 leading-tight">
-                <span id="out-rel-desc-en" class="text-left break-words pr-1"></span>
-                <span id="out-rel-desc-ar" class="text-right font-serif text-[13px] break-words pl-1" dir="rtl"></span>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Alamat (Latin)</label>
+                  <input type="text" id="in-address" maxlength="60" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Alamat (Arab)</label>
+                  <input type="text" id="in-address-ar" maxlength="60" oninput="forceArabic(this)" dir="rtl" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-serif text-right focus:border-indigo-500 outline-none shadow-sm font-medium" />
+                </div>
               </div>
             </div>
-          </div>
+          </section>
 
-          <!-- Awards -->
-          <div class="mb-4">
-            <div class="flex justify-between items-center bg-[var(--primary-bg)] px-2 py-0.5 border-l-4 border-r-4 border-[var(--primary)] mb-1.5">
-              <h2 class="text-[var(--primary-dark)] font-black uppercase text-[11px] tracking-wider">Awards & Honors</h2>
-              <h2 class="text-[var(--primary-dark)] font-bold font-serif text-[14px]" dir="rtl">الجوائز والشهادات</h2>
-            </div>
-            <div class="px-1">
-              <div class="grid grid-cols-2 gap-3 text-[11px] font-black text-slate-800">
-                <span class="text-left break-words"><span id="out-awd-title-en"></span> (<span id="out-awd-year-en"></span>)</span>
-                <span class="text-right font-serif text-[14px] break-words" dir="rtl"><span id="out-awd-title-ar"></span> (<span id="out-awd-year-ar"></span>)</span>
-              </div>
-              <div class="grid grid-cols-2 gap-3 text-slate-600 font-medium text-[10px] mt-1">
-                <span id="out-awd-desc-en" class="text-left break-words pr-1"></span>
-                <span id="out-awd-desc-ar" class="text-right font-serif text-[13px] break-words pl-1" dir="rtl"></span>
-              </div>
-            </div>
-          </div>
+          <!-- SUMMARY -->
+          <section>
+            <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 mb-4 pb-2 border-b border-slate-100 uppercase tracking-wider">
+              <i data-lucide="star" class="text-slate-400 w-4 h-4"></i> Ringkasan Profesional
+            </h2>
+            <textarea id="in-summary-ar" maxlength="500" oninput="forceArabic(this)" class="w-full p-3 bg-white border border-slate-200 rounded-xl h-32 text-sm focus:border-indigo-500 outline-none shadow-sm font-medium mb-3 font-serif text-right" dir="rtl" placeholder="الملخص المهني (Arab) - Max 500 char">طالب في اللغة العربية وآدابها، مهتم بالتصميم ومعالجة البيانات، ومتمكن في ترجمة الوثائق الرسمية. أسعى للدراسة في الجامعة الإسلامية بالمدينة المنورة وخدمة المجتمع في المناطق النائية.</textarea>
+            <textarea id="in-summary-en" maxlength="500" oninput="syncCV()" class="w-full p-3 bg-white border border-slate-200 rounded-xl h-32 text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" placeholder="Professional Summary (English) - Max 500 char">Arabic Language and Literature student with interests in design and data processing, skilled in translating official documents. Aspiring to study at Islamic University of Madinah and serve rural communities.</textarea>
+          </section>
 
-          <!-- Experience -->
-          <div class="mb-4">
-            <div class="flex justify-between items-center bg-[var(--primary-bg)] px-2 py-0.5 border-l-4 border-r-4 border-[var(--primary)] mb-1.5">
-              <h2 class="text-[var(--primary-dark)] font-black uppercase text-[11px] tracking-wider">Experience</h2>
-              <h2 class="text-[var(--primary-dark)] font-bold font-serif text-[14px]" dir="rtl">الخبرات العملية</h2>
+          <!-- PENDIDIKAN -->
+          <section>
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+              <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 uppercase tracking-wider"><i data-lucide="book-open" class="text-slate-400 w-4 h-4"></i> Pendidikan Terakhir</h2>
             </div>
-            <div class="px-1">
-              <div class="grid grid-cols-2 gap-3 text-[11px] font-black text-slate-800">
-                <span id="out-exp-role-en" class="text-left break-words"></span>
-                <span id="out-exp-role-ar" class="text-right font-serif text-[14px] break-words" dir="rtl"></span>
+            <div class="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-200 shadow-sm space-y-3 mt-1">
+              <input type="text" id="in-edu-year" maxlength="20" oninput="syncCV()" placeholder="Tahun (ex: 2019 - 2022)" value="2019 - 2022" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="in-edu-inst-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Institusi (Arab)" value="مدرسة لقمان الحكيم" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-indigo-500" dir="rtl" />
+                <input type="text" id="in-edu-inst-en" maxlength="60" oninput="syncCV()" placeholder="Institution (English)" value="Lukmanul Hakim Senior High School" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
               </div>
-              <div class="grid grid-cols-2 gap-3 text-[var(--primary)] font-bold text-[10px] mt-0.5">
-                <span class="text-left break-words"><span id="out-exp-org-en"></span> | <span id="out-exp-year-en"></span></span>
-                <span class="text-right font-serif text-[13px] break-words" dir="rtl"><span id="out-exp-org-ar"></span> | <span id="out-exp-year-ar"></span></span>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="in-edu-deg-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Jurusan (Arab)" value="العلوم الطبيعية" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-indigo-500" dir="rtl" />
+                <input type="text" id="in-edu-deg-en" maxlength="60" oninput="syncCV()" placeholder="Major (English)" value="Science Major" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
               </div>
-              <div class="grid grid-cols-2 gap-3 text-slate-600 font-medium text-[10px] mt-1">
-                <span id="out-exp-desc-en" class="text-left break-words pr-1"></span>
-                <span id="out-exp-desc-ar" class="text-right font-serif text-[13px] break-words pl-1" dir="rtl"></span>
-              </div>
+              <input type="text" id="in-edu-gpa" maxlength="20" oninput="syncCV()" placeholder="Nilai / GPA" value="90/100" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
             </div>
-          </div>
+          </section>
 
-          <!-- Skills -->
-          <div class="mb-2">
-            <div class="flex justify-between items-center bg-[var(--primary-bg)] px-2 py-0.5 border-l-4 border-r-4 border-[var(--primary)] mb-1.5">
-              <h2 class="text-[var(--primary-dark)] font-black uppercase text-[11px] tracking-wider">Skills</h2>
-              <h2 class="text-[var(--primary-dark)] font-bold font-serif text-[14px]" dir="rtl">المهارات</h2>
+          <!-- PENGALAMAN AGAMA -->
+          <section>
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+              <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 uppercase tracking-wider"><i data-lucide="award" class="text-slate-400 w-4 h-4"></i> Keahlian Keagamaan</h2>
             </div>
-            <div class="grid grid-cols-2 gap-x-6 gap-y-1.5 px-1 text-[11px] text-slate-700">
-              <div class="flex justify-between items-start border-b border-slate-100 pb-0.5">
-                <span class="font-bold w-1/3">Arabic:</span>
-                <span id="out-skill-ar" class="font-medium w-2/3 text-right break-words"></span>
+            <div class="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-200 shadow-sm space-y-3 mt-1">
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="in-rel-title-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Judul (Arab)" value="حفظ القرآن ٣٠ جزءًا" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-indigo-500" dir="rtl" />
+                <input type="text" id="in-rel-title-en" maxlength="60" oninput="syncCV()" placeholder="Title (English)" value="30 Juz Quran" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
               </div>
-              <div class="flex justify-between items-start border-b border-slate-100 pb-0.5">
-                <span class="font-bold w-1/3">English:</span>
-                <span id="out-skill-en" class="font-medium w-2/3 text-right break-words"></span>
+              <textarea id="in-rel-desc-ar" maxlength="150" oninput="forceArabic(this)" placeholder="Deskripsi (Arab)" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-indigo-500" dir="rtl" rows="2">حفظ القرآن كاملاً، والأجرومية، وتحفة الأطفال</textarea>
+              <textarea id="in-rel-desc-en" maxlength="150" oninput="syncCV()" placeholder="Description (English)" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" rows="2">Memorized 30 Juz, Al-Jurumiyah, and Tuhfatul Athfal</textarea>
+            </div>
+          </section>
+
+          <!-- PENGHARGAAN -->
+          <section>
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+              <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 uppercase tracking-wider"><i data-lucide="medal" class="text-slate-400 w-4 h-4"></i> Penghargaan</h2>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-200 shadow-sm space-y-3 mt-1">
+              <input type="text" id="in-awd-year" maxlength="20" oninput="syncCV()" placeholder="Tahun" value="2023" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="in-awd-title-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Penghargaan (Arab)" value="بطل مسابقة تلاوة القرآن" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-indigo-500" dir="rtl" />
+                <input type="text" id="in-awd-title-en" maxlength="60" oninput="syncCV()" placeholder="Award (English)" value="1st Place MTQ" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
               </div>
-              <div class="flex justify-between items-start border-b border-slate-100 pb-0.5">
-                <span class="font-bold w-1/3">Technical:</span>
-                <span id="out-skill-tech" class="font-medium w-2/3 text-right break-words"></span>
-              </div>
-              <div class="flex justify-between items-start border-b border-slate-100 pb-0.5">
-                <span class="font-bold w-1/3">Soft Skills:</span>
-                <span id="out-skill-soft" class="font-medium w-2/3 text-right break-words"></span>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="in-awd-desc-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Penyelenggara (Arab)" value="على مستوى المحافظة" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-indigo-500" dir="rtl" />
+                <input type="text" id="in-awd-desc-en" maxlength="60" oninput="syncCV()" placeholder="Issuer (English)" value="Provincial Level" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
               </div>
             </div>
-          </div>
+          </section>
+
+          <!-- PENGALAMAN KERJA -->
+          <section>
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+              <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 uppercase tracking-wider"><i data-lucide="briefcase" class="text-slate-400 w-4 h-4"></i> Pengalaman</h2>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-200 shadow-sm space-y-3 mt-1">
+              <input type="text" id="in-exp-year" maxlength="20" oninput="syncCV()" placeholder="Tahun (ex: 2020 - 2022)" value="2022 - 2026" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="in-exp-role-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Posisi (Arab)" value="مدرس وإمام" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-indigo-500" dir="rtl" />
+                <input type="text" id="in-exp-role-en" maxlength="60" oninput="syncCV()" placeholder="Role (English)" value="Teacher & Imam" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="in-exp-org-ar" maxlength="60" oninput="forceArabic(this)" placeholder="Organisasi (Arab)" value="مؤسسة هداية الله" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-indigo-500" dir="rtl" />
+                <input type="text" id="in-exp-org-en" maxlength="60" oninput="syncCV()" placeholder="Organization (English)" value="Hidayatullah Foundation" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" />
+              </div>
+              <textarea id="in-exp-desc-ar" maxlength="150" oninput="forceArabic(this)" placeholder="Deskripsi (Arab)" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-sm text-right font-serif outline-none focus:border-indigo-500" dir="rtl" rows="2">تدريس العلوم الإسلامية وإمامة الصلوات.</textarea>
+              <textarea id="in-exp-desc-en" maxlength="150" oninput="syncCV()" placeholder="Description (English)" class="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-500" rows="2">Teaching Islamic sciences and leading prayers.</textarea>
+            </div>
+          </section>
+
+          <!-- SKILLS -->
+          <section>
+            <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 mb-4 pb-2 border-b border-slate-100 uppercase tracking-wider"><i data-lucide="settings" class="text-slate-400 w-4 h-4"></i> Keahlian Tambahan</h2>
+            <div class="grid grid-cols-1 gap-4">
+              <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Bahasa Arab</label>
+                <input type="text" id="in-skill-ar" list="lang-levels" maxlength="40" oninput="syncCV()" placeholder="Pilih..." value="ممتاز / Fluent" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" autocomplete="off" />
+                <datalist id="lang-levels">
+                  <option value="مبتدئ / Beginner"></option><option value="متوسط / Intermediate"></option>
+                  <option value="جيد / Good"></option><option value="جيد جداً / Very Good"></option><option value="ممتاز / Fluent"></option>
+                </datalist>
+              </div>
+              <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Bahasa Inggris</label>
+                <input type="text" id="in-skill-en" list="lang-levels" maxlength="40" oninput="syncCV()" placeholder="Pilih..." value="جيد جداً / Very Good" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" autocomplete="off" />
+              </div>
+              <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Teknis</label>
+                <input type="text" id="in-skill-tech" list="tech-list" maxlength="60" oninput="syncCV()" placeholder="Ketik..." value="MS Office, Research" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" autocomplete="off" />
+                <datalist id="tech-list"><option value="MS Office"></option><option value="Graphic Design"></option></datalist>
+              </div>
+              <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Soft Skills</label>
+                <input type="text" id="in-skill-soft" list="soft-list" maxlength="60" oninput="syncCV()" placeholder="Ketik..." value="Leadership, Speaking" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-indigo-500 outline-none shadow-sm font-medium" autocomplete="off" />
+                <datalist id="soft-list"><option value="Leadership & Teamwork"></option><option value="Public Speaking"></option></datalist>
+              </div>
+            </div>
+          </section>
 
         </div>
-        
-        <!-- Footer Accent -->
-        <div class="h-3 bg-[var(--primary)] w-full absolute bottom-0 left-0 right-0 print-accent z-10 mt-auto"></div>
       </div>
-    </div>
 
+    </div>
   </div>
 
   <!-- ================= SCRIPTS ================= -->
@@ -508,46 +525,154 @@
     lucide.createIcons();
     let photoDataUrl = null;
 
-    // --- 20 KOMBINASI WARNA TEMA ---
+    // Pastikan saat dicetak (print), skala di-reset ke normal agar tidak terpotong atau mengecil
+    window.addEventListener('beforeprint', () => {
+      const preview = document.getElementById('cv-preview');
+      if(preview) {
+        preview.style.transform = 'none';
+        preview.style.marginBottom = '0';
+      }
+    });
+
+    window.addEventListener('afterprint', () => {
+      adjustPreviewScale();
+    });
+
+    // --- LOGIKA PENYESUAIAN SKALA PREVIEW (MOBILE RESPONSIVE) ---
+    const adjustPreviewScale = () => {
+      const wrapper = document.getElementById('preview-wrapper');
+      const preview = document.getElementById('cv-preview');
+      if (!wrapper || !preview) return;
+      if (window.matchMedia && window.matchMedia('print').matches) return;
+
+      preview.style.transform = 'none';
+      preview.style.marginBottom = '0';
+
+      const wrapperWidth = wrapper.clientWidth;
+      const padding = window.innerWidth < 768 ? 32 : 64; 
+      const availableWidth = wrapperWidth - padding;
+      const originalWidth = 793.7; 
+      const originalHeight = 1122.5;
+
+      if (availableWidth < originalWidth) {
+        const scale = availableWidth / originalWidth;
+        preview.style.transform = `scale(${scale})`;
+        preview.style.transformOrigin = 'top center';
+        const heightDiff = originalHeight - (originalHeight * scale);
+        preview.style.marginBottom = `-${heightDiff}px`;
+      }
+    };
+    window.addEventListener('resize', adjustPreviewScale);
+
+    // --- LOGIKA MOBILE PREVIEW ---
+    let currentPreviewState = 'minimized'; 
+    function togglePreviewState(targetState) {
+      const wrapper = document.getElementById('preview-wrapper');
+      const iconEye = document.getElementById('icon-eye');
+      const iconEyeOff = document.getElementById('icon-eye-off');
+      const textStatus = document.getElementById('preview-text-status');
+
+      if (targetState === 'collapse') targetState = currentPreviewState === 'collapsed' ? 'minimized' : 'collapsed';
+      currentPreviewState = targetState;
+
+      wrapper.classList.remove('h-0', 'h-[35vh]', 'h-[75vh]', 'p-0', 'p-4', 'md:p-8');
+      wrapper.classList.add('md:p-8');
+
+      if (targetState === 'collapsed') {
+        wrapper.classList.add('h-0', 'p-0', 'md:h-auto', 'md:flex-1');
+        iconEye.classList.add('hidden'); iconEyeOff.classList.remove('hidden'); textStatus.innerText = 'Preview (Disembunyikan)';
+      } else if (targetState === 'minimized') {
+        wrapper.classList.add('h-[35vh]', 'p-4', 'md:h-auto', 'md:flex-1');
+        iconEye.classList.remove('hidden'); iconEyeOff.classList.add('hidden'); textStatus.innerText = 'Preview (Sebagian)';
+      } else if (targetState === 'maximized') {
+        wrapper.classList.add('h-[75vh]', 'p-4', 'md:h-auto', 'md:flex-1');
+        iconEye.classList.remove('hidden'); iconEyeOff.classList.add('hidden'); textStatus.innerText = 'Preview (Penuh)';
+      }
+      setTimeout(adjustPreviewScale, 310);
+    }
+
+    // --- STREAMING_CHUNK:Menyiapkan 3 Layout dan 3 Tema Tersisa... ---
+    // --- 3 STRUKTUR LAYOUT TERSISA ---
+    const layoutOptions = [
+      { id: 'layout-0', name: 'Klasik Minimalis', icon: 'layout-template' },
+      { id: 'layout-1', name: 'Sidebar Kiri', icon: 'layout-sidebar' },
+      { id: 'layout-2', name: 'Sidebar Kanan', icon: 'layout-sidebar-reverse' }
+    ];
+
+    const renderLayouts = () => {
+      const container = document.getElementById('layout-container');
+      container.innerHTML = ''; // Bersihkan container
+      layoutOptions.forEach((layout, idx) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = "relative rounded-xl overflow-hidden";
+
+        const btn = document.createElement('button');
+        btn.className = `flex flex-col items-center w-full justify-center p-1.5 border-2 border-transparent bg-white transition-all group h-14 hover:border-indigo-300 hover:shadow-md`;
+        btn.innerHTML = `
+          <i data-lucide="${layout.icon}" class="w-4 h-4 text-indigo-400 group-hover:text-indigo-600 mb-1 transition-colors"></i>
+          <span class="text-[7.5px] font-bold text-slate-600 group-hover:text-indigo-700 text-center leading-tight px-0.5 break-words w-full">${layout.name}</span>
+        `;
+        
+        btn.onclick = () => applyLayout(idx, btn);
+        wrapper.appendChild(btn);
+        container.appendChild(wrapper);
+      });
+      lucide.createIcons();
+
+      // Pilih ulang layout yang tersimpan (atau default 0)
+      const savedLayout = localStorage.getItem('cv_builder_layout_free');
+      let layoutIdxToApply = (savedLayout !== null && parseInt(savedLayout) < layoutOptions.length) ? parseInt(savedLayout) : 0;
+      setTimeout(() => {
+         const layoutBtns = container.querySelectorAll('button');
+         if(layoutBtns[layoutIdxToApply]) { 
+           applyLayout(layoutIdxToApply, layoutBtns[layoutIdxToApply]); 
+         }
+      }, 50);
+    };
+
+    const applyLayout = (idx, btnElement = null) => {
+      const layoutClass = layoutOptions[idx].id;
+      const grid = document.getElementById('cv-grid');
+      
+      layoutOptions.forEach(opt => grid.classList.remove(opt.id));
+      grid.classList.add(layoutClass);
+
+      if(btnElement) {
+         const allBtns = document.getElementById('layout-container').querySelectorAll('button');
+         allBtns.forEach(b => b.classList.remove('border-indigo-500', 'shadow-md', 'bg-indigo-50'));
+         btnElement.classList.add('border-indigo-500', 'shadow-md', 'bg-indigo-50');
+      }
+
+      localStorage.setItem('cv_builder_layout_free', idx);
+    };
+
+    // --- 3 KOMBINASI WARNA TEMA TERSISA ---
     const themes = [
       { name: 'Teal & Yellow', primary: '#1db1a2', dark: '#168e82', bg: '#f0fbf9', accent: '#eab308' },
       { name: 'Navy & Amber', primary: '#1e3a8a', dark: '#1e3a8a', bg: '#eff6ff', accent: '#fbbf24' },
-      { name: 'Burgundy & Rose', primary: '#881337', dark: '#4c0519', bg: '#fff1f2', accent: '#f87171' },
-      { name: 'Emerald & Mint', primary: '#059669', dark: '#047857', bg: '#ecfdf5', accent: '#10b981' },
-      { name: 'Royal & Orange', primary: '#2563eb', dark: '#1d4ed8', bg: '#eff6ff', accent: '#f97316' },
-      { name: 'Purple & Yellow', primary: '#7c3aed', dark: '#5b21b6', bg: '#f5f3ff', accent: '#facc15' },
-      { name: 'Charcoal & Emerald', primary: '#374151', dark: '#1f2937', bg: '#f3f4f6', accent: '#34d399' },
-      { name: 'Crimson & Navy', primary: '#dc2626', dark: '#b91c1c', bg: '#fef2f2', accent: '#1e3a8a' },
-      { name: 'Slate & Coral', primary: '#475569', dark: '#334155', bg: '#f8fafc', accent: '#fb7185' },
-      { name: 'Indigo & Pink', primary: '#4f46e5', dark: '#3730a3', bg: '#eef2ff', accent: '#fb7185' },
-      { name: 'Forest & Mustard', primary: '#14532d', dark: '#064e3b', bg: '#f0fdf4', accent: '#ca8a04' },
-      { name: 'Chocolate & Sky', primary: '#78350f', dark: '#451a03', bg: '#fffbeb', accent: '#38bdf8' },
-      { name: 'Plum & Orange', primary: '#701a75', dark: '#4a044e', bg: '#fdf4ff', accent: '#d97706' },
-      { name: 'Olive & Rust', primary: '#3f6212', dark: '#365314', bg: '#f7fee7', accent: '#ea580c' },
-      { name: 'Ocean & Lime', primary: '#0891b2', dark: '#0e7490', bg: '#ecfeff', accent: '#84cc16' },
-      { name: 'Mocha & Cream', primary: '#713f12', dark: '#422006', bg: '#fefce8', accent: '#d97706' },
-      { name: 'Amethyst & Aqua', primary: '#9333ea', dark: '#7e22ce', bg: '#faf5ff', accent: '#2dd4bf' },
-      { name: 'Midnight & Silver', primary: '#0f172a', dark: '#020617', bg: '#f8fafc', accent: '#94a3b8' },
-      { name: 'Terracotta & Sage', primary: '#b45309', dark: '#92400e', bg: '#fffbeb', accent: '#14b8a6' },
-      { name: 'Fuchsia & Cyan', primary: '#c026d3', dark: '#a21caf', bg: '#fdf4ff', accent: '#22d3ee' }
+      { name: 'Burgundy & Rose', primary: '#881337', dark: '#4c0519', bg: '#fff1f2', accent: '#f87171' }
     ];
 
-    // Merender tombol tema
     const renderThemes = () => {
       const container = document.getElementById('theme-container');
+      container.innerHTML = '';
       themes.forEach((theme, idx) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = "relative w-8 h-8 rounded-full overflow-hidden";
+
         const btn = document.createElement('button');
-        btn.className = "w-8 h-8 rounded-full border border-slate-300 focus:outline-none hover:scale-110 focus:ring-2 focus:ring-offset-2 transition-transform shadow-sm relative overflow-hidden group";
+        btn.className = `w-full h-full rounded-full border border-slate-300 focus:outline-none transition-transform relative hover:scale-110 focus:ring-2 focus:ring-offset-2 shadow-sm`;
         btn.style.backgroundColor = theme.primary;
         btn.title = theme.name;
-        // Accent slice at bottom
         btn.innerHTML = `<span class="absolute bottom-0 right-0 w-full h-[40%]" style="background-color: ${theme.accent}"></span>`;
+        
         btn.onclick = () => applyTheme(idx);
-        container.appendChild(btn);
+        wrapper.appendChild(btn);
+        container.appendChild(wrapper);
       });
+      lucide.createIcons();
     };
 
-    // Mengaplikasikan tema ke CSS Variables dan Simpan ke Local Storage
     const applyTheme = (idx) => {
       const theme = themes[idx];
       const root = document.documentElement;
@@ -555,33 +680,19 @@
       root.style.setProperty('--primary-dark', theme.dark);
       root.style.setProperty('--primary-bg', theme.bg);
       root.style.setProperty('--accent', theme.accent);
-      
-      // Simpan index tema ke local storage
-      localStorage.setItem('cv_builder_theme', idx);
+      localStorage.setItem('cv_builder_theme_free', idx);
     };
 
-    // ==========================================
-    // LOGIKA PENYIMPANAN LOKAL (AUTO-SAVE)
-    // ==========================================
+    // --- STREAMING_CHUNK:Sistem Input, Sinkronisasi, dan Penyimpanan... ---
+    // --- LOGIKA DATA & PENYIMPANAN ---
     const saveInputsData = () => {
       const inputs = document.querySelectorAll('#main-app input[type="text"], #main-app input[type="email"], #main-app textarea');
       const data = {};
-      inputs.forEach(input => {
-        if (input.id) data[input.id] = input.value;
-      });
+      inputs.forEach(input => { if (input.id) data[input.id] = input.value; });
       localStorage.setItem('cv_builder_data', JSON.stringify(data));
     };
 
-    const setupAutoSave = () => {
-      const inputs = document.querySelectorAll('#main-app input[type="text"], #main-app input[type="email"], #main-app textarea');
-      inputs.forEach(input => {
-        input.addEventListener('input', saveInputsData);
-        input.addEventListener('change', saveInputsData);
-      });
-    };
-
     const loadDataFromLocal = () => {
-      // Load inputs text
       const savedData = localStorage.getItem('cv_builder_data');
       if (savedData) {
         try {
@@ -590,34 +701,23 @@
             const el = document.getElementById(id);
             if (el) el.value = data[id];
           });
-        } catch (e) {
-          console.error("Gagal memuat data", e);
-        }
+        } catch (e) {}
       }
 
-      // Load Theme
-      const savedTheme = localStorage.getItem('cv_builder_theme');
-      if (savedTheme !== null && themes[savedTheme]) {
-        applyTheme(parseInt(savedTheme));
-      } else {
-        applyTheme(0); // Default
-      }
+      const savedTheme = localStorage.getItem('cv_builder_theme_free');
+      applyTheme((savedTheme !== null && parseInt(savedTheme) < themes.length) ? parseInt(savedTheme) : 0);
 
-      // Load Photo
       const savedPhoto = localStorage.getItem('cv_builder_photo');
       if (savedPhoto) {
         photoDataUrl = savedPhoto;
-        const preview = document.getElementById('photo-preview-container');
-        preview.innerHTML = `<img src="${photoDataUrl}" alt="Preview" class="w-full h-full object-cover" />`;
-        
+        document.getElementById('photo-preview-container').innerHTML = `<img src="${photoDataUrl}" alt="Preview" class="w-full h-full object-cover" />`;
         const outImg = document.getElementById('out-photo');
-        outImg.src = photoDataUrl;
-        outImg.classList.remove('hidden');
+        outImg.src = photoDataUrl; outImg.classList.remove('hidden');
         document.getElementById('out-photo-placeholder').classList.add('hidden');
       }
     };
 
-    // Splash Screen Logic
+    // --- INISIALISASI ---
     setTimeout(() => {
       document.getElementById('splash-screen').style.opacity = '0';
       setTimeout(() => {
@@ -625,20 +725,22 @@
         document.getElementById('main-app').classList.remove('hidden');
         document.getElementById('main-app').classList.add('flex');
         
+        renderLayouts();
         renderThemes();
-        
-        // Memuat semua data dari Local Storage dan mengaktifkan Auto-save
         loadDataFromLocal();
-        setupAutoSave();
         
-        syncCV(); // Sinkronisasi awal data agar CV terupdate dengan data yang diload
+        const inputs = document.querySelectorAll('#main-app input[type="text"], #main-app input[type="email"], #main-app textarea');
+        inputs.forEach(input => {
+          input.addEventListener('input', saveInputsData);
+          input.addEventListener('change', saveInputsData);
+        });
+        
+        syncCV(); 
+        adjustPreviewScale();
       }, 500);
     }, 1500);
 
-    // ==========================================
-    // LOGIKA DATA & SYNC CV
-    // ==========================================
-
+    // --- FUNGSI FORMATTING ---
     const toArabicNumerals = (str) => {
       if (!str) return '';
       return str.toString().replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
@@ -647,30 +749,17 @@
     const translateDateToArabic = (dateStr) => {
       if (!dateStr) return '';
       const months = {
-  'january': 'يناير',
-  'february': 'فبراير',
-  'march': 'مارس',
-  'april': 'أبريل',
-  'may': 'مايو',
-  'june': 'يونيو',
-  'july': 'يوليو',
-  'august': 'أغسطس',
-  'september': 'سبتمبر',
-  'october': 'أكتوبر',
-  'november': 'نوفمبر',
-  'december': 'ديسمبر'
-};
+        'january': 'يناير', 'february': 'فبراير', 'march': 'مارس', 'april': 'أبريل',
+        'may': 'مايو', 'june': 'يونيو', 'july': 'يوليو', 'august': 'أغسطس',
+        'september': 'سبتمبر', 'october': 'أكتوبر', 'november': 'نوفمبر', 'december': 'ديسمبر'
+      };
       let result = dateStr.toLowerCase();
-      for (const [id, ar] of Object.entries(months)) {
-        result = result.replace(id, ar);
-      }
+      for (const [id, ar] of Object.entries(months)) { result = result.replace(id, ar); }
       return toArabicNumerals(result);
     };
 
     const forceArabic = (elem) => {
-      let val = elem.value;
-      val = val.replace(/[a-zA-Z]/g, '');
-      val = val.replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+      let val = elem.value.replace(/[a-zA-Z]/g, '').replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
       elem.value = val;
       syncCV();
     };
@@ -681,42 +770,25 @@
         const reader = new FileReader();
         reader.onload = (event) => {
           photoDataUrl = event.target.result;
-          const preview = document.getElementById('photo-preview-container');
-          preview.innerHTML = `<img src="${photoDataUrl}" alt="Preview" class="w-full h-full object-cover" />`;
-          
+          document.getElementById('photo-preview-container').innerHTML = `<img src="${photoDataUrl}" alt="Preview" class="w-full h-full object-cover" />`;
           const outImg = document.getElementById('out-photo');
-          outImg.src = photoDataUrl;
-          outImg.classList.remove('hidden');
+          outImg.src = photoDataUrl; outImg.classList.remove('hidden');
           document.getElementById('out-photo-placeholder').classList.add('hidden');
-          
-          // Simpan foto ke local storage (dengan batasan jika ukuran terlalu besar)
-          try {
-            localStorage.setItem('cv_builder_photo', photoDataUrl);
-          } catch (err) {
-            console.warn("Ukuran foto terlalu besar untuk disimpan di Local Storage.");
-          }
+          try { localStorage.setItem('cv_builder_photo', photoDataUrl); } catch (err) {}
         };
         reader.readAsDataURL(file);
       }
     };
 
     const syncSplit = (inputArId, inputEnId, outArId, outEnId) => {
-      if(outEnId && document.getElementById(inputEnId)) {
-        document.getElementById(outEnId).innerText = document.getElementById(inputEnId).value || '-';
-      }
-      if(outArId && document.getElementById(inputArId)) {
-        let arVal = document.getElementById(inputArId).value || '-';
-        document.getElementById(outArId).innerText = toArabicNumerals(arVal);
-      }
+      if(outEnId && document.getElementById(inputEnId)) document.getElementById(outEnId).innerText = document.getElementById(inputEnId).value || '-';
+      if(outArId && document.getElementById(inputArId)) document.getElementById(outArId).innerText = toArabicNumerals(document.getElementById(inputArId).value || '-');
     };
 
     const syncShared = (inputId, outArId, outEnId, isDate = false) => {
       let val = document.getElementById(inputId)?.value || '-';
       if(outEnId) document.getElementById(outEnId).innerText = val;
-      if(outArId) {
-        let arVal = isDate ? translateDateToArabic(val) : toArabicNumerals(val);
-        document.getElementById(outArId).innerText = arVal;
-      }
+      if(outArId) document.getElementById(outArId).innerText = isDate ? translateDateToArabic(val) : toArabicNumerals(val);
     };
 
     const syncCV = () => {
@@ -725,7 +797,15 @@
       syncSplit('in-address-ar', 'in-address', 'out-address-ar', 'out-address-en');
       syncShared('in-dob', 'out-dob-ar', 'out-dob-en', true);
       syncShared('in-phone', 'out-phone-ar', 'out-phone-en');
-      syncShared('in-email', 'out-email-ar', 'out-email-en');
+      
+      // Sinkronisasi Passport
+      syncShared('in-passport', 'out-passport-ar', 'out-passport-en');
+      
+      // Email khusus agar tidak direplace ke angka arab
+      let emailVal = document.getElementById('in-email') ? document.getElementById('in-email').value : '-';
+      if(document.getElementById('out-email-en')) document.getElementById('out-email-en').innerText = emailVal || '-';
+      if(document.getElementById('out-email-ar')) document.getElementById('out-email-ar').innerText = emailVal || '-';
+
       syncSplit('in-summary-ar', 'in-summary-en', 'out-summary-ar', 'out-summary-en');
       syncShared('in-edu-year', 'out-edu-year-ar', 'out-edu-year-en');
       syncShared('in-edu-gpa', 'out-edu-gpa-ar', 'out-edu-gpa-en');
@@ -745,6 +825,18 @@
       document.getElementById('out-skill-en').innerText = document.getElementById('in-skill-en').value || '-';
       document.getElementById('out-skill-tech').innerText = document.getElementById('in-skill-tech').value || '-';
       document.getElementById('out-skill-soft').innerText = document.getElementById('in-skill-soft').value || '-';
+
+      // Dinamis menyembunyikan blok Penghargaan jika kosong agar struktur tak berantakan
+      const awdTitleEn = document.getElementById('in-awd-title-en').value.trim();
+      const awdTitleAr = document.getElementById('in-awd-title-ar').value.trim();
+      const gridAwd = document.getElementById('grid-awd');
+      if(gridAwd) {
+        if (!awdTitleEn && !awdTitleAr) {
+          gridAwd.style.display = 'none';
+        } else {
+          gridAwd.style.display = 'block';
+        }
+      }
     };
 
     const exportPDF = () => {
@@ -754,6 +846,7 @@
       window.print();
       setTimeout(() => { document.title = originalTitle; }, 500);
     };
+
   </script>
 </body>
 </html>
