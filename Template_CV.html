@@ -313,7 +313,7 @@
             <h2 class="text-sm font-black flex items-center gap-2 text-slate-800 mb-4 uppercase tracking-wider">
               <i data-lucide="palette" class="text-[var(--primary)] w-4 h-4"></i> Tema Warna Premium
             </h2>
-            <div id="theme-container" class="flex gap-3">
+            <div id="theme-container" class="grid grid-cols-5 sm:grid-cols-10 gap-3">
               <!-- Tombol tema via JS -->
             </div>
           </section>
@@ -646,11 +646,18 @@
       localStorage.setItem('cv_builder_layout_free', idx);
     };
 
-    // --- 3 KOMBINASI WARNA TEMA TERSISA ---
+    // --- 10 KOMBINASI WARNA TEMA ---
     const themes = [
       { name: 'Teal & Yellow', primary: '#1db1a2', dark: '#168e82', bg: '#f0fbf9', accent: '#eab308' },
       { name: 'Navy & Amber', primary: '#1e3a8a', dark: '#1e3a8a', bg: '#eff6ff', accent: '#fbbf24' },
-      { name: 'Burgundy & Rose', primary: '#881337', dark: '#4c0519', bg: '#fff1f2', accent: '#f87171' }
+      { name: 'Burgundy & Rose', primary: '#881337', dark: '#4c0519', bg: '#fff1f2', accent: '#f87171' },
+      { name: 'Emerald & Mint', primary: '#059669', dark: '#047857', bg: '#ecfdf5', accent: '#10b981' },
+      { name: 'Royal & Orange', primary: '#2563eb', dark: '#1d4ed8', bg: '#eff6ff', accent: '#f97316' },
+      { name: 'Purple & Yellow', primary: '#7c3aed', dark: '#5b21b6', bg: '#f5f3ff', accent: '#facc15' },
+      { name: 'Charcoal & Emerald', primary: '#374151', dark: '#1f2937', bg: '#f3f4f6', accent: '#34d399' },
+      { name: 'Indigo & Pink', primary: '#4f46e5', dark: '#3730a3', bg: '#eef2ff', accent: '#fb7185' },
+      { name: 'Chocolate & Sky', primary: '#78350f', dark: '#451a03', bg: '#fffbeb', accent: '#38bdf8' },
+      { name: 'Midnight & Silver', primary: '#0f172a', dark: '#020617', bg: '#f8fafc', accent: '#94a3b8' }
     ];
 
     const renderThemes = () => {
